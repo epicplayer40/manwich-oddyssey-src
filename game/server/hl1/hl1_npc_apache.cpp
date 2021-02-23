@@ -51,17 +51,18 @@ public:
 	int  BloodColor( void ) { return DONT_BLEED; }
 	Class_T  Classify( void ) { 
 	
-	if (FClassnameIs(this, "monster_apache"))
-	{
-		return CLASS_TEAM3;	
-	}
+		if (FClassnameIs(this, "monster_apache"))
+		{
+			return CLASS_TEAM3;
+		}
 
-	else if (FClassnameIs(this, "monster_apache_ally"))
-	{
-		return CLASS_CONSCRIPT;	
-	}
+		else if (FClassnameIs(this, "monster_apache_ally"))
+		{
+			return CLASS_CONSCRIPT;
+		}
 		
-	
+		// AARIK : Why did this function not return a value properly?
+		return CLASS_NONE;
 	
 	};
 	void InitializeRotorSound( void );

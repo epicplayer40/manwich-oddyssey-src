@@ -655,7 +655,8 @@ void CWeaponImmolator::ItemPostFrame( void )
 	BaseClass::ItemPostFrame();
 }
 
-
+// AARIKFIXME : Too tired right now fix this later.
+#pragma warning(disable : 4706)
 
 void CWeaponImmolator::ImmolationDamage( const CTakeDamageInfo &info, const Vector &vecSrcIn, float flRadius, int iClassIgnore )
 {

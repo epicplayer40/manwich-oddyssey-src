@@ -294,11 +294,13 @@ void CNPC_HGang::Spawn()
 
 	if (m_iWeapons == 0)
 	{
-
+		// AARIK : What the fuck is this???
+		/*
 		if ("additonalequipment" == "weapon_shotgun")
 		{
 				m_iWeapons = TRESH_SHOTGUN | TRESH_HANDGRENADE;
 		}
+		*/
 		// initialize to original values
 		//m_iWeapons = TRESH_9MMAR | TRESH_HANDGRENADE;
 	//	m_iWeapons = TRESH_HANDGRENADE;
@@ -970,6 +972,8 @@ int CNPC_HGang::OnTakeDamage_Alive(const CTakeDamageInfo &inputInfo)
 
 	return BaseClass::OnTakeDamage_Alive(inputInfo);
 }
+
+#pragma warning(disable : 4717)
 
 void CNPC_HGang::StartFollowing(	CBaseEntity *pLeader )
 {

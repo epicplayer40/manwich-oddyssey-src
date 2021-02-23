@@ -19,14 +19,34 @@ $Configuration
 	}
 }
 
-$Project "Client (Episodic)"
+$Project "Client (Mambridge)"
 {
 	$Folder	"Source Files"
 	{
 		$File	"hud_chat.cpp"
 		$File	"c_team_objectiveresource.cpp"
 		$File	"c_team_objectiveresource.h"
-
+		
+		// help me please god
+		$Folder "MISC"
+		{
+		
+			$File	"hl2/c_animal.cpp"
+			$File	"hl2/c_cohrt.cpp"
+			$File	"hl2/c_combineguard.cpp"
+			$File	"hl2/c_conscript.cpp"
+			$File	"hl2/c_conscript_new.cpp"
+			$File	"hl2/c_islaveboss.cpp"
+			$File	"hl2/c_odell.cpp"
+			$File	"hl2/c_vance.cpp"
+			$File	"c_kleinercombat.cpp"
+			$File	"c_minigunner.cpp"
+			$File	"c_minigunner_ally.cpp"
+			$File	"worldlight.cpp"
+			$File	"worldlight.h"
+		
+		}
+		
 		$Folder	"HL2 DLL"
 		{
 			$File	"$SRCDIR\game\shared\hl2\basehlcombatweapon_shared.cpp"

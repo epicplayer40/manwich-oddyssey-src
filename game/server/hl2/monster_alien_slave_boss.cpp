@@ -303,6 +303,9 @@ Class_T	CNPC_SynthElite::Classify ( void )
 	{
 		return	CLASS_CONSCRIPT;
 	}
+
+	return CLASS_NONE;
+
 }
 
 LINK_ENTITY_TO_CLASS( npc_islaveboss, CNPC_SynthElite ); //Obsolete, leaving this in anyway

@@ -946,6 +946,9 @@ int CNPC_HGrunt::OnTakeDamage_Alive(const CTakeDamageInfo &inputInfo)
 	return BaseClass::OnTakeDamage_Alive(inputInfo);
 }
 
+// AARIK : NIGHTMARE NIGHTMARE NIGHTMARE
+#pragma warning(disable : 4717)
+
 void CNPC_HGrunt::StartFollowing(	CBaseEntity *pLeader )
 {
 //	if ( !HasSpawnFlags( SF_NPC_GAG ) )

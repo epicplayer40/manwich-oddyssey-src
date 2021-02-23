@@ -653,6 +653,8 @@ Class_T	CNPC_STrooper::Classify(void)
 		return	CLASS_CONSCRIPT;
 	}
 
+	return CLASS_NONE;
+
 }
 
 //=========================================================
@@ -1073,6 +1075,9 @@ int CNPC_STrooper::OnTakeDamage_Alive(const CTakeDamageInfo &inputInfo)
 
 	return BaseClass::OnTakeDamage_Alive(inputInfo);
 }
+
+// AARIK : NIGHTMARE NIGHTMARE NIGHTMARE
+#pragma warning(disable : 4717)
 
 void CNPC_STrooper::StartFollowing(	CBaseEntity *pLeader )
 {

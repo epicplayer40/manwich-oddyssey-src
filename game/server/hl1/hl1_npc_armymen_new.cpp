@@ -655,6 +655,10 @@ Class_T	CNPC_ArmyMen::Classify(void)
 		{
 			return	CLASS_TEAM4;
 		}
+
+	// AARIK : Functions have to return a value no matter what even if you think the path wont be reached.
+		return CLASS_NONE;
+
 }
 
 //=========================================================
@@ -1075,6 +1079,9 @@ int CNPC_ArmyMen::OnTakeDamage_Alive(const CTakeDamageInfo &inputInfo)
 
 	return BaseClass::OnTakeDamage_Alive(inputInfo);
 }
+
+// AARIK : NIGHTMARE NIGHTMARE NIGHTMARE
+#pragma warning(disable : 4717)
 
 void CNPC_ArmyMen::StartFollowing(	CBaseEntity *pLeader )
 {

@@ -64,3 +64,5 @@ config.cfg
 # shader files
 *.tmp
 
+*.pdb
+*.txt

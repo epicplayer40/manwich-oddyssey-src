@@ -538,7 +538,8 @@ void CNPC_HL1Alien_Trooper::Event_Killed( const CTakeDamageInfo &info )
 		// drop the gun!
 		Vector vecGunPos;
 		QAngle angGunAngles;
-		CBaseEntity *pGun = NULL;
+		// ?
+		//CBaseEntity *pGun = NULL;
 
 		SetBodygroup( 1, ALIEN_TROOPER_BODY_GUNGONE);
 

@@ -338,6 +338,8 @@ char const *CDecalEmitterSystem::TranslateDecalForGameMaterial( char const *deca
 			return d;
 		}
 	}
+
+	return decalName;
 }
 
 

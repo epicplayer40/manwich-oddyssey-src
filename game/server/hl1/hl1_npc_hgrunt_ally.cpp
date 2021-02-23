@@ -951,6 +951,9 @@ int CNPC_FHGrunt::OnTakeDamage_Alive(const CTakeDamageInfo &inputInfo)
 	return BaseClass::OnTakeDamage_Alive(inputInfo);
 }
 
+// AARIK : NIGHTMARE NIGHTMARE NIGHTMARE
+#pragma warning(disable : 4717)
+
 void CNPC_FHGrunt::StartFollowing(	CBaseEntity *pLeader )
 {
 //	if ( !HasSpawnFlags( SF_NPC_GAG ) )
@@ -975,6 +978,7 @@ void CNPC_FHGrunt::StopFollowing( void )
 
 	CNPC_FHGrunt::StopFollowing();
 }
+
 
 
 //=========================================================
@@ -1627,6 +1631,9 @@ void CNPC_FHGrunt::ClearAttackConditions(void)
 		SetCondition(COND_CAN_RANGE_ATTACK2);
 	}
 }
+
+// AARIK : Not dealing with this
+#pragma warning(disable : 4715)
 
 int CNPC_FHGrunt::SelectSchedule(void)
 {

@@ -274,7 +274,7 @@ void CNPC_AlienSuppressor::Event_Killed( const CTakeDamageInfo &info )
 		// drop the gun!
 		Vector vecGunPos;
 		QAngle angGunAngles;
-		CBaseEntity *pGun = NULL;
+		//CBaseEntity *pGun = NULL;
 
 		SetBodygroup( 1, CREM_BODY_GUNGONE);
 

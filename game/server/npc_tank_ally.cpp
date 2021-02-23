@@ -326,6 +326,8 @@ Class_T	CNPC_TankAlly::Classify(void)
 	{
 		return	CLASS_TEAM4;
 	}
+
+	return CLASS_NONE;
 }
 
 LINK_ENTITY_TO_CLASS(npc_tank_ally, CNPC_TankAlly);

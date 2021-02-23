@@ -242,6 +242,7 @@ bool CNPC_Conscript::CanBecomeRagdoll( void )
 {
 	if ( IsCurSchedule( SCHED_DIE ) )
 		return true;
+	return false;
 }
 
 void CNPC_Conscript::Event_Killed( const CTakeDamageInfo &info )
@@ -376,6 +377,8 @@ Class_T	CNPC_Conscript::Classify ( void )
 	{
 		return	CLASS_TEAM1; //Only hostile temporarily, will change to CLASS_CONSCRIPT
 	}
+
+	return CLASS_NONE;
 }
 
 //=========================================================
