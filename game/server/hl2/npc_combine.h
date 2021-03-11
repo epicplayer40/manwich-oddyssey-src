@@ -27,6 +27,15 @@
 #define SF_COMBINE_NO_GRENADEDROP ( 1 << 17 )
 #define SF_COMBINE_NO_AR2DROP ( 1 << 18 )
 
+enum FlyState_t
+{
+	FlyState_Walking = 0,
+	FlyState_Flying,
+	FlyState_Falling,
+	FlyState_Landing,
+};
+
+
 //=========================================================
 //	>> CNPC_Combine
 //=========================================================
@@ -42,6 +51,7 @@ public:
 	// Create components
 	virtual bool	CreateComponents();
 
+	bool			m_bFlying;
 	bool			CanThrowGrenade( const Vector &vecTarget );
 	bool			CheckCanThrowGrenade( const Vector &vecTarget );
 	virtual	bool	CanGrenadeEnemy( bool bUseFreeKnowledge = true );
@@ -70,6 +80,8 @@ public:
 	void InputAssault( inputdata_t &inputdata );
 	void InputHitByBugbait( inputdata_t &inputdata );
 	void InputThrowGrenadeAtTarget( inputdata_t &inputdata );
+	void InputEnableJetpack(inputdata_t &inputdata);
+	void InputDisableJetpack(inputdata_t &inputdata);
 
 	bool			UpdateEnemyMemory( CBaseEntity *pEnemy, const Vector &position, CBaseEntity *pInformer = NULL );
 
@@ -81,6 +93,7 @@ public:
 	bool			IsElite() { return m_fIsElite; }
 	bool			IsMossman() { return m_fIsMossman; }
 	bool			IsTsoLing() { return m_fIsTsoLing; }
+	bool			Hasjetpack() { return m_fHasjetpack; }
 	void			DelayAltFireAttack( float flDelay );
 	void			DelaySquadAltFireAttack( float flDelay );
 	float			MaxYawSpeed( void );
@@ -154,8 +167,17 @@ public:
 
 	void			SetKickDamage( int nDamage ) { m_nKickDamage = nDamage; }
 
+	void	InitializeJetpackSound(void);
+	void	StopJetpackSound();
+
 protected:
 	CAI_Sentence< CNPC_Combine > *GetSentences() { return &m_Sentences; }
+	void Takeoff(void);
+	void SetFlyingState(FlyState_t eState);
+	float m_flGroundIdleMoveTime;
+	inline bool IsFlying(void) const { return GetNavType() == NAV_FLY; }
+	void turnoffjetpack();
+	bool m_fJetpackEnabledOnSpawn;		// Is my jetpack activate when I spawn? (jetpack soldiers only)
 
 private:
 	//=========================================================
@@ -198,6 +220,9 @@ private:
 		SCHED_COMBINE_MOVE_TO_FORCED_GREN_LOS,
 		SCHED_COMBINE_FACE_IDEAL_YAW,
 		SCHED_COMBINE_MOVE_TO_MELEE,
+		SCHED_JETPACK_TAKEOFF,
+		SCHED_JETPACK_LAND,
+		SCHED_JETPACK_LAND_IMMEDIATE,
 		NEXT_SCHEDULE,
 	};
 
@@ -215,6 +240,9 @@ private:
 		TASK_COMBINE_PLAY_SEQUENCE_FACE_ALTFIRE_TARGET,
 		TASK_COMBINE_GET_PATH_TO_FORCED_GREN_LOS,
 		TASK_COMBINE_SET_STANDING,
+		TASK_JETPACK_TAKEOFF,
+		TASK_JETPACK_LAND,
+		TASK_JETPACK_FINDHEADROOM,
 		NEXT_TASK
 	};
 
@@ -290,11 +318,17 @@ private:
 	CAI_RappelBehavior			m_RappelBehavior;
 	CAI_ActBusyBehavior			m_ActBusyBehavior;
 
+	Vector				m_vLastStoredOrigin;
+	float				m_flLastStuckCheck;
+
+	CSoundPatch		*m_pJetpackSound;
+
 public:
 	int				m_iLastAnimEventHandled;
 	bool			m_fIsElite;
 	bool			m_fIsMossman;
 	bool			m_fIsTsoLing;
+	bool			m_fHasjetpack;
 	Vector			m_vecAltFireTarget;
 
 	int				m_iTacticalVariant;

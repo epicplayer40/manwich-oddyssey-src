@@ -29,6 +29,7 @@
 #include "weapon_physcannon.h"
 #include "SoundEmitterSystem/isoundemittersystembase.h"
 #include "npc_headcrab.h"
+#include "soundenvelope.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -78,6 +79,8 @@ int	g_interactionCombineBash		= 0; // melee bash attack
 #define COMBINE_AE_GREN_DROP		( 9 )
 #define COMBINE_AE_CAUGHT_ENEMY		( 10) // grunt established sight with an enemy (player only) that had previously eluded the squad.
 
+static int AE_JETPACK_TAKEOFF;
+
 int COMBINE_AE_BEGIN_ALTFIRE;
 int COMBINE_AE_ALTFIRE;
 
@@ -97,6 +100,8 @@ Activity ACT_COMBINE_BUGBAIT;
 Activity ACT_COMBINE_AR2_ALTFIRE;
 Activity ACT_WALK_EASY;
 Activity ACT_WALK_MARCH;
+Activity ACT_JETPACK_TAKEOFF;
+Activity ACT_GESTURE_JETPACK_LEGS;
 
 // -----------------------------------------------
 //	> Squad slots
@@ -147,6 +152,7 @@ DEFINE_FIELD( m_flNextAltFireTime, FIELD_TIME ),
 DEFINE_FIELD( m_nShots, FIELD_INTEGER ),
 DEFINE_FIELD( m_flShotDelay, FIELD_FLOAT ),
 DEFINE_FIELD( m_flStopMoveShootTime, FIELD_TIME ),
+DEFINE_FIELD( m_bFlying, FIELD_BOOLEAN ),
 DEFINE_KEYFIELD( m_iNumGrenades, FIELD_INTEGER, "NumGrenades" ),
 DEFINE_EMBEDDED( m_Sentences ),
 
@@ -168,15 +174,21 @@ DEFINE_INPUTFUNC( FIELD_STRING,	"Assault", InputAssault ),
 DEFINE_INPUTFUNC( FIELD_VOID,	"HitByBugbait",		InputHitByBugbait ),
 
 DEFINE_INPUTFUNC( FIELD_STRING,	"ThrowGrenadeAtTarget",	InputThrowGrenadeAtTarget ),
+DEFINE_INPUTFUNC( FIELD_STRING, "EnableJetpack", InputEnableJetpack ),
+DEFINE_INPUTFUNC( FIELD_STRING, "DisableJetpack", InputDisableJetpack ),
+DEFINE_KEYFIELD( m_fJetpackEnabledOnSpawn, FIELD_BOOLEAN, "jetpackenabledonspawn" ),
 
 DEFINE_FIELD( m_iLastAnimEventHandled, FIELD_INTEGER ),
 DEFINE_FIELD( m_fIsElite, FIELD_BOOLEAN ),
 DEFINE_FIELD( m_fIsMossman, FIELD_BOOLEAN ),
 DEFINE_FIELD( m_fIsTsoLing, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_fHasjetpack, FIELD_BOOLEAN),
 DEFINE_FIELD( m_vecAltFireTarget, FIELD_VECTOR ),
 
 DEFINE_KEYFIELD( m_iTacticalVariant, FIELD_INTEGER, "tacticalvariant" ),
 DEFINE_KEYFIELD( m_iPathfindingVariant, FIELD_INTEGER, "pathfindingvariant" ),
+
+DEFINE_SOUNDPATCH(m_pJetpackSound),
 
 END_DATADESC()
 
@@ -287,6 +299,14 @@ void CNPC_Combine::Precache()
 	PrecacheScriptSound( "NPC_Combine.WeaponBash" );
 	PrecacheScriptSound( "Weapon_CombineGuard.Special1" );
 
+	if (m_fHasjetpack)
+	{
+		PrecacheScriptSound("NPC_CombineDropship.NearRotorLoop");
+		PrecacheScriptSound("NPC_JetpackCombine.Loop");
+		PrecacheScriptSound("NPC_JetpackCombine.Start");
+		PrecacheScriptSound("NPC_JetpackCombine.Stop");
+	}
+
 	BaseClass::Precache();
 }
 
@@ -351,6 +371,17 @@ void CNPC_Combine::Spawn( void )
 	m_flAlertPatrolTime			= 0;
 
 	m_flNextAltFireTime = gpGlobals->curtime;
+
+	if (m_fHasjetpack && m_fJetpackEnabledOnSpawn)
+	{
+		//SetActivity(ACT_JETPACK_TAKEOFF);
+		int nLayer = AddGesture((Activity)ACT_GESTURE_JETPACK_LEGS); // add legs gesture
+		SetLayerPriority(nLayer, 1.0f);
+		SetLayerPlaybackRate(nLayer, 0.0f); //pause the gesture so it lasts forever
+		InitializeJetpackSound();
+		SetBodygroup(1, 1);
+		Takeoff();
+	}
 
 
 	if( HasDbarrel() )
@@ -472,6 +503,19 @@ void CNPC_Combine::PrescheduleThink()
 		if( GetNavigator()->GetPathTimeToGoal() <= 1.0f )
 		{
 			m_MoveAndShootOverlay.SuspendMoveAndShoot( 0 );
+			if (m_fHasjetpack && m_bFlying)
+			{
+	
+				// Trace down and make sure we can fit here
+				trace_t	tr;
+				AI_TraceHull(EyePosition(), EyePosition() - Vector(0, 0, 80), GetHullMins(), GetHullMaxs(), MASK_NPCSOLID, this, COLLISION_GROUP_NONE, &tr);
+	
+				// Deactivate jetpack otherwise
+				if (tr.fraction < 1.0f)
+				{
+					turnoffjetpack();
+				}
+			}
 		}
 	}
 }
@@ -957,7 +1001,7 @@ void CNPC_Combine::StartTask( const Task_t *pTask )
 			bool bIsFlying = (GetMoveType() == MOVETYPE_FLY) || (GetMoveType() == MOVETYPE_FLYGRAVITY);
 			if (bIsFlying)
 			{
-				SetIdealActivity( ACT_GLIDE );
+				// SetIdealActivity( ACT_GLIDE );
 			}
 
 		}
@@ -1025,6 +1069,48 @@ void CNPC_Combine::StartTask( const Task_t *pTask )
 			TaskComplete();
 		}
 		break;
+
+	case TASK_JETPACK_TAKEOFF:
+	{
+		Takeoff();
+		break;
+	}
+	case TASK_JETPACK_LAND:
+	{
+		if (m_fHasjetpack && IsFlying())
+		{
+			trace_t	tr;
+			AI_TraceHull(GetAbsOrigin(), GetAbsOrigin() - Vector(0, 0, 200), GetHullMins(), GetHullMaxs(), MASK_NPCSOLID, this, COLLISION_GROUP_NONE, &tr);
+
+			// Deactivate jetpack otherwise
+			if (tr.fraction < 1.0f)
+			{
+				turnoffjetpack();
+				TaskComplete();
+			}
+			else TaskFail(FAIL_NO_ROUTE);
+
+		}
+		break;
+	}
+
+	case TASK_JETPACK_FINDHEADROOM:
+	{
+		if (m_fHasjetpack && !IsFlying())
+		{
+			trace_t tr;
+			UTIL_TraceEntity(this, GetAbsOrigin(), GetAbsOrigin() + Vector(0, 0, 100), MASK_NPCSOLID, this, GetCollisionGroup(), &tr);
+
+			if (tr.fraction == 1.0f)
+			{
+				//Msg("Headroom\n");
+				TaskComplete();
+			}
+			else TaskFail(FAIL_BAD_POSITION);
+
+		}
+		break;
+	}		
 
 	default: 
 		BaseClass:: StartTask( pTask );
@@ -1173,6 +1259,23 @@ void CNPC_Combine::RunTask( const Task_t *pTask )
 		}
 		break;
 
+	case TASK_JETPACK_TAKEOFF:
+	{
+	 	if (GetNavigator()->IsGoalActive())
+		{
+			GetMotor()->SetIdealYawToTargetAndUpdate(GetAbsOrigin() + GetNavigator()->GetCurWaypointPos(), AI_KEEP_YAW_SPEED);
+		}
+		else
+			TaskFail(FAIL_NO_ROUTE);
+
+		if (IsActivityFinished())
+		{
+			TaskComplete();
+		}
+
+		break;
+	}
+
 	default:
 		{
 			BaseClass::RunTask( pTask );
@@ -1258,6 +1361,10 @@ void CNPC_Combine::Event_Killed( const CTakeDamageInfo &info )
 		}
 	}
 
+	if (m_fHasjetpack && IsFlying())
+	{
+		turnoffjetpack();
+	}
 	BaseClass::Event_Killed( info );
 }
 
@@ -1346,6 +1453,39 @@ Activity CNPC_Combine::NPC_TranslateActivity( Activity eNewActivity )
 			eNewActivity = ACT_RUN_AIM;
 			break;
 		}
+	}
+
+	if (IsFlying() && eNewActivity == ACT_IDLE)
+	{
+//		return ACT_FLY;
+		/*
+		switch (eNewActivity)
+		{
+		case ACT_IDLE:
+			return ACT_FLY;
+			break;
+
+		case ACT_WALK:
+			return ACT_FLY;
+			break;
+
+		case ACT_RUN:
+			return ACT_GLIDE;
+			break;
+
+		case ACT_IDLE_ANGRY:
+			return ACT_FLY;
+			break;
+
+		case ACT_WALK_AIM:
+			return ACT_FLY;
+			break;
+
+		case ACT_RUN_AIM:
+			return ACT_GLIDE;
+			break;
+		}
+		*/
 	}
 
 	return BaseClass::NPC_TranslateActivity( eNewActivity );
@@ -1502,6 +1642,18 @@ int CNPC_Combine::SelectCombatSchedule()
 	{
 		// call base class, all code to handle dead enemies is centralized there.
 		return SCHED_NONE;
+	}
+
+	// ----------
+	// can't reach enemy without flying
+	// ----------
+	
+	if (HasCondition(COND_ENEMY_UNREACHABLE))
+	{
+		if (m_fHasjetpack && !IsFlying())
+		{
+			return SCHED_JETPACK_TAKEOFF;
+		}
 	}
 
 	// -----------
@@ -1836,6 +1988,11 @@ int CNPC_Combine::SelectSchedule( void )
 	{
 	case NPC_STATE_IDLE:
 		{
+			if (m_fHasjetpack && IsFlying())
+			{
+				return SCHED_JETPACK_LAND;
+			}
+
 			if ( m_bShouldPatrol )
 				return SCHED_COMBINE_PATROL;
 		}
@@ -1896,6 +2053,10 @@ int CNPC_Combine::SelectFailSchedule( int failedSchedule, int failedTask, AI_Tas
 	{
 		if( IsInSquad() && IsStrategySlotRangeOccupied(SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2) && HasCondition(COND_SEE_ENEMY) )
 		{
+			if (m_fHasjetpack && IsFlying())
+			{
+				return SCHED_JETPACK_LAND;
+			}
 			// This eases the effects of an unfortunate bug that usually plagues shotgunners. Since their rate of fire is low,
 			// they spend relatively long periods of time without an attack squad slot. If you corner a shotgunner, usually 
 			// the other memebers of the squad will hog all of the attack slots and pick schedules to move to establish line of
@@ -1908,8 +2069,14 @@ int CNPC_Combine::SelectFailSchedule( int failedSchedule, int failedTask, AI_Tas
 		{
 				return SCHED_COMBINE_ESTABLISH_RPG_LINE_OF_FIRE;
 		}
+	}
 
-
+	if (failedTask == TASK_GET_PATH_TO_GOAL || failedTask == TASK_GET_PATH_TO_TARGET || failedSchedule == SCHED_FORCED_GO_RUN)
+	{
+		if (m_fHasjetpack && !IsFlying())
+		{
+			return SCHED_JETPACK_TAKEOFF;
+		}
 	}
 
 	return BaseClass::SelectFailSchedule( failedSchedule, failedTask, taskFailCode );
@@ -2086,6 +2253,13 @@ int CNPC_Combine::TranslateSchedule( int scheduleType )
 					if ( ShouldChargePlayer() && !IsUnreachable( GetEnemy() ) )
 						return SCHED_COMBINE_CHARGE_PLAYER;
 
+					if (m_fHasjetpack && !IsFlying()) //IsUnreachable(GetEnemy())
+					{
+//						DevMsg("Fly!\n");
+						//Takeoff(); //crash cause
+						return SCHED_JETPACK_TAKEOFF;
+					}
+
 					return SCHED_COMBINE_TAKE_COVER1;
 				}
 			}
@@ -2190,6 +2364,12 @@ int CNPC_Combine::TranslateSchedule( int scheduleType )
 				}
 			}
 
+			if (m_fHasjetpack && !IsFlying() && OccupyStrategySlotRange(SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2))
+			{
+				//Takeoff();
+				return SCHED_JETPACK_TAKEOFF;
+			}
+
 			return SCHED_COMBINE_ESTABLISH_LINE_OF_FIRE;
 		}
 		break;
@@ -2234,6 +2414,11 @@ int CNPC_Combine::TranslateSchedule( int scheduleType )
 				 GetActiveWeapon()->WeaponSound(RELOAD_NPC);
 				  return SCHED_TAKE_COVER_FROM_ENEMY;
 				}
+			}
+
+			if (m_fHasjetpack && IsFlying())
+			{
+				return SCHED_JETPACK_LAND;
 			}
 
 			return SCHED_COMBINE_HIDE_AND_RELOAD;
@@ -2332,6 +2517,12 @@ int CNPC_Combine::TranslateSchedule( int scheduleType )
 				}
 			}
 
+			if (m_fHasjetpack && !IsFlying() && IsUnreachable(GetEnemy()))
+			{
+				//Takeoff();
+				return SCHED_JETPACK_TAKEOFF;
+			}
+
 			return SCHED_COMBINE_SUPPRESS;
 		}
 	case SCHED_FAIL:
@@ -2348,6 +2539,11 @@ int CNPC_Combine::TranslateSchedule( int scheduleType )
 			// If I have an enemy, don't go off into random patrol mode.
 			if ( GetEnemy() && GetEnemy()->IsAlive() )
 				return SCHED_COMBINE_PATROL_ENEMY;
+
+			if (m_fHasjetpack && IsFlying())
+			{
+				return SCHED_JETPACK_LAND;
+			}
 
 			return SCHED_COMBINE_PATROL;
 		}
@@ -2374,7 +2570,25 @@ void CNPC_Combine::HandleAnimEvent( animevent_t *pEvent )
 
 	if (pEvent->type & AE_TYPE_NEWEVENTSYSTEM)
 	{
-		if ( pEvent->event == COMBINE_AE_BEGIN_ALTFIRE )
+		if (pEvent->event == AE_JETPACK_TAKEOFF) //called during the jetpack takeoff animation
+		{
+			int nLayer = AddGesture((Activity)ACT_GESTURE_JETPACK_LEGS); // add legs gesture
+			SetLayerPriority(nLayer, 1.0f);
+//			int nLayer = FindGestureLayer((Activity)ACT_GESTURE_JETPACK_LEGS);
+			SetLayerPlaybackRate(nLayer, 0.0f); //pause the gesture so it lasts forever
+			EmitSound("NPC_JetpackCombine.Start"); 
+			InitializeJetpackSound();
+			SetBodygroup(1, 1);
+
+			if (GetNavigator()->GetPath()->GetCurWaypoint())
+			{
+				Takeoff();
+			} else Takeoff();
+			handledEvent = true;
+//			return;
+		}
+
+		else if ( pEvent->event == COMBINE_AE_BEGIN_ALTFIRE )
 		{
 			EmitSound( "Weapon_CombineGuard.Special1" );
 			handledEvent = true;
@@ -2528,6 +2742,16 @@ void CNPC_Combine::HandleAnimEvent( animevent_t *pEvent )
 			m_Sentences.Speak( "COMBINE_ALERT" );
 			handledEvent = true;
 			break;
+
+		case NPC_EVENT_LEFTFOOT:
+		case NPC_EVENT_RIGHTFOOT:
+		{
+			if (m_fHasjetpack && IsFlying())
+			{
+				EmitSound("NPC_JetpackCombine.Footstep", pEvent->eventtime);
+			}
+		}
+		break;			
 
 		default:
 			BaseClass::HandleAnimEvent( pEvent );
@@ -3390,6 +3614,122 @@ bool CNPC_Combine::ShouldPickADeathPose( void )
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: Switches between flying mode and ground mode for jetpack soldier.
+//-----------------------------------------------------------------------------
+void CNPC_Combine::SetFlyingState(FlyState_t eState)
+{
+	if (eState == FlyState_Flying)
+	{
+		// Flying
+		SetGroundEntity(NULL);
+		AddFlag(FL_FLY);
+		SetNavType(NAV_FLY);
+		//CapabilitiesRemove(bits_CAP_MOVE_GROUND);
+		CapabilitiesRemove(bits_CAP_DUCK); // dont crouch when flying
+		CapabilitiesAdd(bits_CAP_MOVE_FLY);
+		SetMoveType(MOVETYPE_STEP);
+		m_vLastStoredOrigin = GetAbsOrigin();
+		m_flLastStuckCheck = gpGlobals->curtime + 3.0f;
+		m_flGroundIdleMoveTime = gpGlobals->curtime + random->RandomFloat(5.0f, 10.0f);
+	}
+	else if (eState == FlyState_Walking)
+	{
+		// Walking
+		QAngle angles = GetAbsAngles();
+		angles[PITCH] = 0.0f;
+		angles[ROLL] = 0.0f;
+		SetAbsAngles(angles);
+
+		RemoveFlag(FL_FLY);
+		SetNavType(NAV_GROUND);
+		CapabilitiesRemove(bits_CAP_MOVE_FLY);
+		//CapabilitiesAdd(bits_CAP_MOVE_GROUND);
+		CapabilitiesAdd(bits_CAP_DUCK);
+		SetMoveType(MOVETYPE_STEP);
+		m_vLastStoredOrigin = vec3_origin;
+		m_flGroundIdleMoveTime = gpGlobals->curtime + random->RandomFloat(5.0f, 10.0f);
+	}
+	else
+	{
+		// Falling
+		RemoveFlag(FL_FLY);
+		SetNavType(NAV_GROUND);
+		CapabilitiesRemove(bits_CAP_MOVE_FLY);
+		CapabilitiesAdd(bits_CAP_MOVE_GROUND);
+		SetMoveType(MOVETYPE_STEP);
+		m_flGroundIdleMoveTime = gpGlobals->curtime + random->RandomFloat(5.0f, 10.0f);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Performs a takeoff for the jetpack soldier. Called via an animation event at the moment
+//			our feet leave the ground.
+// Input  : pGoalEnt - The entity that we are going to fly toward.
+//-----------------------------------------------------------------------------
+void CNPC_Combine::Takeoff(void)
+{
+	UTIL_SetOrigin(this, GetAbsOrigin() + Vector(0, 0, 1));
+	SetFlyingState(FlyState_Flying);
+}
+
+void CNPC_Combine::InitializeJetpackSound(void)
+{
+	CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
+
+	CPASAttenuationFilter filter(this);
+
+	m_pJetpackSound = controller.SoundCreate(filter, entindex(), "NPC_JetpackCombine.Loop");
+
+	if (m_pJetpackSound)
+	{
+		controller.Play(m_pJetpackSound, 1.0, 100);
+	}
+}
+
+void CNPC_Combine::StopJetpackSound()
+{
+	CSoundEnvelopeController &controller = CSoundEnvelopeController::GetController();
+
+	if (m_pJetpackSound)
+	{
+		controller.SoundDestroy(m_pJetpackSound);
+		m_pJetpackSound = NULL;
+	}
+
+	EmitSound("NPC_JetpackCombine.Stop");
+}
+
+void CNPC_Combine::turnoffjetpack()
+{
+	SetFlyingState(FlyState_Falling);
+	RemoveGesture((Activity)ACT_GESTURE_JETPACK_LEGS);
+	StopJetpackSound();
+	SetBodygroup(1, 0);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Tells the jetpack soldier to enable his jetpack.
+//-----------------------------------------------------------------------------
+void CNPC_Combine::InputEnableJetpack(inputdata_t &inputdata)
+{
+	if (IsAlive() == false || !m_fHasjetpack || (m_fHasjetpack && IsFlying()))
+		return;
+
+	SetSchedule(SCHED_JETPACK_TAKEOFF);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Tells the jetpack soldier to disable his jetpack right now.
+//-----------------------------------------------------------------------------
+void CNPC_Combine::InputDisableJetpack(inputdata_t &inputdata)
+{
+	if (IsAlive() == false || !m_fHasjetpack || (m_fHasjetpack && !IsFlying()))
+		return;
+
+	SetSchedule(SCHED_JETPACK_LAND_IMMEDIATE);
+}
+
+//-----------------------------------------------------------------------------
 //
 // Schedules
 //
@@ -3407,6 +3747,9 @@ DECLARE_TASK( TASK_COMBINE_DIE_INSTANTLY )
 DECLARE_TASK( TASK_COMBINE_PLAY_SEQUENCE_FACE_ALTFIRE_TARGET )
 DECLARE_TASK( TASK_COMBINE_GET_PATH_TO_FORCED_GREN_LOS )
 DECLARE_TASK( TASK_COMBINE_SET_STANDING )
+DECLARE_TASK( TASK_JETPACK_TAKEOFF )
+DECLARE_TASK( TASK_JETPACK_LAND )
+DECLARE_TASK( TASK_JETPACK_FINDHEADROOM )
 
 //Activities
 DECLARE_ACTIVITY( ACT_COMBINE_THROW_GRENADE )
@@ -3415,9 +3758,12 @@ DECLARE_ACTIVITY( ACT_COMBINE_BUGBAIT )
 DECLARE_ACTIVITY( ACT_COMBINE_AR2_ALTFIRE )
 DECLARE_ACTIVITY( ACT_WALK_EASY )
 DECLARE_ACTIVITY( ACT_WALK_MARCH )
+DECLARE_ACTIVITY( ACT_JETPACK_TAKEOFF )
+DECLARE_ACTIVITY( ACT_GESTURE_JETPACK_LEGS )
 
 DECLARE_ANIMEVENT( COMBINE_AE_BEGIN_ALTFIRE )
 DECLARE_ANIMEVENT( COMBINE_AE_ALTFIRE )
+DECLARE_ANIMEVENT( AE_JETPACK_TAKEOFF )
 
 DECLARE_SQUADSLOT( SQUAD_SLOT_GRENADE1 )
 DECLARE_SQUADSLOT( SQUAD_SLOT_GRENADE2 )
@@ -4189,6 +4535,53 @@ DEFINE_SCHEDULE
  "		COND_NEW_ENEMY"
  "		COND_ENEMY_DEAD"
  "		COND_CAN_MELEE_ATTACK1"
+ )
+
+ //==================================================
+ // Jetpack Schedules
+ //==================================================
+
+ DEFINE_SCHEDULE
+ (
+ SCHED_JETPACK_TAKEOFF,
+
+ "	Tasks"
+ "		TASK_STOP_MOVING				0"
+ //"		TASK_FACE_ENEMY					0"
+ "		TASK_JETPACK_FINDHEADROOM		0"	
+ "		TASK_PLAY_SEQUENCE				ACTIVITY:ACT_JETPACK_TAKEOFF"
+ "		TASK_JETPACK_TAKEOFF			0"
+ "		TASK_WAIT						1"
+ "	"
+ "	Interrupts"
+ )
+
+ DEFINE_SCHEDULE
+ (
+ SCHED_JETPACK_LAND,
+
+ "	Tasks"
+ "		TASK_GET_PATH_TO_RANDOM_NODE				500"
+ "		TASK_RUN_PATH_WITHIN_DIST					100"
+ //"		TASK_RUN_PATH								0"
+// "		TASK_STOP_MOVING							0"
+ "		TASK_JETPACK_LAND							0"
+// "		TASK_FALL_TO_GROUND							0"
+ "		TASK_WAIT						1"
+ "	"
+ "	Interrupts"
+ "		COND_NEW_ENEMY"
+ )
+
+ DEFINE_SCHEDULE
+ (
+ SCHED_JETPACK_LAND_IMMEDIATE,
+
+ "	Tasks"
+ "		TASK_JETPACK_LAND							0"
+ "		TASK_WAIT						1"
+ "	"
+ "	Interrupts"
  )
 
  AI_END_CUSTOM_NPC()

@@ -139,6 +139,15 @@ void CNPC_CombineS::Precache()
 		m_fIsTsoLing = false;
 	}
 
+	if (!Q_stricmp(pModelName, "models/combine_jetpack_soldier.mdl"))
+	{
+		m_fHasjetpack = true;
+	}
+	else
+	{
+		m_fHasjetpack = false;
+	}
+
 	if( !GetModelName() )
 	{
 		SetModelName( MAKE_STRING( "models/combine_soldier.mdl" ) );
