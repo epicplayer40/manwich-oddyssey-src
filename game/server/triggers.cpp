@@ -2781,6 +2781,8 @@ public:
 	void FollowTarget( void );
 	void Move(void);
 
+	void UpdateOnRemove();
+
 	// Always transmit to clients so they know where to move the view to
 	virtual int UpdateTransmitState();
 	
@@ -3375,6 +3377,12 @@ void CTriggerCamera::Move()
 		}
 	}
 #endif
+}
+
+void CTriggerCamera::UpdateOnRemove()
+{
+	Disable();
+	BaseClass::UpdateOnRemove();
 }
 
 
