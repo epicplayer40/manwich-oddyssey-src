@@ -1029,17 +1029,17 @@ int CNPC_Conscript::SelectSchedule ( void )
 				{
 				if (iPercent <= 25 && GetEnemy() != NULL)
 					{
-						Msg("CONSCRIPT (balanced): CHOSE FALLBACK!\n");
+						// Msg("CONSCRIPT (balanced): CHOSE FALLBACK!\n");
 						return SCHED_RUN_FROM_ENEMY_FALLBACK;
 					}
 					else if (iPercent <= 50 && GetEnemy() != NULL) 
 					{
-						Msg("CONSCRIPT (balanced): CHOSE TO TAKE COVER!\n");
+						// Msg("CONSCRIPT (balanced): CHOSE TO TAKE COVER!\n");
 						return SCHED_TAKE_COVER_FROM_ENEMY;
 					}
 					else if (iPercent >= 75 && GetEnemy() != NULL) 
 					{
-						Msg("CONSCRIPT (balanced): CHOSE ESTABLISH LOF!\n");
+						// Msg("CONSCRIPT (balanced): CHOSE ESTABLISH LOF!\n");
 						return SCHED_ESTABLISH_LINE_OF_FIRE;
 					}
 				}
@@ -1048,17 +1048,17 @@ int CNPC_Conscript::SelectSchedule ( void )
 				{
 				if (iPercent <= 75 && GetEnemy() != NULL)
 					{
-						Msg("CONSCRIPT (cautious): CHOSE CAUTIOUS TAKECOVER!\n");
+						// Msg("CONSCRIPT (cautious): CHOSE CAUTIOUS TAKECOVER!\n");
 						return SCHED_CONSCRIPT_CAUTIOUS_TAKECOVER;
 					}
 					else if (iPercent <= 30 && GetEnemy() != NULL) 
 					{
-						Msg("CONSCRIPT (cautious): CHOSE TO TAKE COVER!\n");
+						// Msg("CONSCRIPT (cautious): CHOSE TO TAKE COVER!\n");
 						return SCHED_TAKE_COVER_FROM_ENEMY;
 					}
 					else if (iPercent >= 25 && GetEnemy() != NULL) 
 					{
-						Msg("CONSCRIPT (cautious): CHOSE ESTABLISH LOF!\n");
+						// Msg("CONSCRIPT (cautious): CHOSE ESTABLISH LOF!\n");
 						return SCHED_ESTABLISH_LINE_OF_FIRE;
 					}
 				}
@@ -1067,17 +1067,17 @@ int CNPC_Conscript::SelectSchedule ( void )
 				{
 				if (iPercent <= 50 && GetEnemy() != NULL)
 					{
-						Msg("CONSCRIPT (aggressive): CHOSE CHASE ENEMY!\n");
+						// Msg("CONSCRIPT (aggressive): CHOSE CHASE ENEMY!\n");
 						return SCHED_CHASE_ENEMY;
 					}
 					else if (iPercent <= 15 && GetEnemy() != NULL) 
 					{
-						Msg("CONSCRIPT (aggressive): CHOSE TO TAKE COVER!\n");
+						// Msg("CONSCRIPT (aggressive): CHOSE TO TAKE COVER!\n");
 						return SCHED_TAKE_COVER_FROM_ENEMY;
 					}
 					else if (iPercent >= 75 && GetEnemy() != NULL) 
 					{
-						Msg("CONSCRIPT (aggressive): CHOSE ESTABLISH LOF!\n");
+						// Msg("CONSCRIPT (aggressive): CHOSE ESTABLISH LOF!\n");
 						return SCHED_ESTABLISH_LINE_OF_FIRE;
 					}
 				}
@@ -1094,19 +1094,19 @@ int CNPC_Conscript::SelectSchedule ( void )
 					if (iPercent <= 30 && GetEnemy() != NULL)
 					{
 						return SCHED_ESTABLISH_LINE_OF_FIRE;
-						Msg("CONSCRIPT: I'M PICKING ESTABLISH LOF AGAINST OCCLUDED ENEMY!\n");
+						// Msg("CONSCRIPT: I'M PICKING ESTABLISH LOF AGAINST OCCLUDED ENEMY!\n");
 						//Speak ( CONSCRIPT_GOINGAFTER);
 					}
 					else if (iPercent <= 60 && GetEnemy() != NULL)
 					{
 						return SCHED_CONSCRIPT_SUPPRESSINGFIRE;
-						Msg("CONSCRIPT: I'M PICKING SUPPRESSING FIRE AGAINST OCCLUDED ENEMY!\n");
+						// Msg("CONSCRIPT: I'M PICKING SUPPRESSING FIRE AGAINST OCCLUDED ENEMY!\n");
 						//Speak (CONSCRIPT_SUPPRESS);
 					}
 					else if (iPercent <= 40 && GetEnemy() != NULL)
 					{
 						return SCHED_STANDOFF;
-						Msg("CONSCRIPT: I'M PICKING STANDOFF AGAINST OCCLUDED ENEMY!\n");
+						// Msg("CONSCRIPT: I'M PICKING STANDOFF AGAINST OCCLUDED ENEMY!\n");
 						//Speak (CONSCRIPT_TAUNT);
 					}
 				}
@@ -1116,19 +1116,19 @@ int CNPC_Conscript::SelectSchedule ( void )
 					if (iPercent <= 10 && GetEnemy() != NULL)
 					{
 						return SCHED_ESTABLISH_LINE_OF_FIRE;
-						Msg("CONSCRIPT (cautious): I'M PICKING ESTABLISH LOF AGAINST OCCLUDED ENEMY!\n");
+						// Msg("CONSCRIPT (cautious): I'M PICKING ESTABLISH LOF AGAINST OCCLUDED ENEMY!\n");
 						//Speak ( CONSCRIPT_GOINGAFTER);
 					}
 					else if (iPercent <= 60 && GetEnemy() != NULL)
 					{
 						return SCHED_CONSCRIPT_SUPPRESSINGFIRE;
-						Msg("CONSCRIPT (cautious): I'M PICKING SUPPRESSING FIRE AGAINST OCCLUDED ENEMY!\n");
+						// Msg("CONSCRIPT (cautious): I'M PICKING SUPPRESSING FIRE AGAINST OCCLUDED ENEMY!\n");
 						//Speak (CONSCRIPT_SUPPRESS);
 					}
 					else if (iPercent <= 30 && GetEnemy() != NULL)
 					{
 						return SCHED_STANDOFF;
-						Msg("CONSCRIPT (cautious): I'M PICKING STANDOFF AGAINST OCCLUDED ENEMY!\n");
+						// Msg("CONSCRIPT (cautious): I'M PICKING STANDOFF AGAINST OCCLUDED ENEMY!\n");
 						//Speak (CONSCRIPT_TAUNT);
 					}
 				}
@@ -1138,19 +1138,19 @@ int CNPC_Conscript::SelectSchedule ( void )
 					if (iPercent <= 50 && GetEnemy() != NULL)
 					{
 						return SCHED_ESTABLISH_LINE_OF_FIRE;
-						Msg("CONSCRIPT (aggressive): I'M PICKING ESTABLISH LOF AGAINST OCCLUDED ENEMY!\n");
+						// Msg("CONSCRIPT (aggressive): I'M PICKING ESTABLISH LOF AGAINST OCCLUDED ENEMY!\n");
 						//Speak ( CONSCRIPT_GOINGAFTER);
 					}
 					else if (iPercent <= 20 && GetEnemy() != NULL)
 					{
 						return SCHED_CONSCRIPT_SUPPRESSINGFIRE;
-						Msg("CONSCRIPT (aggressive): I'M PICKING SUPPRESSING FIRE AGAINST OCCLUDED ENEMY!\n");
+						// Msg("CONSCRIPT (aggressive): I'M PICKING SUPPRESSING FIRE AGAINST OCCLUDED ENEMY!\n");
 						//Speak (CONSCRIPT_SUPPRESS);
 					}
 					else if (iPercent <= 30 && GetEnemy() != NULL)
 					{
 						return SCHED_CHASE_ENEMY;
-						Msg("CONSCRIPT (aggressive): I'M GOING AFTER OCCLUDED ENEMY!\n");
+						// Msg("CONSCRIPT (aggressive): I'M GOING AFTER OCCLUDED ENEMY!\n");
 						//Speak (CONSCRIPT_TAUNT);
 					}
 				}
