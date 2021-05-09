@@ -3379,6 +3379,9 @@ void CTriggerCamera::Move()
 #endif
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Cleans up when camera is removed. How the fuck did Valve miss this?
+//-----------------------------------------------------------------------------
 void CTriggerCamera::UpdateOnRemove()
 {
 	Disable();
