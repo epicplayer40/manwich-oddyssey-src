@@ -210,7 +210,7 @@ void CWeaponMP5::Operator_HandleAnimEvent(animevent_t *pEvent, CBaseCombatCharac
 {
 	switch( pEvent->event )
 	{
-	case EVENT_WEAPON_AR2_GRENADE:
+	case EVENT_WEAPON_SMG1:
 		{
 			Vector vecShootOrigin, vecShootDir;
 			QAngle angDiscard;
@@ -230,7 +230,7 @@ void CWeaponMP5::Operator_HandleAnimEvent(animevent_t *pEvent, CBaseCombatCharac
 		break;
 
 		//FIXME: Re-enable
-		case EVENT_WEAPON_SMG1:
+		case EVENT_WEAPON_AR2_GRENADE:
 		/*
 		{
 		CAI_BaseNPC *npc = pOperator->MyNPCPointer();

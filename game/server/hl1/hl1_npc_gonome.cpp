@@ -171,9 +171,6 @@ void CGonomeSpit::Precache( void )
 	PrecacheScriptSound( "NPC_BigMomma.SpitTouch1" );
 	PrecacheScriptSound( "NPC_BigMomma.SpitHit1" );
 	PrecacheScriptSound( "NPC_BigMomma.SpitHit2" );
-
-	PrecacheScriptSound( "Zombie.AttackHit" );
-	PrecacheScriptSound( "Zombie.AttackMiss" );
 }
 
 void CGonomeSpit:: Spawn( void )
@@ -339,6 +336,10 @@ void CNPC_Gonome::Precache()
 	PrecacheScriptSound( "Gonome.Attack" );
 	PrecacheScriptSound( "Gonome.Bite" );
 	PrecacheScriptSound( "Gonome.Growl" );
+
+	PrecacheParticleSystem("blood_impact_zombie_01");
+	PrecacheScriptSound("Zombie.AttackHit");
+	PrecacheScriptSound("Zombie.AttackMiss");
 }
 
 
