@@ -155,7 +155,7 @@ private:
 
 };
 
-LINK_ENTITY_TO_CLASS( squidspit, CAshdudeSpit );
+LINK_ENTITY_TO_CLASS( ashdudespit, CAshdudeSpit );
 
 BEGIN_DATADESC( CAshdudeSpit )
 	DEFINE_FIELD( m_nAshdudeSpitSprite, FIELD_INTEGER ),
@@ -180,7 +180,7 @@ void CAshdudeSpit:: Spawn( void )
 	Precache();
 
 	SetMoveType ( MOVETYPE_FLY );
-	SetClassname( "squidspit" );
+	SetClassname( "ashdudespit" );
 	
 	SetSolid( SOLID_BBOX );
 
@@ -198,7 +198,7 @@ void CAshdudeSpit:: Spawn( void )
 
 void CAshdudeSpit::Shoot( CBaseEntity *pOwner, Vector vecStart, Vector vecVelocity )
 {
-	CAshdudeSpit *pSpit = CREATE_ENTITY( CAshdudeSpit, "squidspit" );
+	CAshdudeSpit *pSpit = CREATE_ENTITY( CAshdudeSpit, "ashdudespit" );
 	pSpit->Spawn();
 	
 	UTIL_SetOrigin( pSpit, vecStart );

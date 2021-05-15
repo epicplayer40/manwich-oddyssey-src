@@ -156,7 +156,7 @@ private:
 
 };
 
-LINK_ENTITY_TO_CLASS( squidspit, CGonomeSpit );
+LINK_ENTITY_TO_CLASS( gonomespit, CGonomeSpit );
 
 BEGIN_DATADESC( CGonomeSpit )
 	DEFINE_FIELD( m_nGonomeSpitSprite, FIELD_INTEGER ),
@@ -178,7 +178,7 @@ void CGonomeSpit:: Spawn( void )
 	Precache();
 
 	SetMoveType ( MOVETYPE_FLY );
-	SetClassname( "squidspit" );
+	SetClassname( "gonomespit" );
 	
 	SetSolid( SOLID_BBOX );
 
@@ -196,7 +196,7 @@ void CGonomeSpit:: Spawn( void )
 
 void CGonomeSpit::Shoot( CBaseEntity *pOwner, Vector vecStart, Vector vecVelocity )
 {
-	CGonomeSpit *pSpit = CREATE_ENTITY( CGonomeSpit, "squidspit" );
+	CGonomeSpit *pSpit = CREATE_ENTITY( CGonomeSpit, "gonomespit" );
 	pSpit->Spawn();
 	
 	UTIL_SetOrigin( pSpit, vecStart );

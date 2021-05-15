@@ -116,6 +116,8 @@ public:
 	void DeathSound( const CTakeDamageInfo &info );
 	void AlertSound( void );
 
+	bool ShouldPlayIdleSound( void );
+	void IdleSound( void );
 
 
 	float MaxYawSpeed( void );
@@ -157,6 +159,8 @@ public:
 	int	m_PitchControl;
 	int	m_MuzzleAttachment;
 
+	float m_flIdleDelay;
+
 
 	DECLARE_DATADESC();
 
@@ -186,6 +190,33 @@ void CNPC_Minigunner::AlertSound( void )
 {
 	EmitSound( "Hassault.Alert" );
 
+}
+
+bool CNPC_Minigunner::ShouldPlayIdleSound(void)
+{
+	//Only do idles in the right states
+	if ((m_NPCState != NPC_STATE_IDLE && m_NPCState != NPC_STATE_ALERT))
+		return false;
+
+	//Gagged monsters don't talk
+	if (m_spawnflags & SF_NPC_GAG)
+		return false;
+
+	//Don't cut off another sound or play again too soon
+	if (m_flIdleDelay > gpGlobals->curtime)
+		return false;
+
+	//Randomize it a bit
+	if (random->RandomInt(0, 20))
+		return false;
+
+	return true;
+}
+
+void CNPC_Minigunner::IdleSound(void)
+{
+	EmitSound("Hassault.Idle");
+	m_flIdleDelay = gpGlobals->curtime + 4.0f;
 }
 
 
@@ -265,6 +296,7 @@ BEGIN_DATADESC( CNPC_Minigunner )
 	DEFINE_FIELD( m_PitchControl, FIELD_INTEGER ),
 	DEFINE_FIELD( m_MuzzleAttachment, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iAmmoType, FIELD_INTEGER ),
+	DEFINE_FIELD(m_flIdleDelay, FIELD_TIME),
 
 END_DATADESC()
 
@@ -303,6 +335,7 @@ int ACT_MINIGUNNER_HELPLESS;
 
 CNPC_Minigunner::CNPC_Minigunner( void )
 {
+	m_flIdleDelay = 0.0f;
 }
 
 Class_T	CNPC_Minigunner::Classify ( void )
