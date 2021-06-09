@@ -74,6 +74,9 @@ public:
 				break;
 		}
 	}
+
+	bool Reload();
+
 	DECLARE_ACTTABLE();
 };
 
@@ -174,4 +177,10 @@ void CWeaponHMG1::AddViewKick( void )
 	}
 	pPlayer->ViewPunch( viewPunch );*/
 	DoMachineGunKick( pPlayer, EASY_DAMPEN, MAX_VERTICAL_KICK, m_fFireDuration, SLIDE_LIMIT );
+}
+
+bool CWeaponHMG1::Reload()
+{
+	WeaponSound(RELOAD);
+	return BaseClass::Reload();
 }

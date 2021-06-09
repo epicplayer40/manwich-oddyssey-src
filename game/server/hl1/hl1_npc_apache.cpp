@@ -53,7 +53,7 @@ public:
 	
 		if (FClassnameIs(this, "monster_apache"))
 		{
-			return CLASS_TEAM3;
+			return CLASS_COMBINE;
 		}
 
 		else if (FClassnameIs(this, "monster_apache_ally"))

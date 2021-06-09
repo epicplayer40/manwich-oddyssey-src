@@ -38,6 +38,8 @@ public:
 	int		GetMinBurst() { return 10; }
 	int		GetMaxBurst() { return 30; }
 
+	bool Reload();
+
 	DECLARE_ACTTABLE();
 };
 
@@ -153,6 +155,12 @@ void CWeaponSMG2::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatChar
 			BaseClass::Operator_HandleAnimEvent( pEvent, pOperator );
 			break;
 	}
+}
+
+bool CWeaponSMG2::Reload()
+{
+	WeaponSound(RELOAD);
+	return BaseClass::Reload();
 }
 
 

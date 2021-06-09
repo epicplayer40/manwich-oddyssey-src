@@ -421,11 +421,11 @@ bool CWeaponOICW::Reload( void )
 	{
 		Zoom();
 	}
-	//bool fRet;
-//	float fCacheTime = m_flNextSecondaryAttack;
-//	fRet = DefaultReload( GetMaxClip1(), GetMaxClip2(), ACT_VM_RELOAD );
-//	bool fRet = DefaultReload( GetMaxClip1(), GetMaxClip2(), ACT_VM_RELOAD );
-	/*if ( fRet )
+	// bool fRet;
+	float fCacheTime = m_flNextSecondaryAttack;
+	// fRet = DefaultReload( GetMaxClip1(), GetMaxClip2(), ACT_VM_RELOAD );
+	bool fRet = DefaultReload( GetMaxClip1(), GetMaxClip2(), ACT_VM_RELOAD );
+	if ( fRet )
 	{
 		// Undo whatever the reload process has done to our secondary
 		// attack timer. We allow you to interrupt reloading to fire
@@ -433,7 +433,7 @@ bool CWeaponOICW::Reload( void )
 		m_flNextSecondaryAttack = GetOwner()->m_flNextAttack = fCacheTime;
 
 		WeaponSound( RELOAD );
-	}*/
+	}
 	return BaseClass::Reload();
 
 }
