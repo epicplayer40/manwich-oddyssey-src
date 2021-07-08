@@ -210,6 +210,12 @@ END_DATADESC()
 //-----------------------------------------------------------------------------
 void CNPC_Conscript::RunTask( const Task_t *pTask )
 {
+	if (m_bParented && !GetMoveParent())
+	{
+		SetMoveType(MOVETYPE_STEP);
+		CapabilitiesAdd(bits_CAP_MOVE_GROUND);
+		m_bParented = false;
+	}
 	switch ( pTask->iTask )
 	{
 	case TASK_RANGE_ATTACK1:
@@ -328,6 +334,10 @@ Activity CNPC_Conscript::NPC_TranslateActivity( Activity eNewActivity )  //MESSY
 		if( Weapon_OwnsThisType( "weapon_hmg1" ) && eNewActivity == ACT_IDLE ) { return (Activity)ACT_IDLE_AR1; }
 		if( Weapon_OwnsThisType( "weapon_hmg1" ) && eNewActivity == ACT_RUN ) { return (Activity)ACT_RUN_AR1; }
 		if( Weapon_OwnsThisType( "weapon_hmg1" ) && eNewActivity == ACT_WALK ) { return (Activity)ACT_CONSCRIPT_WALK_AR1; }
+
+
+		if (Weapon_OwnsThisType("weapon_uzi") && eNewActivity == ACT_RANGE_ATTACK_PISTOL) { return (Activity)ACT_CONSCRIPT_SHOOT_AR1; }
+
 
 		if( Weapon_OwnsThisType( "weapon_annabelle" ) && eNewActivity == ACT_RANGE_ATTACK_SHOTGUN ) { return (Activity)ACT_CONSCRIPT_SHOOT_SNIPER_RIFLE; }
 
@@ -567,23 +577,32 @@ void CNPC_Conscript::Spawn()
 		if (r == 3)	{ m_iPersonality = CONSCRIPT_PERSONALITY_AGGRESSIVE; }
 	}
 
-if ( sk_conscript_personality_colors.GetInt() != 0 )
-{
-	if (m_iPersonality == CONSCRIPT_PERSONALITY_BALANCED )
+	if ( sk_conscript_personality_colors.GetInt() != 0 )
 	{
-		SetRenderColor( 255, 255, 0, 255);
+		if (m_iPersonality == CONSCRIPT_PERSONALITY_BALANCED )
+		{
+			SetRenderColor( 255, 255, 0, 255);
+		}
+	
+		if (m_iPersonality == CONSCRIPT_PERSONALITY_CAUTIOUS )
+		{
+			SetRenderColor( 0, 0, 255, 255);
+		}
+	
+		if (m_iPersonality == CONSCRIPT_PERSONALITY_AGGRESSIVE )
+		{
+			SetRenderColor( 255, 0, 0, 255);
+		}
 	}
 
-	if (m_iPersonality == CONSCRIPT_PERSONALITY_CAUTIOUS )
-	{
-		SetRenderColor( 0, 0, 255, 255);
-	}
+	m_bParented = false;
 
-	if (m_iPersonality == CONSCRIPT_PERSONALITY_AGGRESSIVE )
+	if (GetMoveParent())
 	{
-		SetRenderColor( 255, 0, 0, 255);
+		CapabilitiesRemove(bits_CAP_MOVE_GROUND);
+		SetMoveType(MOVETYPE_NONE);
+		m_bParented = true;
 	}
-}
 }
 
 //=========================================================

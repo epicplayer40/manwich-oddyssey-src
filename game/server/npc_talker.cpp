@@ -789,8 +789,8 @@ void CNPCSimpleTalker::SetAnswerQuestion( CNPCSimpleTalker *pSpeaker )
 int CNPCSimpleTalker::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 {
 	CTakeDamageInfo subInfo = info;
-
-	// if player damaged this entity, have other friends talk about it.
+	// HACK
+	/*// if player damaged this entity, have other friends talk about it.
 	if (subInfo.GetAttacker() && (subInfo.GetAttacker()->GetFlags() & FL_CLIENT) && subInfo.GetDamage() < GetHealth() )
 	{
 		CBaseEntity *pFriend = FindNearestFriend(false);
@@ -805,7 +805,7 @@ int CNPCSimpleTalker::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 				pTalkNPC->Speak( TLK_NOSHOOT );
 			}
 		}
-	}
+	}*/
 	return BaseClass::OnTakeDamage_Alive( subInfo );
 }
 

@@ -93,6 +93,7 @@ public:
 	bool			m_bInBarnacleMouth;
 	bool			m_bIsFemale;
 	int				m_iPersonality;
+	bool			m_bParented;
 
 	CAI_ActBusyBehavior			m_ActBusyBehavior;
 
