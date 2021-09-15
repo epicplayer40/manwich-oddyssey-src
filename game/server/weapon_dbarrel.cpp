@@ -106,12 +106,12 @@ END_DATADESC()
 
 acttable_t	CWeaponDBarrel::m_acttable[] = 
 {
-	{ ACT_IDLE,						ACT_IDLE_SMG1,					true },	// FIXME: hook to dbarrel unique
+	{ ACT_IDLE,						ACT_IDLE_SMG1,					false },	// FIXME: hook to dbarrel unique
 
-	{ ACT_RANGE_ATTACK1,			ACT_RANGE_ATTACK_SHOTGUN,			true },
+	{ ACT_RANGE_ATTACK1,			ACT_RANGE_ATTACK_SHOTGUN,			false },
 	{ ACT_RELOAD,					ACT_RELOAD_SHOTGUN,					false },
-	{ ACT_WALK,						ACT_WALK_RIFLE,						true },
-	{ ACT_IDLE_ANGRY,				ACT_IDLE_ANGRY_SHOTGUN,				true },
+	{ ACT_WALK,						ACT_WALK_RIFLE,						false },
+	{ ACT_IDLE_ANGRY,				ACT_IDLE_ANGRY_SHOTGUN,				false },
 
 // Readiness activities (not aiming)
 	{ ACT_IDLE_RELAXED,				ACT_IDLE_SHOTGUN_RELAXED,		false },//never aims
@@ -140,15 +140,15 @@ acttable_t	CWeaponDBarrel::m_acttable[] =
 	{ ACT_RUN_AIM_AGITATED,			ACT_RUN_AIM_RIFLE,				false },//always aims
 //End readiness activities
 
-	{ ACT_WALK_AIM,					ACT_WALK_AIM_SHOTGUN,				true },
-	{ ACT_WALK_CROUCH,				ACT_WALK_CROUCH_RIFLE,				true },
-	{ ACT_WALK_CROUCH_AIM,			ACT_WALK_CROUCH_AIM_RIFLE,			true },
-	{ ACT_RUN,						ACT_RUN_RIFLE,						true },
-	{ ACT_RUN_AIM,					ACT_RUN_AIM_SHOTGUN,				true },
-	{ ACT_RUN_CROUCH,				ACT_RUN_CROUCH_RIFLE,				true },
-	{ ACT_RUN_CROUCH_AIM,			ACT_RUN_CROUCH_AIM_RIFLE,			true },
-	{ ACT_GESTURE_RANGE_ATTACK1,	ACT_GESTURE_RANGE_ATTACK_SHOTGUN,	true },
-	{ ACT_RANGE_ATTACK1_LOW,		ACT_RANGE_ATTACK_SHOTGUN_LOW,		true },
+	{ ACT_WALK_AIM,					ACT_WALK_AIM_SHOTGUN,				false },
+	{ ACT_WALK_CROUCH,				ACT_WALK_CROUCH_RIFLE,				false },
+	{ ACT_WALK_CROUCH_AIM,			ACT_WALK_CROUCH_AIM_RIFLE,			false },
+	{ ACT_RUN,						ACT_RUN_RIFLE,						false },
+	{ ACT_RUN_AIM,					ACT_RUN_AIM_SHOTGUN,				false },
+	{ ACT_RUN_CROUCH,				ACT_RUN_CROUCH_RIFLE,				false },
+	{ ACT_RUN_CROUCH_AIM,			ACT_RUN_CROUCH_AIM_RIFLE,			false },
+	{ ACT_GESTURE_RANGE_ATTACK1,	ACT_GESTURE_RANGE_ATTACK_SHOTGUN,	false },
+	{ ACT_RANGE_ATTACK1_LOW,		ACT_RANGE_ATTACK_SHOTGUN_LOW,		false },
 	{ ACT_RELOAD_LOW,				ACT_RELOAD_SHOTGUN_LOW,				false },
 	{ ACT_GESTURE_RELOAD,			ACT_GESTURE_RELOAD_SHOTGUN,			false },
 };
