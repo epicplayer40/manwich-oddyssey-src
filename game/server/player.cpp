@@ -4238,6 +4238,7 @@ void CBasePlayer::CheckSuitUpdate()
 
 void CBasePlayer::SetSuitUpdate(const char *name, int fgroup, int iNoRepeatTime)
 {
+	/*
 	int i;
 	int isentence;
 	int iempty = -1;
@@ -4261,6 +4262,7 @@ void CBasePlayer::SetSuitUpdate(const char *name, int fgroup, int iNoRepeatTime)
 			m_rgSuitPlayList[i] = 0;
 		return;
 	}
+
 	// get sentence or group number
 	if (!fgroup)
 	{
@@ -4326,7 +4328,7 @@ void CBasePlayer::SetSuitUpdate(const char *name, int fgroup, int iNoRepeatTime)
 		else 
 			m_flSuitUpdate = gpGlobals->curtime + SUITUPDATETIME; 
 	}
-
+	*/
 }
 
 //=========================================================
