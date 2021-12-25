@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2001, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2001, Valve LLC, All rights reserved. ============
 //
 // Purpose:
 //
@@ -299,6 +299,10 @@ void CWeaponImmolator::Precache( void )
 	m_beamIndex = engine->PrecacheModel( "sprites/bluelaser1.vmt" );
 
 	BaseClass::Precache();
+
+	PrecacheScriptSound( "Weapon_Immolator.Start" );
+	PrecacheScriptSound( "Weapon_Immolator.Run" );
+	PrecacheScriptSound( "Weapon_Immolator.Off" );
 }
 
 //-----------------------------------------------------------------------------
