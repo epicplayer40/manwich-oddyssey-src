@@ -26,6 +26,7 @@ $Project "Server (Mambridge)"
 		$Folder "Manwich"
 		{
 			$File "manwich/npc_cigbine.cpp"
+			$File "manwich/item_vest.cpp"
 		}
 
 		$File	"ai_eventresponse.cpp"

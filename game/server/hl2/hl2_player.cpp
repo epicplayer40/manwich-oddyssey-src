@@ -2034,6 +2034,31 @@ bool CHL2_Player::ApplyBattery( float powerMultiplier )
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+bool CHL2_Player::ApplyVest()
+{
+	const float MAX_NORMAL_BATTERY = 100;
+	if ((ArmorValue() < MAX_NORMAL_BATTERY) && IsSuitEquipped())
+	{
+		IncrementArmorValue(100, MAX_NORMAL_BATTERY);
+
+		// FIXME: Change
+		CPASAttenuationFilter filter(this, "ItemVest.Touch");
+		EmitSound(filter, entindex(), "ItemVest.Touch");
+
+		CSingleUserRecipientFilter user(this);
+		user.MakeReliable();
+
+		UserMessageBegin(user, "ItemPickup");
+		WRITE_STRING("item_vest");
+		MessageEnd();
+
+		return true;
+	}
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 int CHL2_Player::FlashlightIsOn( void )
 {
 	return IsEffectActive( EF_DIMLIGHT );
