@@ -27,6 +27,7 @@ $Project "Server (Mambridge)"
 		{
 			$File "manwich/npc_cigbine.cpp"
 			$File "manwich/item_vest.cpp"
+			$File "manwich/weapon_vp70.cpp"
 		}
 
 		$File	"ai_eventresponse.cpp"
@@ -228,7 +229,7 @@ $Project "Server (Mambridge)"
 			$File	"hl2/weapon_oicw.cpp"
 			$File	"hl2/weapon_oicw.h"
 			$File	"weapon_p90.cpp"
-			$File	"weapon_silenced_pistol.cpp"
+			// $File	"weapon_silenced_pistol.cpp"
 			$File	"hl2/weapon_smg2.cpp"
 			$File	"hl2/weapon_sniperrifle.cpp"
 			$File	"weapon_tommygun.cpp"

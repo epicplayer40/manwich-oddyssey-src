@@ -43,6 +43,7 @@ public:
 
 protected:
 
+	bool m_bIsSilenced;
 	int	m_nShotsFired;	// Number of consecutive shots fired
 
 	float	m_flNextSoundTime;	// real-time clock of when to make next sound
@@ -72,6 +73,7 @@ public:
 	
 	DECLARE_SERVERCLASS();
 
+	virtual void	ItemPostFrame( void );
 	virtual float	GetBurstCycleRate( void );
 	virtual float	GetFireRate( void );
 

@@ -68,7 +68,7 @@ void CHLMachineGun::PrimaryAttack( void )
 	float fireRate = GetFireRate();
 
 	// MUST call sound before removing a round from the clip of a CHLMachineGun
-	while ( m_flNextPrimaryAttack <= gpGlobals->curtime )
+	// while ( m_flNextPrimaryAttack <= gpGlobals->curtime )
 	{
 		WeaponSound(SINGLE, m_flNextPrimaryAttack);
 		m_flNextPrimaryAttack = m_flNextPrimaryAttack + fireRate;
@@ -100,7 +100,8 @@ void CHLMachineGun::PrimaryAttack( void )
 	//Factor in the view kick
 	AddViewKick();
 
-	CSoundEnt::InsertSound( SOUND_COMBAT, GetAbsOrigin(), SOUNDENT_VOLUME_MACHINEGUN, 0.2, pPlayer );
+	if (!m_bIsSilenced)
+		CSoundEnt::InsertSound( SOUND_COMBAT, GetAbsOrigin(), SOUNDENT_VOLUME_MACHINEGUN, 0.2, pPlayer );
 	
 	if (!m_iClip1 && pPlayer->GetAmmoCount(m_iPrimaryAmmoType) <= 0)
 	{
@@ -333,6 +334,9 @@ void CHLSelectFireMachineGun::PrimaryAttack( void )
 	}
 	switch( m_iFireMode )
 	{
+	case FIREMODE_SEMI:
+		BaseClass::PrimaryAttack();
+		break;
 	case FIREMODE_FULLAUTO:
 		BaseClass::PrimaryAttack();
 		// Msg("%.3f\n", m_flNextPrimaryAttack.Get() );
@@ -432,6 +436,7 @@ void CHLSelectFireMachineGun::WeaponSound( WeaponSound_t shoot_type, float sound
 	{
 		switch( m_iFireMode )
 		{
+		case FIREMODE_SEMI:
 		case FIREMODE_FULLAUTO:
 			BaseClass::WeaponSound( SINGLE, soundtime );
 			break;
@@ -507,6 +512,36 @@ int CHLSelectFireMachineGun::WeaponRangeAttack2Condition( float flDot, float flD
 	}
 
 	return COND_CAN_RANGE_ATTACK2;
+}
+
+void CHLSelectFireMachineGun::ItemPostFrame( void )
+{
+	CBasePlayer* pOwner = ToBasePlayer(GetOwner());
+
+	if (pOwner == NULL)
+		return;
+
+	switch (m_iFireMode)
+	{
+	case FIREMODE_SEMI:
+		//Allow a refire as fast as the player can click
+		if (((pOwner->m_nButtons & IN_ATTACK) == false))
+		{
+			m_flNextPrimaryAttack = gpGlobals->curtime - 0.1f;
+		}
+		else if ((pOwner->m_nButtons & IN_ATTACK) && (m_flNextPrimaryAttack < gpGlobals->curtime) && (m_iClip1 <= 0))
+		{
+			//DryFire();
+		}
+		break;
+	case FIREMODE_FULLAUTO:
+	case FIREMODE_3RNDBURST:
+		break;
+	}
+	//return;
+
+
+	BaseClass::ItemPostFrame();
 }
 
 //-----------------------------------------------------------------------------
