@@ -2845,7 +2845,7 @@ void CNPC_Combine::SpeakSentence( int sentenceType )
 //=========================================================
 // PainSound
 //=========================================================
-/*void CNPC_Combine::PainSound ( void )
+/*void CNPC_Combine::PainSound ( const CTakeDamageInfo &info )
 {
 	// NOTE: The response system deals with this at the moment
 	if ( GetFlags() & FL_DISSOLVING )
@@ -2872,7 +2872,7 @@ void CNPC_Combine::SpeakSentence( int sentenceType )
 }
 */
 
-void CNPC_Combine::PainSound ( void )
+void CNPC_Combine::PainSound ( const CTakeDamageInfo &info )
 {
 	if ( gpGlobals->curtime > m_flNextPainSoundTime )
 	{

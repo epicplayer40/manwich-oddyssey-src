@@ -1507,6 +1507,13 @@ void CHudCloseCaption::Process( const wchar_t *stream, float duration, const cha
 
 		const wchar_t *prevpos = curpos;
 
+#if 1
+		if (!wcscmp(curpos, L"Combine"))
+		{
+			Msg("MANWICH\n");
+		}
+#endif
+
 		if ( SplitCommand( &curpos, cmd, args ) )
 		{
 			if ( !wcscmp( cmd, L"delay" ) )
