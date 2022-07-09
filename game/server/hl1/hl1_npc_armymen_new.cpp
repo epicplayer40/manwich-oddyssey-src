@@ -329,7 +329,7 @@ void CNPC_ArmyMen::Spawn()
 	m_iSentence = ARMYMEN_SENT_NONE;
 
 	CapabilitiesClear();
-	CapabilitiesAdd(bits_CAP_SQUAD | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP |  bits_CAP_OPEN_DOORS | bits_CAP_AUTO_DOORS | bits_CAP_USE | bits_CAP_MOVE_GROUND | bits_CAP_NO_HIT_SQUADMATES | bits_CAP_FRIENDLY_DMG_IMMUNE | bits_CAP_NO_HIT_PLAYER );
+	CapabilitiesAdd(bits_CAP_SQUAD | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP |  bits_CAP_OPEN_DOORS | bits_CAP_AUTO_DOORS | bits_CAP_USE | bits_CAP_MOVE_GROUND | bits_CAP_NO_HIT_SQUADMATES | bits_CAP_FRIENDLY_DMG_IMMUNE | bits_CAP_NO_HIT_PLAYER | bits_CAP_MOVE_JUMP );
 	
 	CapabilitiesAdd(bits_CAP_INNATE_RANGE_ATTACK1);
 

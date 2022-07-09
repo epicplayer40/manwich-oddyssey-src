@@ -35,7 +35,7 @@ $Project "Client (Mambridge)"
 		// help me please god
 		$Folder "MISC"
 		{
-		
+			$File	"hl1/hl1_fx_shelleject.cpp"
 			$File	"hl2/c_animal.cpp"
 			$File	"hl2/c_cohrt.cpp"
 			$File	"hl2/c_combineguard.cpp"
