@@ -131,7 +131,7 @@ enum bodygroups
 #define STRIDER_SUBSEQUENT_TARGET_DURATION		1.5 // Spend this much time stitching to targets chosen by distributed fire.
 #define STRIDER_IGNORE_TARGET_DURATION			1.0
 #define STRIDER_IGNORE_PLAYER_DURATION			1.5
-#define STRIDER_DEFAULT_RATE_OF_FIRE			15	// 5 Rounds per second originally
+#define STRIDER_DEFAULT_RATE_OF_FIRE			5	// Rounds per second
 
 #define STRIDER_EP1_RATE_OF_FIRE			10.0f
 #define STRIDER_EP1_SHOOT_ON_TARGET_TIME	 0.3f
@@ -3044,7 +3044,6 @@ void CNPC_Strider::TraceAttack( const CTakeDamageInfo &inputInfo, const Vector &
 			info.SetDamage( 0.01 );
 		}
 	}
-	 
 
 	BaseClass::TraceAttack( info, vecDir, ptr, pAccumulator );
 }
@@ -3062,9 +3061,6 @@ int CNPC_Strider::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 		return TakeDamageFromCombineBall( info );
 
 	if ( info.GetDamageType() == DMG_GENERIC )
-		return BaseClass::OnTakeDamage_Alive( info );
-
-	if ( info.GetDamageType() == DMG_BULLET )
 		return BaseClass::OnTakeDamage_Alive( info );
 
 	if( IsUsingAggressiveBehavior() )
@@ -3164,64 +3160,6 @@ int CNPC_Strider::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 			return damage;
 		}
 
-
-
-if ( (info.GetDamageType() & DMG_BULLET) )
-	{
-		Vector headPos = BodyTarget( info.GetDamagePosition(), false );
-	
-		// close enough to do damage?
-			// Default to NPC damage value
-				int damage = 1;
-
-			m_iHealth -= damage;
-
-			m_OnDamaged.FireOutput( info.GetAttacker(), this);
-
-			if( info.GetAttacker()->IsPlayer() )
-			{
-				m_OnDamagedByPlayer.FireOutput( info.GetAttacker(), this );
-
-				// This also counts as being harmed by player's squad.
-				m_OnDamagedByPlayerSquad.FireOutput( info.GetAttacker(), this );
-			}
-			else
-			{
-				// See if the person that injured me is an NPC.
-				CAI_BaseNPC *pAttacker = dynamic_cast<CAI_BaseNPC *>( info.GetAttacker() );
-				CBasePlayer *pPlayer = AI_GetSinglePlayer();
-
-				if( pAttacker && pAttacker->IsAlive() && pPlayer )
-				{
-					if( pAttacker->GetSquad() != NULL && pAttacker->IsInPlayerSquad() )
-					{
-						m_OnDamagedByPlayerSquad.FireOutput( info.GetAttacker(), this );
-					}
-				}
-			}
-
-			if ( m_iHealth <= ( m_iMaxHealth / 2 ) )
-			{
-				m_OnHalfHealth.FireOutput(this, this);
-			}
-
-			RestartGesture( ACT_GESTURE_SMALL_FLINCH );
-			PainSound( info );
-
-			// Interrupt our gun during the flinch
-			m_pMinigun->StopShootingForSeconds( this, m_pMinigun->GetTarget(), 1.1f );
-
-			GetEnemies()->OnTookDamageFrom( info.GetAttacker() );
-
-			if( !IsSmoking() && m_iHealth <= sk_strider_health.GetInt() / 2 )
-			{
-				StartSmoking();
-			}
-			return damage;
-		}
-}
-
-
 // NOTE: Currently radius damage doesn't even call this because it uses the origin, not the box for distance
 #if 0
 		NDebugOverlay::Box( headPos, WorldAlignMins(), WorldAlignMaxs(), 255, 0, 0, 0, 5.0 );
@@ -3229,6 +3167,7 @@ if ( (info.GetDamageType() & DMG_BULLET) )
 			o.GetDamagePosition(), 24, 0, 255, 0, false, 5.0 );
 		// too far from head, apply damage to nearest leg?
 #endif
+	}
 
 #if 0
 	if ( (info.GetDamageType() & DMG_BULLET) && info.GetDamage() > 1  && m_iHealth > 1 )
@@ -3237,8 +3176,8 @@ if ( (info.GetDamageType() & DMG_BULLET) )
 		return 1;
 	}
 #endif
-	int damage = 20;
-	return damage;
+
+	return 0;
 }
 
 //---------------------------------------------------------
