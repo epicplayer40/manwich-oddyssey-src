@@ -181,6 +181,10 @@ void CWeaponHMG1::AddViewKick( void )
 
 bool CWeaponHMG1::Reload()
 {
-	WeaponSound(RELOAD);
+	bool fRet = DefaultReload(GetMaxClip1(), GetMaxClip2(), ACT_VM_RELOAD);
+	if (fRet)
+	{
+		WeaponSound( RELOAD );
+	}
 	return BaseClass::Reload();
 }

@@ -159,7 +159,11 @@ void CWeaponSMG2::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatChar
 
 bool CWeaponSMG2::Reload()
 {
-	WeaponSound(RELOAD);
+	bool fRet = DefaultReload(GetMaxClip1(), GetMaxClip2(), ACT_VM_RELOAD);
+	if (fRet)
+	{
+		WeaponSound( RELOAD );
+	}
 	return BaseClass::Reload();
 }
 

@@ -22,6 +22,11 @@
 #define	AR1_ACCURACY_SHOT_PENALTY_TIME		0.2f	// Applied amount of time each shot adds to the time we must recover from
 #define	AR1_ACCURACY_MAXIMUM_PENALTY_TIME	1.5f	// Maximum penalty to deal out
 
+static ConVar sk_plr_dmg_ar1_firerate1("sk_plr_dmg_ar1_firerate1", "2", FCVAR_REPLICATED);
+static ConVar sk_plr_dmg_ar1_firerate2("sk_plr_dmg_ar1_firerate2", "4", FCVAR_REPLICATED);
+static ConVar sk_plr_dmg_ar1_firerate3("sk_plr_dmg_ar1_firerate3", "10", FCVAR_REPLICATED);
+static ConVar sk_plr_dmg_ar1_firerate4("sk_plr_dmg_ar1_firerate4", "14", FCVAR_REPLICATED);
+static ConVar sk_plr_dmg_ar1_firerate5("sk_plr_dmg_ar1_firerate5", "20", FCVAR_REPLICATED);
 
 float RateOfFire[ MAX_SETTINGS ] = 
 {
@@ -34,11 +39,11 @@ float RateOfFire[ MAX_SETTINGS ] =
 
 float Damage[ MAX_SETTINGS ] =
 {
-	2,
-	4,
-	10,
-	14,
-	20,
+	sk_plr_dmg_ar1_firerate1.GetFloat(),
+	sk_plr_dmg_ar1_firerate2.GetFloat(),
+	sk_plr_dmg_ar1_firerate3.GetFloat(),
+	sk_plr_dmg_ar1_firerate4.GetFloat(),
+	sk_plr_dmg_ar1_firerate5.GetFloat(),
 };
 
 
@@ -76,7 +81,7 @@ public:
 
 	void SecondaryAttack( void );
 
-	virtual void FireBullets( const FireBulletsInfo_t &info );
+	void FireBullets( const FireBulletsInfo_t& info );
 
 
 	virtual const Vector& GetBulletSpread( void )
@@ -154,7 +159,7 @@ void CWeaponAR1::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatChara
 			ASSERT( npc != NULL );
 			vecShootDir = npc->GetActualShootTrajectory( vecShootOrigin );
 			WeaponSound(SINGLE_NPC);
-			pOperator->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_PRECALCULATED, MAX_TRACE_LENGTH, m_iPrimaryAmmoType, 2 );
+			pOperator->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_PRECALCULATED, MAX_TRACE_LENGTH, m_iPrimaryAmmoType, Damage[ m_ROF ] );
 			pOperator->DoMuzzleFlash();
 
 		}
@@ -310,6 +315,11 @@ END_DATADESC()
 
 void CWeaponAR1::Precache( void )
 {
+	PrecacheScriptSound( "Weapon_AR1.FirerateSwitch1" );
+	PrecacheScriptSound( "Weapon_AR1.FirerateSwitch2" );
+	PrecacheScriptSound( "Weapon_AR1.FirerateSwitch3" );
+	PrecacheScriptSound( "Weapon_AR1.FirerateSwitch4" );
+	PrecacheScriptSound( "Weapon_AR1.FirerateSwitch5" );
 	BaseClass::Precache();
 }
 
@@ -322,12 +332,17 @@ bool CWeaponAR1::Deploy( void )
 
 //=========================================================
 //=========================================================
-void CWeaponAR1::FireBullets( const FireBulletsInfo_t &info )
+void CWeaponAR1::FireBullets( const FireBulletsInfo_t& info )
 {
-	if(CBasePlayer *pPlayer = ToBasePlayer( GetOwner() ))
+
+	FireBulletsInfo_t newInfo = info;
+	newInfo.m_flDamage = Damage[m_ROF];
+
+	if (CBasePlayer *pPlayer = ToBasePlayer(GetOwner()))
 	{
-		pPlayer->FireBullets( info );
+		pPlayer->FireBullets(newInfo);
 	}
+
 }
 
  
@@ -340,7 +355,7 @@ void CWeaponAR1::SecondaryAttack( void )
 		pPlayer->m_nButtons &= ~IN_ATTACK2;
 	}
 
-	m_flNextSecondaryAttack = gpGlobals->curtime + 0.1;
+	m_flNextSecondaryAttack = gpGlobals->curtime + 0.3;
 
 	m_ROF += 1;
 
@@ -349,21 +364,52 @@ void CWeaponAR1::SecondaryAttack( void )
 		m_ROF = 0;
 	}
 
+	
+	const char* fireswitchsound = "0";
+
+	switch (m_ROF)
+	{
+	case 0:
+		fireswitchsound = "Weapon_AR1.FirerateSwitch1";
+		break;
+
+	case 1:
+		fireswitchsound = "Weapon_AR1.FirerateSwitch2";
+		break;
+
+	case 2:
+		fireswitchsound = "Weapon_AR1.FirerateSwitch3";
+		break;
+
+	case 3:
+		fireswitchsound = "Weapon_AR1.FirerateSwitch4";
+		break;
+
+	case 4:
+		fireswitchsound = "Weapon_AR1.FirerateSwitch5";
+		break;
+
+	default:
+		break;
+	}
+
+	EmitSound( fireswitchsound );
+
 	int i;
 
-	Msg( "\n" );
+	DevMsg( "\n" );
 	for( i = 0 ; i < MAX_SETTINGS ; i++ )
 	{
 		if( i == m_ROF )
 		{
-			Msg( "|" );
+			DevMsg( "|" );
 		}
 		else
 		{
-			Msg( "-" );
+			DevMsg( "-" );
 		}
 	}
-	Msg( "\n" );
+	DevMsg( "\n" );
 }
 
 void CWeaponAR1::AddViewKick( void )
