@@ -488,7 +488,7 @@ void CNPC_HL1Gasdude::Event_Killed( const CTakeDamageInfo &info )
 		GetAttachment( "0", vecGunPos, angGunAngles );
 		
 		angGunAngles.y += 180;
-		pGun = DropItem( "weapon_oicw", vecGunPos, angGunAngles );
+		pGun = DropItem( "weapon_smg2", vecGunPos, angGunAngles );
 	}
 
 	SetUse( NULL );	

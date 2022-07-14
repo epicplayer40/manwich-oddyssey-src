@@ -97,7 +97,7 @@ void CGrenadeHomer::Precache( void )
 {
 	m_spriteTexture = PrecacheModel( "sprites/lgtning.vmt" );
 
-	PrecacheModel ( "models/props_junk/watermelon01.mdl" );
+	PrecacheModel ( "models/weapons/w_missile_launch.mdl" );
 
 	PrecacheScriptSound( "GrenadeHomer.StopSounds" );
 	if ( NULL_STRING != m_sFlySound )
@@ -117,7 +117,7 @@ void CGrenadeHomer::Spawn( void )
 {
 	Precache( );
 
-	SetModel ( "models/props_junk/watermelon01.mdl" );
+	SetModel ( "models/weapons/w_missile_launch.mdl" );
 	SetSolid( SOLID_BBOX );
 	SetMoveType( MOVETYPE_FLY );
 

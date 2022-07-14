@@ -120,7 +120,7 @@ acttable_t	CWeaponAnnabelle::m_acttable[] =
 	{ ACT_IDLE,						ACT_IDLE_SMG1,					true },	// FIXME: hook to shotgun unique
 
 	{ ACT_RANGE_ATTACK1,			ACT_RANGE_ATTACK_SHOTGUN,			true },
-	{ ACT_RELOAD,					ACT_RELOAD_SHOTGUN,					false },
+	{ ACT_RELOAD,					ACT_RELOAD_SMG1,					true },
 	{ ACT_WALK,						ACT_WALK_RIFLE,						true },
 	{ ACT_IDLE_ANGRY,				ACT_IDLE_ANGRY_SHOTGUN,				true },
 
@@ -160,8 +160,8 @@ acttable_t	CWeaponAnnabelle::m_acttable[] =
 	{ ACT_RUN_CROUCH_AIM,			ACT_RUN_CROUCH_AIM_RIFLE,			true },
 	{ ACT_GESTURE_RANGE_ATTACK1,	ACT_GESTURE_RANGE_ATTACK_SHOTGUN,	true },
 	{ ACT_RANGE_ATTACK1_LOW,		ACT_RANGE_ATTACK_SHOTGUN_LOW,		true },
-	{ ACT_RELOAD_LOW,				ACT_RELOAD_SHOTGUN_LOW,				false },
-	{ ACT_GESTURE_RELOAD,			ACT_GESTURE_RELOAD_SHOTGUN,			false },
+	{ ACT_RELOAD_LOW,				ACT_RELOAD_SMG1_LOW,				false },
+	{ ACT_GESTURE_RELOAD,			ACT_GESTURE_RELOAD_SMG1,			false },
 };
 
 IMPLEMENT_ACTTABLE(CWeaponAnnabelle);

@@ -264,6 +264,8 @@ public:
 	void OnStateChange( NPC_STATE OldState, NPC_STATE NewState );
 	void Event_Killed( const CTakeDamageInfo &info );
 	bool ShouldBecomeTorso( const CTakeDamageInfo &info, float flDamageThreshold );
+	HeadcrabRelease_t ShouldReleaseHeadcrab( const CTakeDamageInfo &info, float flDamageThreshold );
+	void ReleaseHeadcrab( const Vector &vecOrigin, const Vector &vecVelocity, bool fRemoveHead, bool fRagdollBody, bool fRagdollCrab );
 
 	virtual Vector GetAutoAimCenter() { return WorldSpaceCenter() - Vector( 0, 0, 12.0f ); }
 
@@ -408,18 +410,7 @@ static const char *s_pLegsModel = "models/gibs/fast_zombie_legs.mdl";
 void CWretch::Precache( void )
 {
 	PrecacheModel("models/addon/wretch.mdl");
-#ifdef HL2_EPISODIC
-	PrecacheModel("models/zombie/Fast_torso.mdl");
-	PrecacheScriptSound( "NPC_Wretch.CarEnter1" );
-	PrecacheScriptSound( "NPC_Wretch.CarEnter2" );
-	PrecacheScriptSound( "NPC_Wretch.CarEnter3" );
-	PrecacheScriptSound( "NPC_Wretch.CarEnter4" );
-	PrecacheScriptSound( "NPC_Wretch.CarScream" );
-#endif
-	PrecacheModel( "models/gibs/fast_zombie_torso.mdl" );
-	PrecacheModel( "models/gibs/fast_zombie_legs.mdl" );
-		PrecacheModel( "models/headcrab.mdl" );
-	
+
 	PrecacheScriptSound( "NPC_Wretch.LeapAttack" );
 	PrecacheScriptSound( "NPC_Wretch.FootstepRight" );
 	PrecacheScriptSound( "NPC_Wretch.FootstepLeft" );
@@ -836,12 +827,12 @@ void CWretch::PostNPCInit( void )
 //-----------------------------------------------------------------------------
 const char *CWretch::GetHeadcrabClassname( void )
 {
-	return "";
+	return NULL;
 }
 
 const char *CWretch::GetHeadcrabModel( void )
 {
-	return "models/headcrab.mdl";
+	return NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -880,19 +871,10 @@ float CWretch::MaxYawSpeed( void )
 void CWretch::SetZombieModel( void )
 {
 	Hull_t lastHull = GetHullType();
-
-	if ( m_fIsTorso )
-	{
-		SetModel( "models/zombie/fast_torso.mdl" );
-		SetHullType(HULL_TINY);
-	}
-	else
 	{
 		SetModel( "models/addon/wretch.mdl" );
 		SetHullType(HULL_HUMAN);
 	}
-
-	SetBodygroup( ZOMBIE_BODYGROUP_HEADCRAB, !m_fIsHeadless );
 
 	SetHullSizeNormal( true );
 	SetDefaultEyeOffset();
@@ -916,12 +898,12 @@ void CWretch::SetZombieModel( void )
 //-----------------------------------------------------------------------------
 const char *CWretch::GetLegsModel( void )
 {
-	return s_pLegsModel;
+	return NULL;
 }
 
 const char *CWretch::GetTorsoModel( void )
 {
-	return "models/gibs/fast_zombie_torso.mdl";
+	return NULL;
 }
 
 
@@ -1561,12 +1543,7 @@ void CWretch::StopLoopingSounds( void )
 //-----------------------------------------------------------------------------
 void CWretch::BecomeTorso( const Vector &vecTorsoForce, const Vector &vecLegsForce )
 {
-	CapabilitiesRemove( bits_CAP_MOVE_JUMP );
-	CapabilitiesRemove( bits_CAP_MOVE_CLIMB );
-
-	ReleaseHeadcrab( EyePosition(), vecLegsForce * 0.5, true, true, true );
-
-	BaseClass::BecomeTorso( vecTorsoForce, vecLegsForce );
+	return;
 }
 
 //-----------------------------------------------------------------------------
@@ -1861,21 +1838,28 @@ void CWretch::Event_Killed( const CTakeDamageInfo &info )
 //-----------------------------------------------------------------------------
 bool CWretch::ShouldBecomeTorso( const CTakeDamageInfo &info, float flDamageThreshold )
 {
-	if( m_fIsTorso )
-	{
-		// Already split.
-		return false;
-	}
-
-	// Break in half IF:
-	// 
-	// Take half or more of max health in DMG_BLAST
-	if( (info.GetDamageType() & DMG_BLAST) && m_iHealth <= 0 )
-	{
-		return true;
-	}
-
 	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: A zombie has taken damage. Determine whether he release his headcrab.
+// Output : YES, IMMEDIATE, or SCHEDULED (see HeadcrabRelease_t)
+//-----------------------------------------------------------------------------
+HeadcrabRelease_t CWretch::ShouldReleaseHeadcrab(const CTakeDamageInfo &info, float flDamageThreshold)
+{
+	return RELEASE_NO;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Input  : &vecOrigin - 
+//			&vecVelocity - 
+//			fRemoveHead - 
+//			fRagdollBody - 
+//-----------------------------------------------------------------------------
+void CWretch::ReleaseHeadcrab( const Vector &vecOrigin, const Vector &vecVelocity, bool fRemoveHead, bool fRagdollBody, bool fRagdollCrab )
+{
+	return;
 }
 
 //=============================================================================

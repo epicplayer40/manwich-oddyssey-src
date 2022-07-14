@@ -107,6 +107,8 @@ ConVar autoaim_unlock_target( "autoaim_unlock_target", "0.8666" );
 
 ConVar sv_stickysprint("sv_stickysprint", "0", FCVAR_ARCHIVE | FCVAR_ARCHIVE_XBOX);
 
+ConVar sv_give_npconly_weapons( "sv_give_npconly_weapons", "0", FCVAR_CHEAT );
+
 #define	FLASH_DRAIN_TIME	 1.1111	// 100 units / 90 secs
 #define	FLASH_CHARGE_TIME	 50.0f	// 100 units / 2 secs
 
@@ -2678,6 +2680,11 @@ bool CHL2_Player::Weapon_CanUse( CBaseCombatWeapon *pWeapon )
 	{
 		if ( ApplyBattery( 0.5 ) )
 			UTIL_Remove( pWeapon );
+		return false;
+	}
+	if ( !sv_give_npconly_weapons.GetBool() && ( pWeapon->ClassMatches("weapon_mp5") || pWeapon->ClassMatches("weapon_p90") ) )
+	{
+//		UTIL_Remove( pWeapon );
 		return false;
 	}
 #endif

@@ -598,15 +598,17 @@ void CNPC_Apache::LaunchRocket( Vector &viewDir, int damage, int radius, Vector 
 {
 
 	CGrenadeHomer *pGrenade = CGrenadeHomer::CreateGrenadeHomer( 
-		MAKE_STRING("models/weapons/w_missile.mdl"), 
+		MAKE_STRING( "models/weapons/w_missile_launch.mdl" ),
 		MAKE_STRING( "Apache.RPG" ), 
 		vecLaunchPoint, vec3_angle, edict() );
+	pGrenade->m_flDetonateTime = (gpGlobals->curtime + 6.0f); //Added a detonate timer so the missile can't get stuck forever on the Tribase level - epicplayer
 	pGrenade->Spawn( );
 	pGrenade->SetHoming(MISSILE_HOMING_STRENGTH, MISSILE_HOMING_DELAY,
 						MISSILE_HOMING_RAMP_UP,	MISSILE_HOMING_DURATION,
 						MISSILE_HOMING_RAMP_DOWN);
 	pGrenade->SetDamage( damage );
 	pGrenade->m_DmgRadius = 512; //512, was just "radius" originally
+
 
 	pGrenade->Launch( this, GetEnemy(), viewDir * 1500, 500, 0, HOMER_SMOKE_TRAIL_ON );
 

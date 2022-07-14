@@ -199,6 +199,7 @@ BEGIN_DATADESC( CNPC_Conscript )
 	DEFINE_FIELD( m_lastAttackCheck,	FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bInBarnacleMouth,	FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_hPhysicsEnt, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_nKillingDamageType, FIELD_INTEGER ),
 	DEFINE_KEYFIELD(m_iPersonality, FIELD_INTEGER, "AIPersonality"),
 
 END_DATADESC()
@@ -240,26 +241,54 @@ bool CNPC_Conscript::CreateBehaviors()
 
 Activity CNPC_Conscript::GetDeathActivity()
 {
-	return ACT_DIESIMPLE;
+	return BaseClass::GetDeathActivity();
 }
 
 
 bool CNPC_Conscript::CanBecomeRagdoll( void )
 {
-	if ( IsCurSchedule( SCHED_DIE ) )
-		return true;
-	return false;
+	return ( m_nKillingDamageType & DMG_CRUSH ) ||
+		IsCurSchedule( SCHED_DIE, false ) ||								// Finished playing death anim, time to ragdoll
+//		IsCurSchedule( SCHED_HUNTER_CHARGE_ENEMY, false ) ||				// While moving, it looks better to ragdoll instantly
+		IsCurSchedule( SCHED_SCRIPTED_RUN, false ) ||
+		( GetActivity() == ACT_WALK ) || ( GetActivity() == ACT_RUN ) ||
+		GetCurSchedule() == NULL;	
 }
 
 void CNPC_Conscript::Event_Killed( const CTakeDamageInfo &info )
 {
+	// Remember the killing blow to make decisions about ragdolling.
+	m_nKillingDamageType = info.GetDamageType();
 
-	SetIdealActivity(ACT_DIESIMPLE);
+	SetIdealActivity(GetDeathActivity());
 
 	BaseClass::Event_Killed( info );
 }
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void CNPC_Conscript::StartTask( const Task_t *pTask )
+{
+	switch ( pTask->iTask )
+	{
+	
+		case TASK_DIE:
+		{
+			GetNavigator()->StopMoving();	
+			ResetActivity();
+			SetIdealActivity( GetDeathActivity() );
+			m_lifeState = LIFE_DYING;
 
+			break;
+		}
+	
+		default:
+		{
+			BaseClass::StartTask( pTask );
+			break;
+		}
+	}
+}
 //-----------------------------------------------------------------------------
 // Purpose:
 // Input  :
@@ -956,7 +985,7 @@ int CNPC_Conscript::TranslateSchedule( int scheduleType )
 int CNPC_Conscript::SelectSchedule ( void )
 {
 	// These things are done in any state but dead and prone
-	if (m_NPCState != NPC_STATE_DEAD && m_NPCState != NPC_STATE_PRONE)
+	if ( m_NPCState != NPC_STATE_DEAD && m_NPCState != NPC_STATE_PRONE && GetState() != NPC_STATE_SCRIPT && m_NPCState != NPC_STATE_SCRIPT ) //Added checks for scripting so scripted conscripts don't run away like idiots
 	{
 		if ( HasCondition( COND_HEAR_DANGER ) )
 		{

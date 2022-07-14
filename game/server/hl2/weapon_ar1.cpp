@@ -83,13 +83,13 @@ public:
 
 	void FireBullets( const FireBulletsInfo_t& info );
 
-
+	/*
 	virtual const Vector& GetBulletSpread( void )
 	{
 		static const Vector cone = VECTOR_CONE_10DEGREES;
 		return cone;
-	}
-	/*virtual const Vector& GetBulletSpread( void )
+	}*/
+	virtual const Vector& GetBulletSpread( void )
 	{		
 		// Handle NPCs first
 		static Vector npcCone = VECTOR_CONE_10DEGREES;
@@ -109,7 +109,7 @@ public:
 			// We lerp from very accurate to inaccurate over time
 			VectorLerp( VECTOR_CONE_4DEGREES, VECTOR_CONE_10DEGREES, ramp, cone );
 		return cone;
-	}*/
+	}
 
 void CWeaponAR1::UpdatePenaltyTime( void )
 {

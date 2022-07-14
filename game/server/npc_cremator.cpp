@@ -48,6 +48,8 @@
 #include "basecombatweapon.h"
 #include "soundemittersystem/isoundemittersystembase.h"
 #include "EntityFlame.h"
+#include "particle_parse.h"
+#include "te_particlesystem.h"
 
 
 //=========================================================
@@ -118,7 +120,7 @@ void CNPC_Cremator::Spawn()
 	SetSolid( SOLID_BBOX );
 	AddSolidFlags( FSOLID_NOT_STANDABLE );
 	SetMoveType( MOVETYPE_STEP );
-	m_bloodColor		= BLOOD_COLOR_BLUE; //NOTE TO DL'ers: You really, really, really want to change this
+	m_bloodColor		= DONT_BLEED; //Emit Hunter blood - epicplayer
 	ClearEffects();
     m_iHealth			= sk_cremator_health.GetFloat();
 	m_flFieldOfView		= 0.65;
@@ -160,6 +162,9 @@ void CNPC_Cremator::Precache()
 	PrecacheScriptSound( "Crem.ImmoShoot" );
 	PrecacheScriptSound( "Crem.Footstep" );
 	PrecacheScriptSound( "Crem.Swish" );
+
+	PrecacheParticleSystem("blood_impact_synth_01");
+
 }
 
 
@@ -444,6 +449,29 @@ void CNPC_Cremator::TraceAttack( const CTakeDamageInfo &info, const Vector &vecD
 	if ( info.GetDamageType() & DMG_SHOCK )
 	 return;
 
+	// Even though the damage might not hurt us, we want to react to it
+	// if it's from the player.
+	if ( info.GetAttacker()->IsPlayer() )
+	{
+		if ( !HasMemory( bits_MEMORY_PROVOKED ) )
+		{
+			GetEnemies()->ClearMemory( info.GetAttacker() );
+			Remember( bits_MEMORY_PROVOKED );
+			SetCondition( COND_LIGHT_DAMAGE );
+		}
+	}
+
+	// Makes the Cremator emit hunter damage particles - epicplayer
+	if ( ( info.GetDamageType() & DMG_BULLET ) ||
+		 ( info.GetDamageType() & DMG_BUCKSHOT ) ||
+		 ( info.GetDamageType() & DMG_CLUB ) ||
+		 ( info.GetDamageType() & DMG_NEVERGIB ) )
+	{
+		QAngle vecAngles;
+		VectorAngles( ptr->plane.normal, vecAngles );
+		DispatchParticleEffect( "blood_impact_synth_01", ptr->endpos, vecAngles );
+	}
+
 	BaseClass::TraceAttack( info, vecDir, ptr, pAccumulator );
 }
 
@@ -468,8 +496,8 @@ int CNPC_Cremator::SelectSchedule( void )
 				if ( HasCondition ( COND_HEAR_DANGER ) )
 					 return SCHED_TAKE_COVER_FROM_BEST_SOUND;
 				
-				else
-				 	 return SCHED_INVESTIGATE_SOUND;
+//				else
+//				 	 return SCHED_INVESTIGATE_SOUND; //This causes the cremator to investigate sounds even when in the middle of a firefight, meaning he doesn't kill anything. Disabling - epicplayer
 			}
 			
 		}
@@ -838,7 +866,7 @@ AI_BEGIN_CUSTOM_NPC( npc_cremator, CNPC_Cremator )
 		"	Interrupts"
 		"		COND_CAN_MELEE_ATTACK1"
 		"		COND_HEAVY_DAMAGE"
-		"		COND_HEAR_DANGER"
+//		"		COND_HEAR_DANGER"
 	)
 
 

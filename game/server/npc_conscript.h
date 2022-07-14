@@ -94,6 +94,8 @@ public:
 	bool			m_bIsFemale;
 	int				m_iPersonality;
 	bool			m_bParented;
+	int				m_nKillingDamageType;
+	void			StartTask( const Task_t *pTask );
 
 	CAI_ActBusyBehavior			m_ActBusyBehavior;
 
