@@ -47,6 +47,9 @@ public:
 
 	void RemoveIgnoredConditions ( void );
 	int MeleeAttack1Conditions ( float flDot, float flDist );
+
+	bool		ShouldGib( const CTakeDamageInfo &info );
+	bool		CorpseGib( const CTakeDamageInfo &info );
 };
 
 #endif //NPC_ZOMBIE_H

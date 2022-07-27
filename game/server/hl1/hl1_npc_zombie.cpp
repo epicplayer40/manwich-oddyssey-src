@@ -17,6 +17,8 @@
 #include "NPCEvent.h"
 #include "hl1_npc_zombie.h"
 #include "gib.h"
+#include "props.h"
+#include "particle_parse.h"
 //#include "AI_Interactions.h"
 #include "ndebugoverlay.h"
 #include "vstdlib/random.h"
@@ -72,6 +74,26 @@ void CNPC_Zombie::Precache()
 	PrecacheScriptSound( "Zombie.Idle" );
 	PrecacheScriptSound( "Zombie.Alert" );
 	PrecacheScriptSound( "Zombie.Attack" );
+	PrecacheScriptSound( "BaseCombatCharacter.FleshGib" );
+
+//	PrecacheModel("models/zombie/classic_torso.mdl");
+	PrecacheModel("models/gibs/zombie_legs.mdl");
+	PrecacheModel("models/gibs/zombie_lleg.mdl");
+	PrecacheModel("models/gibs/zombie_rleg.mdl");
+	PrecacheModel("models/gibs/zombie_lleg_static.mdl");
+	PrecacheModel("models/gibs/zombie_rleg_static.mdl");
+
+	PrecacheModel("models/gibs/zombie_lhand.mdl");
+	PrecacheModel("models/gibs/zombie_larm.mdl");
+	PrecacheModel("models/gibs/zombie_rarm.mdl");
+
+	PrecacheModel("models/gibs/zombie_head.mdl");
+	PrecacheModel("models/gibs/zombie_torso.mdl");
+	PrecacheModel("models/gibs/zombie_organ.mdl");
+
+	PrecacheParticleSystem( "blood_zombie_split" );
+//	PrecacheParticleSystem( "blood_zombie_split_spray" ); these particles don't parent properly, disabling - epicplayer
+//	PrecacheParticleSystem( "blood_zombie_split_spray_tiny2" );
 
 	BaseClass::Precache();
 }
@@ -239,6 +261,81 @@ int CNPC_Zombie::OnTakeDamage_Alive( const CTakeDamageInfo &inputInfo )
 		 PainSound( info );
 	
 	return BaseClass::OnTakeDamage_Alive( info );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Input  : &info - 
+// Output : Returns true on success, false on failure.
+//-----------------------------------------------------------------------------
+bool CNPC_Zombie::ShouldGib(const CTakeDamageInfo &info)
+{
+	// If we're being hoisted, we only want to gib when the barnacle hurts us with his bite!
+	if ( IsEFlagSet( EFL_IS_BEING_LIFTED_BY_BARNACLE ) )
+	{
+		if ( info.GetAttacker() && info.GetAttacker()->Classify() != CLASS_BARNACLE )
+			return false;
+
+		return true;
+	}
+
+	if ( info.GetDamageType() & (DMG_NEVERGIB|DMG_DISSOLVE) )
+		return false;
+
+	if ( info.GetDamageType() & (DMG_ALWAYSGIB|DMG_BLAST) )
+		return true;
+
+	if ( m_iHealth < -20 )
+		return true;
+	
+	return false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Output : Returns true on success, false on failure.
+//-----------------------------------------------------------------------------
+bool CNPC_Zombie::CorpseGib(const CTakeDamageInfo &info)
+{
+
+	// Use the bone position to handle being moved by an animation (like a dynamic scripted sequence)
+	static int s_nBodyBone = -1;
+	if ( s_nBodyBone == -1 )
+	{
+		s_nBodyBone = LookupBone( "Bip01 Pelvis" );
+	}
+
+	Vector vecOrigin;
+	QAngle angBone;
+	GetBonePosition( s_nBodyBone, vecOrigin, angBone );
+
+	DispatchParticleEffect( "blood_zombie_split", vecOrigin, QAngle( 0, 0, 0 ) );
+//	CPASAttenuationFilter filter( this );
+//	EmitSound( filter, entindex(), "BaseCombatCharacter.FleshGib" );
+	EmitSound( "BaseCombatCharacter.FleshGib" );
+
+	Vector velocity = vec3_origin;
+	AngularImpulse	angVelocity = RandomAngularImpulse( -150, 150 );
+	breakablepropparams_t params( EyePosition(), GetAbsAngles(), velocity, angVelocity );
+	params.impactEnergyScale = 1.0f;
+	params.defBurstScale = 150.0f;
+	params.defCollisionGroup = COLLISION_GROUP_DEBRIS;
+	PropBreakableCreateAll( GetModelIndex(), NULL, params, this, -1, true, true );
+
+//	gm_nTopGunAttachment = LookupAttachment( "top_eye" );
+	/*
+	CBaseEntity *pGib = CreateRagGib( "models/zombie/classic_torso.mdl", GetAbsOrigin(), GetAbsAngles(), velocity, 10.0f );
+	DispatchParticleEffect( "blood_zombie_split_spray", PATTACH_ABSORIGIN_FOLLOW, pGib );
+	DispatchParticleEffect( "blood_zombie_split_spray", PATTACH_POINT_FOLLOW, pGib, 1 );
+	DispatchParticleEffect("blood_zombie_split_spray", PATTACH_ROOTBONE_FOLLOW, pGib);
+
+	// don't collide with this thing ever
+	if ( pGib )
+	{
+		pGib->SetOwnerEntity( this );
+	}	
+	*/
+	return true;
 }
 
 void CNPC_Zombie::PainSound( const CTakeDamageInfo &info )
