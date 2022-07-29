@@ -27,6 +27,7 @@ static ConVar sk_plr_dmg_ar1_firerate2("sk_plr_dmg_ar1_firerate2", "4", FCVAR_RE
 static ConVar sk_plr_dmg_ar1_firerate3("sk_plr_dmg_ar1_firerate3", "10", FCVAR_REPLICATED);
 static ConVar sk_plr_dmg_ar1_firerate4("sk_plr_dmg_ar1_firerate4", "14", FCVAR_REPLICATED);
 static ConVar sk_plr_dmg_ar1_firerate5("sk_plr_dmg_ar1_firerate5", "20", FCVAR_REPLICATED);
+static ConVar sk_npc_dmg_ar1("sk_npc_dmg_ar1", "3", FCVAR_REPLICATED);
 
 float RateOfFire[ MAX_SETTINGS ] = 
 {
@@ -194,7 +195,7 @@ void CWeaponAR1::FireNPCPrimaryAttack( CBaseCombatCharacter *pOperator, bool bUs
 
 	CSoundEnt::InsertSound( SOUND_COMBAT|SOUND_CONTEXT_GUNFIRE, pOperator->GetAbsOrigin(), SOUNDENT_VOLUME_MACHINEGUN, 0.2, pOperator, SOUNDENT_CHANNEL_WEAPON, pOperator->GetEnemy() );
 
-	pOperator->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_PRECALCULATED, MAX_TRACE_LENGTH, m_iPrimaryAmmoType, 2 );
+	pOperator->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_PRECALCULATED, MAX_TRACE_LENGTH, m_iPrimaryAmmoType, sk_npc_dmg_ar1.GetFloat() );
 
 	// NOTENOTE: This is overriden on the client-side
 	 pOperator->DoMuzzleFlash();

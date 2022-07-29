@@ -1814,11 +1814,12 @@ ConVar  alyx_darkness_force( "alyx_darkness_force", "0", FCVAR_CHEAT | FCVAR_REP
 
 		if( pAttacker->IsPlayer() && pVictim->IsNPC() )
 		{
-			if( pVictim->MyCombatCharacterPointer() )
+			if( pVictim->MyCombatCharacterPointer() && ( pAmmoDef->DamageType( nAmmoType ) & !DMG_SNIPER ) )
 			{
 				// Player is shooting an NPC. Adjust the damage! This protects breakables
 				// and other 'non-living' entities from being easier/harder to break
 				// in different skill levels.
+				// Except sniper rifles lol - epicplayer
 				flDamage = pAmmoDef->PlrDamage( nAmmoType );
 				flDamage = AdjustPlayerDamageInflicted( flDamage );
 			}

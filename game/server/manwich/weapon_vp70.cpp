@@ -17,7 +17,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-static ConVar sk_vp90_damage("sk_vp90_damage", "10", FCVAR_REPLICATED);
+static ConVar sk_plr_dmg_vp70("sk_plr_dmg_vp70", "10", FCVAR_REPLICATED);
 
 class CWeaponSilencedPistol : public CHLSelectFireMachineGun
 {
@@ -123,7 +123,7 @@ float CWeaponSilencedPistol::GetFireRate(void)
 void CWeaponSilencedPistol::FireBullets(const FireBulletsInfo_t& info)
 {
 	FireBulletsInfo_t newInfo = info;
-	newInfo.m_flDamage = sk_vp90_damage.GetFloat();
+	newInfo.m_flDamage = sk_plr_dmg_vp70.GetFloat();
 
 	if (CBasePlayer* pPlayer = ToBasePlayer(GetOwner()))
 	{

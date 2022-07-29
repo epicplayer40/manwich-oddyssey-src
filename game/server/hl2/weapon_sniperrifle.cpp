@@ -159,6 +159,7 @@ IMPLEMENT_ACTTABLE(CWeaponSniperRifle);
 
 void CWeaponSniperRifle::FireNPCPrimaryAttack( CBaseCombatCharacter *pOperator, bool bUseWeaponAngles )
 {
+
 	Vector vecShootOrigin, vecShootDir;
 
 	CAI_BaseNPC *npc = pOperator->MyNPCPointer();
@@ -179,7 +180,7 @@ void CWeaponSniperRifle::FireNPCPrimaryAttack( CBaseCombatCharacter *pOperator, 
 
 	CSoundEnt::InsertSound( SOUND_COMBAT|SOUND_CONTEXT_GUNFIRE, pOperator->GetAbsOrigin(), SOUNDENT_VOLUME_MACHINEGUN, 0.2, pOperator, SOUNDENT_CHANNEL_WEAPON, pOperator->GetEnemy() );
 
-	pOperator->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, MAX_TRACE_LENGTH, m_iPrimaryAmmoType, 2 );
+	pOperator->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_20DEGREES, MAX_TRACE_LENGTH, m_iPrimaryAmmoType, 2 );
 
 	// NOTENOTE: This is overriden on the client-side
 	// pOperator->DoMuzzleFlash();
@@ -482,8 +483,14 @@ void CWeaponSniperRifle::Zoom( void )
 //-----------------------------------------------------------------------------
 const Vector &CWeaponSniperRifle::GetBulletSpread( void )
 {
+//	CBasePlayer *pPlayer = ToBasePlayer(GetOwner());
+
 	static Vector cone = SNIPER_CONE_PLAYER;
-	return cone;
+//	if ( pPlayer )
+//	{
+		return cone;
+//	}	
+//	else return BaseClass::GetBulletSpread( WEAPON_PROFICIENCY_VERY_GOOD );
 }
 
 
@@ -519,7 +526,7 @@ void CWeaponSniperRifle::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCom
 			vecShootDir = npc->GetActualShootTrajectory( vecShootOrigin );
 
 			WeaponSound(SINGLE_NPC);
-			pOperator->FireBullets( 3, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, MAX_TRACE_LENGTH, m_iPrimaryAmmoType, 2 );
+			pOperator->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, MAX_TRACE_LENGTH, m_iPrimaryAmmoType, 2 );
 			pOperator->DoMuzzleFlash();
 			m_iClip1 = m_iClip1 - 1;
 		}
