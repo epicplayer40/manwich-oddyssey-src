@@ -11,8 +11,12 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#define SF_APCDRIVER_NO_ROCKET_ATTACK	0x10000
-#define SF_APCDRIVER_NO_GUN_ATTACK		0x20000
+// Spawnflags
+enum
+{
+	SF_APCDRIVER_NO_ROCKET_ATTACK		= 0x00000020,
+	SF_APCDRIVER_NO_GUN_ATTACK			= 0x20000
+};
 
 #define NPC_APCDRIVER_REMEMBER_TIME		4
 
