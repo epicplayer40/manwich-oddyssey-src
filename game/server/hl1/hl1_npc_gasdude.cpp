@@ -126,7 +126,7 @@ void CNPC_HL1Gasdude::Spawn()
 {
 	Precache( );
 
-	SetModel( "models/squad_gasdude.mdl");
+	SetModel( "models/gascit_mp5.mdl" );
 
 	SetRenderColor( 255, 255, 255, 255 );
 	
@@ -165,7 +165,7 @@ void CNPC_HL1Gasdude::Precache()
 	m_iAmmoType = GetAmmoDef()->Index("Pistol");
 	PrecacheModel( STRING( GetModelName() ) );
 
-	PrecacheModel( "models/squad_gasdude.mdl" );
+	PrecacheModel( "models/gascit_mp5.mdl" );
 
 	PrecacheScriptSound( "Gasdude.FireWeapon" );
 	PrecacheScriptSound( "Gasdude.Pain" );
@@ -330,10 +330,16 @@ void CNPC_HL1Gasdude::GasdudeFirePistol ( void )
 	Vector vecShootDir = GetShootEnemyDir( vecShootOrigin );
 
 	QAngle angDir;
-	
-	VectorAngles( vecShootDir, angDir );
-//	SetBlending( 0, angDir.x );
+	VectorAngles(vecShootDir, angDir);
+
+	float curPitch = GetPoseParameter("aim_pitch");
+	float newPitch = curPitch + UTIL_AngleDiff(UTIL_ApproachAngle(angDir.x, curPitch, 60), curPitch);
+
+	SetPoseParameter("aim_pitch", newPitch);
+
 	DoMuzzleFlash();
+
+
 
 	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_8DEGREES, 1024, m_iAmmoType ); //raised gun range to 1200 in accordance with range increase
 
@@ -561,9 +567,23 @@ void CNPC_HL1Gasdude::RunTask( const Task_t *pTask )
 		{
 			m_flPlaybackRate = 1.5;
 		}
+
 		BaseClass::RunTask( pTask );
 		break;
 	default:
+
+		if ( !m_fGunDrawn && ( ( GetActivity() == ACT_WALK ) || ( GetActivity() == ACT_RUN ) ) )
+			{
+				if ( GetFollowTarget() || ( m_NPCState == NPC_STATE_ALERT || m_NPCState == NPC_STATE_COMBAT ) )
+				{
+					GetNavigator()->SetMovementActivity( (Activity)ACT_RUN_RELAXED );
+				}
+				else
+				{
+					GetNavigator()->SetMovementActivity( (Activity)ACT_WALK_RELAXED );
+				}
+
+			}
 //		m_flPlaybackRate = 2.5; //fire rate increased
 		BaseClass::RunTask( pTask );
 		break;
@@ -823,10 +843,10 @@ bool CNPC_HL1Gasdude::ShouldGib( const CTakeDamageInfo &info )
 {
 //	if ( UTIL_IsLowViolence() )
 //	{
-//		return false;
+		return false;
 //	}
 
-	return BaseClass::ShouldGib( info );
+//	return BaseClass::ShouldGib( info );
 }
 
 bool CNPC_HL1Gasdude::CorpseGib( const CTakeDamageInfo &info )
@@ -950,74 +970,3 @@ AI_BEGIN_CUSTOM_NPC( monster_gasdude, CNPC_HL1Gasdude )
 	)
 		
 AI_END_CUSTOM_NPC()
-
-
-//=========================================================
-// DEAD GASDUDE PROP
-//
-// Designer selects a pose in worldcraft, 0 through num_poses-1
-// this value is added to what is selected as the 'first dead pose'
-// among the monster's normal animations. All dead poses must
-// appear sequentially in the model file. Be sure and set
-// the m_iFirstPose properly!
-//
-//=========================================================
-class CNPC_DeadGasdude : public CAI_BaseNPC
-{
-	DECLARE_CLASS( CNPC_DeadGasdude, CAI_BaseNPC );
-public:
-
-	void Spawn( void );
-	Class_T	Classify ( void ) { return	CLASS_NONE; }
-
-	bool KeyValue( const char *szKeyName, const char *szValue );
-	float MaxYawSpeed ( void ) { return 8.0f; }
-
-	int	m_iPose;// which sequence to display	-- temporary, don't need to save
-	int m_iDesiredSequence;
-	static char *m_szPoses[3];
-	
-	DECLARE_DATADESC();
-};
-
-char *CNPC_DeadGasdude::m_szPoses[] = { "lying_on_back", "lying_on_side", "lying_on_stomach" };
-
-bool CNPC_DeadGasdude::KeyValue( const char *szKeyName, const char *szValue )
-{
-	if ( FStrEq( szKeyName, "pose" ) )
-		m_iPose = atoi( szValue );
-	else 
-		BaseClass::KeyValue( szKeyName, szValue );
-
-	return true;
-}
-
-LINK_ENTITY_TO_CLASS( monster_gasdude_dead, CNPC_DeadGasdude );
-
-BEGIN_DATADESC( CNPC_DeadGasdude )
-END_DATADESC()
-
-//=========================================================
-// ********** DeadGasdude SPAWN **********
-//=========================================================
-void CNPC_DeadGasdude::Spawn( void )
-{
-	PrecacheModel("models/gasdudehl1.mdl");
-	SetModel( "models/gasdudehl1.mdl");
-
-	ClearEffects();
-	SetSequence( 0 );
-	m_bloodColor		= BLOOD_COLOR_RED;
-
-	SetRenderColor( 255, 255, 255, 255 );
-
-	SetSequence( m_iDesiredSequence = LookupSequence( m_szPoses[m_iPose] ) );
-	if ( GetSequence() == -1 )
-	{
-		Msg ( "Dead gasdude with bad pose\n" );
-	}
-	// Corpses have less health
-	m_iHealth			= 0.0;//gSkillData.gasdudeHealth;
-
-	NPCInitDead();
-}
