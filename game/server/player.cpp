@@ -6173,7 +6173,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_rpg" );
 		GiveNamedItem( "weapon_357" );
 		GiveNamedItem( "weapon_crossbow" );
-		// Issue 1
+		GiveNamedItem( "weapon_physgun" );
 		GiveNamedItem( "weapon_katana" );
 		GiveNamedItem( "weapon_uzi" );
 		GiveNamedItem( "weapon_mp5" );
@@ -6182,6 +6182,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_cguard" );
 		GiveNamedItem( "weapon_immolator" );
 		GiveNamedItem( "weapon_flaregun" );
+
 #ifdef HL2_EPISODIC
 		// GiveNamedItem( "weapon_magnade" );
 #endif

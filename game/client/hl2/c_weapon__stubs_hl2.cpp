@@ -31,6 +31,7 @@ STUB_WEAPON_CLASS( weapon_garand, WeaponGarand,C_BaseHLCombatWeapon );
 STUB_WEAPON_CLASS( weapon_uzi, WeaponUzi, C_HLMachineGun);
 STUB_WEAPON_CLASS( weapon_mp5, WeaponMP5, C_HLSelectFireMachineGun );
 STUB_WEAPON_CLASS( weapon_p90, WeaponP90, C_HLSelectFireMachineGun );
+//STUB_WEAPON_CLASS( weapon_physgun, WeaponGravityGun, C_BaseHLCombatWeapon );
 
 //Beta weapons
 //STUB_WEAPON_CLASS(weapon_binoculars, WeaponBinoculars, C_BaseHLCombatWeapon);

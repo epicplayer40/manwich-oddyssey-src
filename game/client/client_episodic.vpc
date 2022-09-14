@@ -30,6 +30,7 @@ $Project "Client (Mambridge)"
 		// help me please god
 		$Folder "Manwich"
 		{
+			$File	"hl2/c_weapon_gravitygun.cpp"
 		}
 
 		// help me please god

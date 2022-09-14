@@ -28,6 +28,7 @@ $Project "Server (Mambridge)"
 			$File "manwich/npc_cigbine.cpp"
 			$File "manwich/item_vest.cpp"
 			$File "manwich/weapon_vp70.cpp"
+			$File "hl2/physgun.cpp"
 		}
 
 		$File	"ai_eventresponse.cpp"

@@ -16,10 +16,8 @@
 #include "engine/IEngineSound.h"
 #include "ndebugoverlay.h"
 #include "physics_saverestore.h"
-#include "physics_prop_ragdoll.h"
 #include "player_pickup.h"
 #include "soundemittersystem/isoundemittersystembase.h"
-#include "weapon_physcannon.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -33,7 +31,7 @@ ConVar phys_gunglueradius("phys_gunglueradius", "128" );
 static int g_physgunBeam;
 #define PHYSGUN_BEAM_SPRITE		"sprites/physbeam.vmt"
 
-#define MAX_PELLETS	10 
+#define MAX_PELLETS	50
 
 class CWeaponGravityGun;
 
@@ -46,7 +44,8 @@ public:
 	~CGravityPellet();
 	void Precache()
 	{
-		SetModelName( MAKE_STRING( "models/weapons/glueblob.mdl" ) ); 
+		//SetModelName( MAKE_STRING( "models/weapons/glueblob.mdl" ) );
+		SetModelName( MAKE_STRING( "models/weapons/w_bugbait.mdl" ) );
 		PrecacheModel( STRING( GetModelName() ) );
 		BaseClass::Precache();
 	}
@@ -105,13 +104,14 @@ public:
 	bool				m_isInert;
 };
 
-LINK_ENTITY_TO_CLASS(gravity_pellet, CGravityPellet); 
+LINK_ENTITY_TO_CLASS(gravity_pellet, CGravityPellet);
 PRECACHE_REGISTER(gravity_pellet);
 
 BEGIN_DATADESC( CGravityPellet )
 
 	DEFINE_PHYSPTR( m_pConstraint ),
-	DEFINE_FIELD( m_isInert, FIELD_BOOLEAN ),	// physics system will fire this input if the constraint breaks due to physics
+	DEFINE_FIELD( m_isInert, FIELD_BOOLEAN ),
+	// physics system will fire this input if the constraint breaks due to physics
 	DEFINE_INPUTFUNC( FIELD_VOID, "ConstraintBroken", InputOnBreak ),
 
 END_DATADESC()
@@ -188,21 +188,21 @@ BEGIN_SIMPLE_DATADESC( CGravControllerPoint )
 	DEFINE_FIELD( m_localPosition,		FIELD_VECTOR ),
 	DEFINE_FIELD( m_targetPosition,		FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( m_worldPosition,		FIELD_POSITION_VECTOR ),
-	DEFINE_FIELD( m_localAlignNormal,	FIELD_VECTOR ),
+	DEFINE_FIELD( m_localAlignNormal,		FIELD_VECTOR ),
 	DEFINE_FIELD( m_localAlignPosition,	FIELD_VECTOR ),
 	DEFINE_FIELD( m_targetAlignNormal,	FIELD_VECTOR ),
-	DEFINE_FIELD( m_targetAlignPosition,FIELD_POSITION_VECTOR ),
+	DEFINE_FIELD( m_targetAlignPosition,	FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( m_align,				FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_saveDamping,		FIELD_FLOAT ),
+	DEFINE_FIELD( m_saveDamping,			FIELD_FLOAT ),
 	DEFINE_FIELD( m_maxVel,				FIELD_FLOAT ),
-	DEFINE_FIELD( m_maxAcceleration,	FIELD_FLOAT ),
+	DEFINE_FIELD( m_maxAcceleration,		FIELD_FLOAT ),
 	DEFINE_FIELD( m_maxAngularAcceleration,	FIELD_VECTOR ),
 	DEFINE_FIELD( m_attachedEntity,		FIELD_EHANDLE ),
 	DEFINE_FIELD( m_targetRotation,		FIELD_VECTOR ),
-	DEFINE_FIELD( m_timeToArrive,		FIELD_FLOAT ),
+	DEFINE_FIELD( m_timeToArrive,			FIELD_FLOAT ),
 
 	// Physptrs can't be saved in embedded classes... this is to silence classcheck
-	//DEFINE_PHYSPTR( m_controller ),
+	// DEFINE_PHYSPTR( m_controller ),
 
 END_DATADESC()
 
@@ -292,6 +292,7 @@ IMotionEvent::simresult_e CGravControllerPoint::Simulate( IPhysicsMotionControll
 	pObject->LocalToWorld( &world, m_localPosition );
 	m_worldPosition = world;
 	pObject->GetVelocity( &vel, &angVel );
+	//pObject->GetVelocityAtPoint( world, &vel );
 	float damping = 1.0;
 	world += vel * deltaTime * damping;
 	Vector delta = (m_targetPosition - world) * fracRemainingSimTime * invDeltaTime;
@@ -361,12 +362,16 @@ IMotionEvent::simresult_e CGravControllerPoint::Simulate( IPhysicsMotionControll
 				{
 					destRadius = rotRadius;
 				}
+				//float ratio = rotRadius / destRadius;
 				float angleSrc = atan2( planeSrc.y, planeSrc.x );
 				float angleDest = atan2( planeDest.y, planeDest.x );
 				float angleDiff = angleDest - angleSrc;
 				angleDiff = RAD2DEG(angleDiff);
 				axis += m_targetAlignNormal * angleDiff;
 				world = m_targetPosition;// + rotDest * (1-ratio);
+//				NDebugOverlay::Line( worldRotCenter, worldRotCenter-m_targetAlignNormal*50, 255, 0, 0, false, 0.1 );
+//				NDebugOverlay::Line( worldRotCenter, worldRotCenter+tangent*50, 0, 255, 0, false, 0.1 );
+//				NDebugOverlay::Line( worldRotCenter, worldRotCenter+binormal*50, 0, 0, 255, false, 0.1 );
 			}
 		}
 
@@ -461,9 +466,9 @@ public:
 	DECLARE_CLASS( CWeaponGravityGun, CBaseCombatWeapon );
 
 	CWeaponGravityGun();
-	void Spawn( void ); 
+	void Spawn( void );
 	void OnRestore( void );
-	void Precache( void ); 
+	void Precache( void );
 
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
@@ -478,6 +483,7 @@ public:
 	bool Reload( void );
 	void Equip( CBaseCombatCharacter *pOwner )
 	{
+		// add constraint ammo
 		pOwner->SetAmmoCount( MAX_PELLETS, m_iSecondaryAmmoType );
 		BaseClass::Equip( pOwner );
 	}
@@ -574,7 +580,6 @@ IMPLEMENT_SERVERCLASS_ST( CWeaponGravityGun, DT_WeaponGravityGun )
 	SendPropModelIndex( SENDINFO(m_viewModelIndex) ),
 END_SEND_TABLE()
 
-
 LINK_ENTITY_TO_CLASS( weapon_physgun, CWeaponGravityGun );
 PRECACHE_WEAPON_REGISTER(weapon_physgun);
 
@@ -601,6 +606,7 @@ BEGIN_DATADESC( CWeaponGravityGun )
 	DEFINE_FIELD( m_viewModelIndex,		FIELD_INTEGER ),
 	DEFINE_FIELD( m_originalObjectPosition,	FIELD_POSITION_VECTOR ),
 	DEFINE_EMBEDDED( m_gravCallback ),
+	// Physptrs can't be saved in embedded classes..
 	DEFINE_PHYSPTR( m_gravCallback.m_controller ),
 	DEFINE_EMBEDDED_AUTO_ARRAY( m_activePellets ),
 	DEFINE_FIELD( m_pelletCount,			FIELD_INTEGER ),
@@ -617,6 +623,9 @@ enum physgun_soundstate { SS_SCANNING, SS_LOCKEDON };
 enum physgun_soundIndex { SI_LOCKEDON = 0, SI_SCANNING = 1, SI_LIGHTOBJECT = 2, SI_HEAVYOBJECT = 3, SI_ON, SI_OFF };
 
 
+//=========================================================
+//=========================================================
+
 CWeaponGravityGun::CWeaponGravityGun()
 {
 	m_active = false;
@@ -625,6 +634,8 @@ CWeaponGravityGun::CWeaponGravityGun()
 	m_pelletHeld = -1;
 }
 
+//=========================================================
+//=========================================================
 void CWeaponGravityGun::Spawn( )
 {
 	BaseClass::Spawn();
@@ -643,6 +654,9 @@ void CWeaponGravityGun::OnRestore( void )
 	}
 }
 
+
+//=========================================================
+//=========================================================
 void CWeaponGravityGun::Precache( void )
 {
 	BaseClass::Precache();
@@ -720,32 +734,27 @@ void CWeaponGravityGun::EffectUpdate( void )
 	CBaseEntity *pObject = m_hObject;
 	if ( pObject )
 	{
-		if ( m_useDown )
+		if ( m_useDown ) // if already been pressed 
 		{
-			if ( pOwner->m_afButtonPressed & IN_USE )
-			{
+			if ( pOwner->m_afButtonPressed & IN_USE ) // then if use pressed
+	        {
 				m_useDown = false;
-			}
-		}
-		else 
-		{
-			if ( pOwner->m_afButtonPressed & IN_USE )
-			{
-				m_useDown = true;
-			}
-		}
+				IPhysicsObject *pPhys = pObject->VPhysicsGetObject();
+				pPhys->EnableMotion(true);
 
-		if ( m_useDown )
-		{
-			pOwner->SetPhysicsFlag( PFLAG_DIROVERRIDE, true );
-			if ( pOwner->m_nButtons & IN_FORWARD )
-			{
-				m_distance = UTIL_Approach( 1024, m_distance, gpGlobals->frametime * 100 );
-			}
-			if ( pOwner->m_nButtons & IN_BACK )
-			{
-				m_distance = UTIL_Approach( 40, m_distance, gpGlobals->frametime * 100 );
-			}
+				//Reattach
+				DetachObject();
+				AttachObject( pObject, start, tr.endpos, distance );
+            }
+		}
+        else
+	    {
+			if ( pOwner->m_afButtonPressed & IN_USE )
+	        {
+				m_useDown = true;
+				IPhysicsObject *pPhys = pObject->VPhysicsGetObject();
+				pPhys->EnableMotion(false);
+	        }
 		}
 
 		if ( pOwner->m_nButtons & IN_WEAPON1 )
@@ -826,8 +835,10 @@ void CWeaponGravityGun::EffectUpdate( void )
 	{
 		m_gravCallback.ClearAutoAlign();
 	}
-	    NetworkStateChanged();
+
+	NetworkStateChanged();
 }
+
 void CWeaponGravityGun::SoundCreate( void )
 {
 	m_soundState = SS_SCANNING;
@@ -892,7 +903,6 @@ void CWeaponGravityGun::SoundStart( void )
 	{
 	case SS_SCANNING:
 		{
-			// filter.MakeReliable
 			EmitSound( filter, GetOwner()->entindex(), "Weapon_Physgun.Scanning" );
 		}
 		break;
@@ -1199,7 +1209,6 @@ void CWeaponGravityGun::DetachObject( void )
 void CWeaponGravityGun::AttachObject( CBaseEntity *pObject, const Vector& start, const Vector &end, float distance )
 {
 	m_hObject = pObject;
-	m_useDown = false;
 	IPhysicsObject *pPhysics = pObject ? (pObject->VPhysicsGetObject()) : NULL;
 	if ( pPhysics && pObject->GetMoveType() == MOVETYPE_VPHYSICS )
 	{
@@ -1207,12 +1216,15 @@ void CWeaponGravityGun::AttachObject( CBaseEntity *pObject, const Vector& start,
 
 		m_gravCallback.AttachEntity( pObject, pPhysics, end );
 		float mass = pPhysics->GetMass();
+		Msg( "Object mass: %.2f lbs (%.2f kg)\n", kg2lbs(mass), mass );
 		float vel = phys_gunvel.GetFloat();
 		if ( mass > phys_gunmass.GetFloat() )
 		{
 			vel = (vel*phys_gunmass.GetFloat())/mass;
 		}
 		m_gravCallback.SetMaxVelocity( vel );
+//		Msg( "Object mass: %.2f lbs (%.2f kg) %f %f %f\n", kg2lbs(mass), mass, pObject->GetAbsOrigin().x, pObject->GetAbsOrigin().y, pObject->GetAbsOrigin().z );
+//		Msg( "ANG: %f %f %f\n", pObject->GetAbsAngles().x, pObject->GetAbsAngles().y, pObject->GetAbsAngles().z );
 
 		m_originalObjectPosition = pObject->GetAbsOrigin();
 
@@ -1234,6 +1246,8 @@ void CWeaponGravityGun::AttachObject( CBaseEntity *pObject, const Vector& start,
 	}
 }
 
+//=========================================================
+//=========================================================
 void CWeaponGravityGun::PrimaryAttack( void )
 {
 	if ( !m_active )
@@ -1251,7 +1265,76 @@ void CWeaponGravityGun::PrimaryAttack( void )
 
 void CWeaponGravityGun::SecondaryAttack( void )
 {
+	m_flNextSecondaryAttack = gpGlobals->curtime + 0.1;
+	if ( m_active )
+	{
+		EffectDestroy();
+		SoundDestroy();
+		return;
+	}
+
+	CBasePlayer *pOwner = ToBasePlayer( GetOwner() );
+	Assert( pOwner );
+
+	if ( pOwner->GetAmmoCount(m_iSecondaryAmmoType) <= 0 )
+		return;
+
+	m_viewModelIndex = pOwner->entindex();
+	// Make sure I've got a view model
+	CBaseViewModel *vm = pOwner->GetViewModel();
+	if ( vm )
+	{
+		m_viewModelIndex = vm->entindex();
+	}
+
+	Vector forward;
+	pOwner->EyeVectors( &forward );
+
+	Vector start = pOwner->Weapon_ShootPosition();
+	Vector end = start + forward * 4096;
+
+	trace_t tr;
+	UTIL_TraceLine( start, end, MASK_SHOT, pOwner, COLLISION_GROUP_NONE, &tr );
+	if ( tr.fraction == 1.0 || (tr.surface.flags & SURF_SKY) )
+		return;
+
+	CBaseEntity *pHit = tr.m_pEnt;
 	
+	if ( pHit->entindex() == 0 )
+	{
+		pHit = NULL;
+	}
+	else
+	{
+		// if the object has no physics object, or isn't a physprop or brush entity, then don't glue
+		if ( !pHit->VPhysicsGetObject() || pHit->GetMoveType() != MOVETYPE_VPHYSICS )
+			return;
+	}
+
+	QAngle angles;
+	WeaponSound( SINGLE );
+	SendWeaponAnim(ACT_VM_SECONDARYATTACK);
+	pOwner->RemoveAmmo( 1, m_iSecondaryAmmoType );
+
+	VectorAngles( tr.plane.normal, angles );
+	Vector endPoint = tr.endpos + tr.plane.normal;
+	CGravityPellet *pPellet = (CGravityPellet *)CBaseEntity::Create( "gravity_pellet", endPoint, angles, this );
+	if ( pHit )
+	{
+		pPellet->SetParent( pHit );
+	}
+	AddPellet( pPellet, pHit, tr.plane.normal );
+
+	// UNDONE: Probably should just do this client side
+	CBaseEntity *pEnt = GetBeamEntity();
+	CBeam *pBeam = CBeam::BeamCreate( PHYSGUN_BEAM_SPRITE, 1.5 );
+	pBeam->PointEntInit( endPoint, pEnt );
+	pBeam->SetEndAttachment( 1 );
+	pBeam->SetBrightness( 255 );
+	pBeam->SetColor( 255, 0, 0 );
+	pBeam->RelinkBeam();
+	pBeam->LiveForTime( 0.1 );
+
 }
 
 void CWeaponGravityGun::WeaponIdle( void )
@@ -1288,7 +1371,7 @@ void CWeaponGravityGun::ItemPostFrame( void )
 
 	if ( pOwner->m_afButtonPressed & IN_ATTACK2 )
 	{
-		PrimaryAttack();
+		SecondaryAttack();
 	}
 	else if ( pOwner->m_nButtons & IN_ATTACK )
 	{
@@ -1314,9 +1397,12 @@ void CWeaponGravityGun::ItemPostFrame( void )
 //-----------------------------------------------------------------------------
 bool CWeaponGravityGun::HasAnyAmmo( void )
 {
+	//Always report that we have ammo
 	return true;
 }
 
+//=========================================================
+//=========================================================
 bool CWeaponGravityGun::Reload( void )
 {
 	CBasePlayer *pOwner = ToBasePlayer( GetOwner() );
@@ -1331,3 +1417,103 @@ bool CWeaponGravityGun::Reload( void )
 
 	return false;
 }
+
+#define NUM_COLLISION_TESTS 2500
+void CC_CollisionTest1( const CCommand &args )
+{
+	if ( !physenv )
+		return;
+
+	Msg( "Testing collision system\n" );
+	int i;
+	CBaseEntity *pSpot = gEntList.FindEntityByClassname( NULL, "info_player_start");
+	Vector start = pSpot->GetAbsOrigin();
+	static Vector *targets = NULL;
+	static bool first = true;
+	static float test[2] = {1,1};
+	if ( first )
+	{
+		targets = new Vector[NUM_COLLISION_TESTS];
+		float radius = 0;
+		float theta = 0;
+		float phi = 0;
+		for ( i = 0; i < NUM_COLLISION_TESTS; i++ )
+		{
+			radius += NUM_COLLISION_TESTS * 123.123;
+			radius = fabs(fmod(radius, 128));
+			theta += NUM_COLLISION_TESTS * 76.76;
+			theta = fabs(fmod(theta, DEG2RAD(360)));
+			phi += NUM_COLLISION_TESTS * 1997.99;
+			phi = fabs(fmod(phi, DEG2RAD(180)));
+			
+			float st, ct, sp, cp;
+			SinCos( theta, &st, &ct );
+			SinCos( phi, &sp, &cp );
+
+			targets[i].x = radius * ct * sp;
+			targets[i].y = radius * st * sp;
+			targets[i].z = radius * cp;
+			
+			// make the trace 1024 units long
+			Vector dir = targets[i] - start;
+			VectorNormalize(dir);
+			targets[i] = start + dir * 1024;
+		}
+		first = false;
+	}
+
+	//Vector results[NUM_COLLISION_TESTS];
+
+	int testType = 0;
+	if ( args.ArgC() >= 2 )
+	{
+		testType = atoi( args[1] );
+	}
+	float duration = 0;
+	Vector size[2];
+	size[0].Init(0,0,0);
+	size[1].Init(16,16,16);
+	unsigned int dots = 0;
+
+	for ( int j = 0; j < 2; j++ )
+	{
+		float startTime = engine->Time();
+		if ( testType == 1 )
+		{
+			const CPhysCollide *pCollide = g_PhysWorldObject->GetCollide();
+			trace_t tr;
+
+			for ( i = 0; i < NUM_COLLISION_TESTS; i++ )
+			{
+				physcollision->TraceBox( start, targets[i], -size[j], size[j], pCollide, vec3_origin, vec3_angle, &tr );
+				dots += physcollision->ReadStat(0);
+				//results[i] = tr.endpos;
+			}
+		}
+		else
+		{
+			testType = 0;
+			CBaseEntity *pWorld = GetContainingEntity( INDEXENT(0) );
+			trace_t tr;
+
+			for ( i = 0; i < NUM_COLLISION_TESTS; i++ )
+			{
+				UTIL_TraceModel( start, targets[i], -size[j], size[j], pWorld, COLLISION_GROUP_NONE, &tr );
+				//results[i] = tr.endpos;
+			}
+		}
+
+		duration += engine->Time() - startTime;
+	}
+	test[testType] = duration;
+	Msg("%d collisions in %.2f ms (%u dots)\n", NUM_COLLISION_TESTS, duration*1000, dots );
+	Msg("Current speed ratio: %.2fX BSP:JGJK\n", test[1] / test[0] );
+#if 0
+	int red = 255, green = 0, blue = 0;
+	for ( i = 0; i < NUM_COLLISION_TESTS; i++ )
+	{
+		NDebugOverlay::Line( start, results[i], red, green, blue, false, 2 );
+	}
+#endif
+}
+static ConCommand collision_test1("collision_test1", CC_CollisionTest1, "Tests collision system", FCVAR_CHEAT );
