@@ -12,16 +12,17 @@
 #include "player.h"
 #include "game.h"
 #include "in_buttons.h"
+#include "gamestats.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-ConVar	weapon_smg2_firerate ("weapon_smg2_firerate", "0.056" );
+ConVar	sk_weapon_smg2_firerate ("sk_weapon_smg2_firerate", "0.065" );
 
-class CWeaponSMG2 : public CHLMachineGun
+class CWeaponSMG2 : public CHLSelectFireMachineGun
 {
 public:
-	DECLARE_CLASS( CWeaponSMG2, CHLMachineGun );
+	DECLARE_CLASS( CWeaponSMG2, CHLSelectFireMachineGun );
 
 	CWeaponSMG2();
 
@@ -31,7 +32,7 @@ public:
 	void			Precache( void );
 	void			AddViewKick( void );
 	void			Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator );
-	float			GetFireRate( void ) { return weapon_smg2_firerate.GetFloat(); }
+	float			GetFireRate( void );
 
 	int				CapabilitiesGet( void ) { return bits_CAP_WEAPON_RANGE_ATTACK1; }
 
@@ -39,6 +40,8 @@ public:
 	int		GetMaxBurst() { return 30; }
 
 	bool Reload();
+
+	void SecondaryAttack(void);
 
 	DECLARE_ACTTABLE();
 };
@@ -110,11 +113,73 @@ CWeaponSMG2::CWeaponSMG2( )
 	m_fMaxRange1		= 2000;
 	m_fMinRange1		= 32;
 
+	m_iFireMode = FIREMODE_FULLAUTO;
+	m_bIsSilenced = true;
+
 }
 
 void CWeaponSMG2::Precache( void )
 {
 	BaseClass::Precache();
+}
+
+float CWeaponSMG2::GetFireRate(void)
+{
+	switch (m_iFireMode)
+	{
+	case FIREMODE_SEMI:
+		// the time between rounds fired on semi auto
+		return 0.1f;	// 600 rounds per minute = 0.1 seconds per bullet
+		break;
+
+	case FIREMODE_3RNDBURST:
+		// the time between rounds fired within a single burst
+		return 0.05f;
+		break;
+
+	default:
+		return sk_weapon_smg2_firerate.GetFloat();
+		break;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//
+//
+//-----------------------------------------------------------------------------
+void CWeaponSMG2::SecondaryAttack(void)
+{
+	// change fire modes.
+
+	switch (m_iFireMode)
+	{
+	case FIREMODE_SEMI:
+		m_iFireMode = FIREMODE_FULLAUTO;
+		WeaponSound(SPECIAL1);
+		break;
+
+	case FIREMODE_3RNDBURST:
+		m_iFireMode = FIREMODE_SEMI;
+		WeaponSound(SPECIAL1);
+		break;
+
+	case FIREMODE_FULLAUTO:
+		m_iFireMode = FIREMODE_3RNDBURST;
+		WeaponSound(SPECIAL2);
+		break;
+	}
+
+	SendWeaponAnim(GetSecondaryAttackActivity());
+
+	m_flNextSecondaryAttack = gpGlobals->curtime + 0.3;
+
+	CBasePlayer *pOwner = ToBasePlayer(GetOwner());
+	if (pOwner)
+	{
+		m_iSecondaryAttacks++;
+		gamestats->Event_WeaponFired(pOwner, false, GetClassname());
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -123,8 +188,34 @@ void CWeaponSMG2::Precache( void )
 //-----------------------------------------------------------------------------
 const Vector &CWeaponSMG2::GetBulletSpread( void )
 {
-	static const Vector cone = VECTOR_CONE_10DEGREES;
-	return cone;
+//	static const Vector cone = VECTOR_CONE_10DEGREES;
+
+//	Vector cone = VECTOR_CONE_10DEGREES;
+
+	static const Vector cone1 = VECTOR_CONE_1DEGREES;
+	static const Vector cone2 = VECTOR_CONE_2DEGREES;
+	static const Vector cone3 = VECTOR_CONE_6DEGREES;
+	static Vector npcCone = VECTOR_CONE_10DEGREES;
+
+	if (GetOwner() && GetOwner()->IsNPC())
+		return npcCone;
+
+	switch (m_iFireMode)
+	{
+	case FIREMODE_SEMI:
+		return cone1;
+		break;
+
+	case FIREMODE_3RNDBURST:
+		return cone2;
+		break;
+
+	case FIREMODE_FULLAUTO:
+		return cone3;
+		break;
+	}
+
+	return cone3;
 }
 
 //-----------------------------------------------------------------------------

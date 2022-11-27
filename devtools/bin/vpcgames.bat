@@ -1,0 +1,2 @@
+vpc +gamedlls /allgames
+pause

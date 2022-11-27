@@ -54,7 +54,7 @@
 #define CHOPPER_RED_LIGHT_SPRITE	"sprites/redglow1.vmt"
 
 #define CHOPPER_MAX_SMALL_CHUNKS	1
-#define CHOPPER_MAX_CHUNKS	3 //3 by default
+#define CHOPPER_MAX_CHUNKS	3
 static const char *s_pChunkModelName[CHOPPER_MAX_CHUNKS] = 
 {
 	"models/gibs/helicopter_brokenpiece_01.mdl",
@@ -66,9 +66,9 @@ static const char *s_pChunkModelName[CHOPPER_MAX_CHUNKS] =
 #define BOMB_SKIN_LIGHT_OFF		0
 
 
-#define	HELICOPTER_CHUNK_COCKPIT	"models/gibs/helicopter_brokenpiece_01.mdl" //"models/gibs/helicopter_brokenpiece_04_cockpit.mdl"
-#define	HELICOPTER_CHUNK_TAIL		"models/gibs/helicopter_brokenpiece_02.mdl" //"models/gibs/helicopter_brokenpiece_05_tailfan.mdl"
-#define	HELICOPTER_CHUNK_BODY		"models/gibs/helicopter_brokenpiece_03.mdl" //"models/gibs/helicopter_brokenpiece_06_body.mdl"
+#define	HELICOPTER_CHUNK_COCKPIT	"models/gibs/helicopter_brokenpiece_04_cockpit.mdl"
+#define	HELICOPTER_CHUNK_TAIL		"models/gibs/helicopter_brokenpiece_05_tailfan.mdl"
+#define	HELICOPTER_CHUNK_BODY		"models/gibs/helicopter_brokenpiece_06_body.mdl"
 
 
 #define CHOPPER_MAX_SPEED			(60 * 17.6f)
