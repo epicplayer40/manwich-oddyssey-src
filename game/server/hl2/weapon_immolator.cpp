@@ -19,6 +19,18 @@
 #include "ai_memory.h"
 #include "beam_shared.h"
 #include "EntityFlame.h"
+#include "basehlcombatweapon_shared.h"
+#include "gamerules.h"
+#include "game.h"
+#include "vstdlib/random.h"
+#include "engine/IEngineSound.h"
+#include "IEffects.h"
+#include "te_effect_dispatch.h"
+#include "Sprite.h"
+#include "SpriteTrail.h"
+#include "rumble_shared.h"
+#include "gamestats.h"
+#include "decals.h"
 
 #include "weapon_immolator.h"
 
@@ -29,6 +41,438 @@ extern ConVar sk_cremator_dmg_immo;
 #define RADIUS_GROW_RATE	50.0	// units/sec 
 
 #define IMMOLATOR_TARGET_INVALID Vector( FLT_MAX, FLT_MAX, FLT_MAX )
+
+#define BEAM_MODEL	"models/crossbow_bolt.mdl"
+#define BEAM_AIR_VELOCITY	1500
+
+
+//-----------------------------------------------------------------------------
+// Crossbow Bolt
+//-----------------------------------------------------------------------------
+class CImmolatorBeam : public CBaseCombatCharacter
+{
+	DECLARE_CLASS( CImmolatorBeam, CBaseCombatCharacter );
+
+public:
+	CImmolatorBeam() { };
+	~CImmolatorBeam();
+
+	Class_T Classify( void ) { return CLASS_NONE; }
+
+public:
+	void Spawn( void );
+	void Precache( void );
+	void BubbleThink( void );
+	void BoltTouch( CBaseEntity *pOther );
+	bool CreateVPhysics( void );
+	unsigned int PhysicsSolidMaskForEntity() const;
+	static CImmolatorBeam *BoltCreate( const Vector &vecOrigin, const QAngle &angAngles, CBasePlayer *pentOwner = NULL );
+	int	m_immobeamIndex;
+
+protected:
+
+	bool	CreateSprites( void );
+
+	CHandle<CSprite>		m_pGlowSprite;
+	CHandle<CSpriteTrail>	m_pGlowTrail;
+
+	DECLARE_DATADESC();
+	DECLARE_SERVERCLASS();
+};
+LINK_ENTITY_TO_CLASS( immolator_beam, CImmolatorBeam );
+
+BEGIN_DATADESC( CImmolatorBeam )
+	// Function Pointers
+	DEFINE_FUNCTION( BubbleThink ),
+	DEFINE_FUNCTION( BoltTouch ),
+
+	// These are recreated on reload, they don't need storage
+	DEFINE_FIELD( m_pGlowSprite, FIELD_EHANDLE ),
+	DEFINE_FIELD( m_pGlowTrail, FIELD_EHANDLE ),
+	DEFINE_FIELD(m_immobeamIndex, FIELD_INTEGER),
+
+END_DATADESC()
+
+IMPLEMENT_SERVERCLASS_ST( CImmolatorBeam, DT_ImmolatorBeam )
+END_SEND_TABLE()
+
+CImmolatorBeam *CImmolatorBeam::BoltCreate( const Vector &vecOrigin, const QAngle &angAngles, CBasePlayer *pentOwner )
+{
+	// Create a new entity with CImmolatorBeam private data
+	CImmolatorBeam *pBeam = (CImmolatorBeam *)CreateEntityByName( "immolator_beam" );
+	UTIL_SetOrigin( pBeam, vecOrigin );
+	pBeam->SetAbsAngles( angAngles );
+	pBeam->Spawn();
+	pBeam->SetOwnerEntity( pentOwner );
+
+	return pBeam;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+CImmolatorBeam::~CImmolatorBeam( void )
+{
+	if ( m_pGlowSprite )
+	{
+		UTIL_Remove( m_pGlowSprite );
+	}
+	if ( m_pGlowTrail )
+	{
+		UTIL_Remove( m_pGlowTrail );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Output : Returns true on success, false on failure.
+//-----------------------------------------------------------------------------
+bool CImmolatorBeam::CreateVPhysics( void )
+{
+	// Create the object in the physics system
+	VPhysicsInitNormal( SOLID_BBOX, FSOLID_NOT_STANDABLE, false );
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+unsigned int CImmolatorBeam::PhysicsSolidMaskForEntity() const
+{
+	return ( BaseClass::PhysicsSolidMaskForEntity() | CONTENTS_HITBOX ) & ~CONTENTS_GRATE;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Output : Returns true on success, false on failure.
+//-----------------------------------------------------------------------------
+bool CImmolatorBeam::CreateSprites( void )
+{
+	// Start up the eye glow
+	m_pGlowSprite = CSprite::SpriteCreate( "sprites/light_glow02_noz.vmt", GetLocalOrigin(), false );
+
+	if ( m_pGlowSprite != NULL )
+	{
+		m_pGlowSprite->FollowEntity( this );
+		m_pGlowSprite->SetTransparency( kRenderGlow, 255, 255, 255, 128, kRenderFxNoDissipation );
+		m_pGlowSprite->SetScale( 0.0f );
+		m_pGlowSprite->TurnOff();
+	}
+
+	// Start up the eye trail
+	m_pGlowTrail	= CSpriteTrail::SpriteTrailCreate( "sprites/bluelaser1.vmt", GetLocalOrigin(), false );
+
+	if ( m_pGlowTrail != NULL )
+	{
+		m_pGlowTrail->FollowEntity( this );
+//		m_pGlowTrail->SetAttachment( this, nAttachment );
+		m_pGlowTrail->SetTransparency( kRenderTransAdd, 0, 255, 0, 255, kRenderFxNone );
+		m_pGlowTrail->SetStartWidth( 20.0f );
+		m_pGlowTrail->SetEndWidth( 2.0f );
+		m_pGlowTrail->SetLifeTime( 0.9f );
+	}
+
+	return true;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CImmolatorBeam::Spawn( void )
+{
+	Precache( );
+
+	SetModel( "models/crossbow_bolt.mdl" );
+	SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_CUSTOM );
+	UTIL_SetSize( this, -Vector(0.3f,0.3f,0.3f), Vector(0.3f,0.3f,0.3f) );
+	SetSolid( SOLID_BBOX );
+	SetGravity( 0.7f );
+	AddEffects( EF_NODRAW );
+
+	m_immobeamIndex = engine->PrecacheModel("sprites/bluelaser1.vmt");
+
+	// Make sure we're updated if we're underwater
+	UpdateWaterState();
+
+	SetTouch( &CImmolatorBeam::BoltTouch );
+
+	SetThink( &CImmolatorBeam::BubbleThink );
+	SetNextThink( gpGlobals->curtime + 0.1f );
+	
+	CreateSprites();
+}
+
+
+void CImmolatorBeam::Precache( void )
+{
+	PrecacheModel( BEAM_MODEL );
+
+	// This is used by C_TEStickyBolt, despte being different from above!!!
+	PrecacheModel( "models/crossbow_bolt.mdl" );
+
+	PrecacheModel( "sprites/light_glow02_noz.vmt" );
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
+{
+
+
+		RadiusDamage( CTakeDamageInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_PLASMA ), GetAbsOrigin(), 100,  CLASS_NONE, NULL ); //changed from 256 to 128 to correspond with noisebeams
+
+
+	if ( pOther->IsSolidFlagSet(FSOLID_VOLUME_CONTENTS | FSOLID_TRIGGER) )
+	{
+		// Some NPCs are triggers that can take damage (like antlion grubs). We should hit them.
+		if ( ( pOther->m_takedamage == DAMAGE_NO ) || ( pOther->m_takedamage == DAMAGE_EVENTS_ONLY ) )
+			return;
+	}
+
+	if ( pOther->m_takedamage != DAMAGE_NO )
+	{
+		trace_t	tr, tr2;
+		tr = BaseClass::GetTouchTrace();
+		Vector	vecNormalizedVel = GetAbsVelocity();
+
+		ClearMultiDamage();
+		VectorNormalize( vecNormalizedVel );
+
+		if( GetOwnerEntity() && GetOwnerEntity()->IsPlayer() && pOther->IsNPC() )
+		{
+			CTakeDamageInfo	dmgInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_PLASMA );
+			dmgInfo.AdjustPlayerDamageInflictedForSkillLevel();
+			CalculateMeleeDamageForce( &dmgInfo, vecNormalizedVel, tr.endpos, 0.7f );
+			dmgInfo.SetDamagePosition( tr.endpos );
+			pOther->DispatchTraceAttack( dmgInfo, vecNormalizedVel, &tr );
+
+			CBasePlayer *pPlayer = ToBasePlayer( GetOwnerEntity() );
+			if ( pPlayer )
+			{
+				gamestats->Event_WeaponHit( pPlayer, true, "weapon_immolator", dmgInfo );
+			}
+
+		}
+		else
+		{
+			CTakeDamageInfo	dmgInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_PLASMA | DMG_NEVERGIB );
+			CalculateMeleeDamageForce( &dmgInfo, vecNormalizedVel, tr.endpos, 0.7f );
+			dmgInfo.SetDamagePosition( tr.endpos );
+			pOther->DispatchTraceAttack( dmgInfo, vecNormalizedVel, &tr );
+		}
+
+		ApplyMultiDamage();
+
+		//Adrian: keep going through the glass.
+		if ( pOther->GetCollisionGroup() == COLLISION_GROUP_BREAKABLE_GLASS )
+			 return;
+
+		if ( !pOther->IsAlive() )
+		{
+			// We killed it! 
+			const surfacedata_t *pdata = physprops->GetSurfaceData( tr.surface.surfaceProps );
+			if ( pdata->game.material == CHAR_TEX_GLASS )
+			{
+				return;
+			}
+		}
+
+		SetAbsVelocity( Vector( 0, 0, 0 ) );
+
+		// play body "thwack" sound
+//		EmitSound( "Weapon_Crossbow.BoltHitBody" );
+
+		Vector vForward;
+
+		AngleVectors( GetAbsAngles(), &vForward );
+		VectorNormalize ( vForward );
+
+		UTIL_TraceLine( GetAbsOrigin(),	GetAbsOrigin() + vForward * 128, MASK_BLOCKLOS, pOther, COLLISION_GROUP_NONE, &tr2 );
+
+		if ( tr2.fraction != 1.0f )
+		{
+//			NDebugOverlay::Box( tr2.endpos, Vector( -16, -16, -16 ), Vector( 16, 16, 16 ), 0, 255, 0, 0, 10 );
+//			NDebugOverlay::Box( GetAbsOrigin(), Vector( -16, -16, -16 ), Vector( 16, 16, 16 ), 0, 0, 255, 0, 10 );
+
+			if ( tr2.m_pEnt == NULL || ( tr2.m_pEnt && tr2.m_pEnt->GetMoveType() == MOVETYPE_NONE ) )
+			{
+				CEffectData	data;
+
+				data.m_vOrigin = tr2.endpos;
+				data.m_vNormal = vForward;
+				data.m_nEntIndex = tr2.fraction != 1.0f;
+				
+						CBaseEntity *pEntity;
+						pEntity = tr2.m_pEnt;
+
+						if ( pEntity != NULL && m_takedamage )
+						{
+							RadiusDamage( CTakeDamageInfo( this, pEntity, sk_cremator_dmg_immo.GetFloat(), DMG_BURN ), tr.endpos, 256,  CLASS_NONE, NULL ); //changed from 256 to 128 to correspond with noisebeams
+						}
+						else
+						{
+							// The attack beam struck some kind of entity directly.
+						}
+
+				DispatchEffect( "BoltImpact", data );
+			}
+		}
+		
+		SetTouch( NULL );
+		SetThink( NULL );
+
+
+		UTIL_Remove( this );
+
+	}
+	else
+	{
+		trace_t	tr;
+		tr = BaseClass::GetTouchTrace();
+
+		// See if we struck the world
+		if ( pOther->GetMoveType() == MOVETYPE_NONE && !( tr.surface.flags & SURF_SKY ) )
+		{
+//			EmitSound( "Weapon_Crossbow.BoltHitWorld" );
+
+			// if what we hit is static architecture, can stay around for a while.
+			Vector vecDir = GetAbsVelocity();
+			float speed = VectorNormalize( vecDir );
+
+			// See if we should reflect off this surface
+			float hitDot = DotProduct( tr.plane.normal, -vecDir );
+			
+			if ( ( hitDot < 0.5f ) && ( speed > 100 ) )
+			{
+				Vector vReflection = 2.0f * tr.plane.normal * hitDot + vecDir;
+				
+				QAngle reflectAngles;
+
+				VectorAngles( vReflection, reflectAngles );
+
+				SetLocalAngles( reflectAngles );
+
+				SetAbsVelocity( vReflection * speed * 0.75f );
+
+				// Start to sink faster
+				SetGravity( 1.0f );
+			}
+			else
+			{
+				SetThink( &CImmolatorBeam::SUB_Remove );
+				SetNextThink( gpGlobals->curtime + 2.0f );
+				
+				//FIXME: We actually want to stick (with hierarchy) to what we've hit
+				SetMoveType( MOVETYPE_NONE );
+			
+				Vector vForward;
+
+				AngleVectors( GetAbsAngles(), &vForward );
+				VectorNormalize ( vForward );
+
+				CEffectData	data;
+
+				data.m_vOrigin = tr.endpos;
+				data.m_vNormal = vForward;
+				data.m_nEntIndex = 0;
+			
+				DispatchEffect( "BoltImpact", data );
+				
+				UTIL_ImpactTrace( &tr, DMG_BULLET );
+
+				//epicplayer - cursed immolator fadskjajs effect here
+				int beams;
+
+				for (beams = 0; beams < 5; beams++)
+				{
+					Vector vecDest;
+
+					// Random unit vector
+					vecDest.x = random->RandomFloat(-1, 1);
+					vecDest.y = random->RandomFloat(-1, 1);
+					vecDest.z = random->RandomFloat(0, 1);
+
+					// Push out to radius dist.
+					vecDest = tr.endpos + vecDest * 80.1f;
+
+					UTIL_Beam(tr.endpos,
+						vecDest,
+						m_immobeamIndex,
+						0,		//halo index
+						0,		//frame start
+						2.0f,	//framerate
+						0.15f,	//life
+						20,		// width
+						1.75,	// endwidth
+						0.75,	// fadelength,
+						15,		// noise
+
+						//	0,		// red
+						//	255,	// green
+						//	0,		// blue,
+
+						0,		// red
+						255,	// green
+						0,	// blue,
+
+						128, // bright
+						100  // speed
+						);
+				}
+
+				AddEffects( EF_NODRAW );
+				SetTouch( NULL );
+				SetThink( &CImmolatorBeam::SUB_Remove );
+				SetNextThink( gpGlobals->curtime + 2.0f );
+
+				if ( m_pGlowSprite != NULL )
+				{
+					m_pGlowSprite->TurnOn();
+					m_pGlowSprite->FadeAndDie( 3.0f );
+				}
+
+				UTIL_Remove(this);
+			}
+			
+			// Shoot some sparks
+			if ( UTIL_PointContents( GetAbsOrigin() ) != CONTENTS_WATER)
+			{
+				g_pEffects->Sparks( GetAbsOrigin() );
+			}
+		}
+		else
+		{
+			// Put a mark unless we've hit the sky
+			if ( ( tr.surface.flags & SURF_SKY ) == false )
+			{
+				UTIL_ImpactTrace( &tr, DMG_BULLET );
+			}
+
+			UTIL_Remove( this );
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CImmolatorBeam::BubbleThink( void )
+{
+	QAngle angNewAngles;
+
+	VectorAngles( GetAbsVelocity(), angNewAngles );
+	SetAbsAngles( angNewAngles );
+
+	SetNextThink( gpGlobals->curtime + 0.1f );
+
+	// Make danger sounds out in front of me, to scare snipers back into their hole
+	CSoundEnt::InsertSound( SOUND_DANGER_SNIPERONLY, GetAbsOrigin() + GetAbsVelocity() * 0.2, 120.0f, 0.5f, this, SOUNDENT_CHANNEL_REPEATED_DANGER );
+
+	if ( GetWaterLevel()  == 0 )
+		return;
+
+	UTIL_BubbleTrail( GetAbsOrigin() - GetAbsVelocity() * 0.1f, GetAbsOrigin(), 5 );
+}
 
 IMPLEMENT_SERVERCLASS_ST(CWeaponImmolator, DT_WeaponImmolator)
 END_SEND_TABLE()
@@ -498,7 +942,8 @@ void CWeaponImmolator::UpdateThink( void )
 		return;
 	}
 
-	Update();
+	FireBeam();
+	//Update();
 	SetNextThink( gpGlobals->curtime + 0.05 );
 }
 
@@ -703,4 +1148,76 @@ void CWeaponImmolator::WeaponIdle( void )
 		 StopImmolating();
 
 	SendWeaponAnim( ACT_VM_IDLE );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CWeaponImmolator::SecondaryAttack( void )
+{
+	FireBeam();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CWeaponImmolator::FireBeam( void )
+{
+
+	CBasePlayer *pOwner = ToBasePlayer( GetOwner() );
+	
+	if ( pOwner == NULL )
+		return;
+
+	pOwner->RumbleEffect( RUMBLE_357, 0, RUMBLE_FLAG_RESTART );
+
+	Vector vecAiming	= pOwner->GetAutoaimVector( 0 );
+	Vector vecSrc		= pOwner->Weapon_ShootPosition();
+
+	QAngle angAiming;
+	VectorAngles( vecAiming, angAiming );
+
+	CImmolatorBeam *pBeam = CImmolatorBeam::BoltCreate( vecSrc, angAiming, pOwner );
+
+//	if ( pOwner->GetWaterLevel() == 3 )
+//	{
+//		pBeam->SetAbsVelocity( vecAiming * BEAM_AIR_VELOCITY );
+//	}
+//	else
+//	{
+		pBeam->SetAbsVelocity( vecAiming * BEAM_AIR_VELOCITY );
+//	}
+
+	//epicplayer - cursed stuff incoming
+
+	//m_iClip1--;
+
+//	if (gpGlobals->curtime >= m_flAmmoUseTime)
+	//	{
+			UseAmmo(1);
+
+			if (!HasAmmo())
+			{
+				StopImmolating();
+			}
+
+//			m_flAmmoUseTime = gpGlobals->curtime + 0.1;
+//	}
+
+//	pOwner->ViewPunch( QAngle( -2, 0, 0 ) );
+
+//	WeaponSound( SINGLE );
+//	WeaponSound( SPECIAL2 );
+
+	CSoundEnt::InsertSound( SOUND_COMBAT, GetAbsOrigin(), 200, 0.2 );
+
+//	SendWeaponAnim( ACT_VM_PRIMARYATTACK );
+
+	if ( !m_iClip1 && pOwner->GetAmmoCount( m_iPrimaryAmmoType ) <= 0 )
+	{
+		// HEV suit - indicate out of ammo condition
+		pOwner->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
+	}
+
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack	= gpGlobals->curtime + 0.75;
 }

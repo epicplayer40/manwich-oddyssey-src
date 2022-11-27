@@ -29,6 +29,7 @@ public:
 	
 	void Precache( void );
 	void PrimaryAttack( void );
+	void SecondaryAttack( void );
 	void ItemPostFrame( void );
 
 	int CapabilitiesGet( void ) {	return bits_CAP_WEAPON_RANGE_ATTACK1;	}
@@ -58,6 +59,8 @@ public:
 	void UseAmmo( int count );
 
 	float GetFireRate( void ) { return 1.0f; }
+
+	void	FireBeam( void );
 
 	DECLARE_ACTTABLE();
 	DECLARE_DATADESC();

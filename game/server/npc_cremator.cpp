@@ -65,7 +65,7 @@
 
 
 ConVar	sk_cremator_health( "sk_cremator_health","200");
-ConVar	sk_cremator_dmg_immo( "sk_cremator_dmg_immo","0.7"); //Was 1, changed to 0.7 to accomodate ignite
+ConVar	sk_cremator_dmg_immo( "sk_cremator_dmg_immo","3"); //Was 1, changed to 0.7 to accomodate ignite
 ConVar	sk_cremator_max_range( "sk_cremator_max_range","950");
 ConVar	sk_cremator_immolator_color_r ("sk_cremator_immolator_color_r", "0");
 ConVar	sk_cremator_immolator_color_g ("sk_cremator_immolator_color_g", "255");
