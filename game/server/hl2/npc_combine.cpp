@@ -470,7 +470,7 @@ void CNPC_Combine::PrescheduleThink()
 	// Speak any queued sentences
 	m_Sentences.UpdateSentenceQueue();
 
-	if ( IsOnFire() )
+	if ( IsOnFire() && GetHealth() <= (m_iMaxHealth * 0.3f) )
 	{
 		SetCondition( COND_COMBINE_ON_FIRE );
 	}
@@ -1857,7 +1857,7 @@ int CNPC_Combine::SelectSchedule( void )
 		return BaseClass::SelectSchedule();
 	}
 
-	if ( HasCondition(COND_COMBINE_ON_FIRE) )
+	if ( HasCondition(COND_COMBINE_ON_FIRE) && GetHealth() <= (m_iMaxHealth * 0.3f) )
 		return SCHED_COMBINE_BURNING_STAND;
 
 	int nSched = SelectFlinchSchedule();

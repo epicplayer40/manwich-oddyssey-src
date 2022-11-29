@@ -523,7 +523,7 @@ void CNPC_MetroPolice::PrescheduleThink( void )
 		}
 	}
 
-	if( IsOnFire() )
+	if( IsOnFire() && GetHealth() <= (m_iMaxHealth * 0.5f) )
 	{
 		SetCondition( COND_METROPOLICE_ON_FIRE );
 	}
@@ -3073,7 +3073,7 @@ bool CNPC_MetroPolice::HandleInteraction(int interactionType, void *data, CBaseC
 //-----------------------------------------------------------------------------
 Activity CNPC_MetroPolice::NPC_TranslateActivity( Activity newActivity )
 {
-	if( IsOnFire() && newActivity == ACT_RUN )
+	if( IsOnFire() && (newActivity == ACT_RUN || newActivity == ACT_RUN_PISTOL || newActivity == ACT_RUN_AIM_PISTOL || newActivity == ACT_RUN_RIFLE || newActivity == ACT_RUN_AIM_RIFLE) )
 	{
 		return ACT_RUN_ON_FIRE;
 	}
@@ -4098,7 +4098,17 @@ int CNPC_MetroPolice::SelectSchedule( void )
 	if ( HasCondition(COND_METROPOLICE_ON_FIRE) )
 	{
 		m_Sentences.Speak( "METROPOLICE_ON_FIRE", SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS );
-		return SCHED_METROPOLICE_BURNING_STAND;
+/*		if ( GetActivity() == ACT_RUN_ON_FIRE )
+		{ 
+			return SCHED_METROPOLICE_BURNING_RUN;
+		}
+		else return SCHED_METROPOLICE_BURNING_STAND;
+*/
+		if ( random->RandomInt(0, 1) == 1 )
+		{
+			return SCHED_METROPOLICE_BURNING_RUN;
+		}
+		else return SCHED_METROPOLICE_BURNING_STAND;
 	}
 
 	// React to being struck by a physics object
