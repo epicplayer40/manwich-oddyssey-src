@@ -4104,6 +4104,8 @@ int CNPC_MetroPolice::SelectSchedule( void )
 		}
 		else return SCHED_METROPOLICE_BURNING_STAND;
 */
+		SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_POOR );
+
 		if ( random->RandomInt(0, 1) == 1 )
 		{
 			return SCHED_METROPOLICE_BURNING_RUN;

@@ -65,8 +65,9 @@ public:
 	void BubbleThink( void );
 	void BoltTouch( CBaseEntity *pOther );
 	bool CreateVPhysics( void );
+	void ImmolationDamage( const CTakeDamageInfo &info, const Vector &vecSrcIn, float flRadius, int iClassIgnore );
 	unsigned int PhysicsSolidMaskForEntity() const;
-	static CImmolatorBeam *BoltCreate( const Vector &vecOrigin, const QAngle &angAngles, CBasePlayer *pentOwner = NULL );
+	static CImmolatorBeam *BoltCreate( const Vector &vecOrigin, const QAngle &angAngles, CBaseCombatCharacter *pentOwner = NULL );
 	int	m_immobeamIndex;
 
 protected:
@@ -96,7 +97,7 @@ END_DATADESC()
 IMPLEMENT_SERVERCLASS_ST( CImmolatorBeam, DT_ImmolatorBeam )
 END_SEND_TABLE()
 
-CImmolatorBeam *CImmolatorBeam::BoltCreate( const Vector &vecOrigin, const QAngle &angAngles, CBasePlayer *pentOwner )
+CImmolatorBeam *CImmolatorBeam::BoltCreate( const Vector &vecOrigin, const QAngle &angAngles, CBaseCombatCharacter *pentOwner )
 {
 	// Create a new entity with CImmolatorBeam private data
 	CImmolatorBeam *pBeam = (CImmolatorBeam *)CreateEntityByName( "immolator_beam" );
@@ -139,7 +140,8 @@ bool CImmolatorBeam::CreateVPhysics( void )
 //-----------------------------------------------------------------------------
 unsigned int CImmolatorBeam::PhysicsSolidMaskForEntity() const
 {
-	return ( BaseClass::PhysicsSolidMaskForEntity() | CONTENTS_HITBOX ) & ~CONTENTS_GRATE;
+//	return ( BaseClass::PhysicsSolidMaskForEntity() | CONTENTS_HITBOX ) & ~CONTENTS_GRATE;
+	return MASK_NPCSOLID;
 }
 
 //-----------------------------------------------------------------------------
@@ -167,8 +169,8 @@ bool CImmolatorBeam::CreateSprites( void )
 		m_pGlowTrail->FollowEntity( this );
 //		m_pGlowTrail->SetAttachment( this, nAttachment );
 		m_pGlowTrail->SetTransparency( kRenderTransAdd, 0, 255, 0, 255, kRenderFxNone );
-		m_pGlowTrail->SetStartWidth( 20.0f );
-		m_pGlowTrail->SetEndWidth( 2.0f );
+		m_pGlowTrail->SetStartWidth( 5.2f );
+		m_pGlowTrail->SetEndWidth( 1.0f );
 		m_pGlowTrail->SetLifeTime( 0.9f );
 	}
 
@@ -188,6 +190,8 @@ void CImmolatorBeam::Spawn( void )
 	SetSolid( SOLID_BBOX );
 	SetGravity( 0.7f );
 	AddEffects( EF_NODRAW );
+	//epicplayer
+	SetCollisionGroup( COLLISION_GROUP_PROJECTILE );
 
 	m_immobeamIndex = engine->PrecacheModel("sprites/bluelaser1.vmt");
 
@@ -213,15 +217,85 @@ void CImmolatorBeam::Precache( void )
 	PrecacheModel( "sprites/light_glow02_noz.vmt" );
 }
 
+
+void CImmolatorBeam::ImmolationDamage( const CTakeDamageInfo &info, const Vector &vecSrcIn, float flRadius, int iClassIgnore )
+{
+	CBaseEntity *pEntity = NULL;
+	trace_t		tr;
+	Vector		vecSpot;
+
+	Vector vecSrc = vecSrcIn;
+
+	//epicplayer - cursed immolator fadskjajs effect here
+	int beams;
+
+	for (beams = 0; beams < 5; beams++)
+	{
+		Vector vecDest;
+
+		// Random unit vector
+		vecDest.x = random->RandomFloat(-1, 1);
+		vecDest.y = random->RandomFloat(-1, 1);
+		vecDest.z = random->RandomFloat(0, 1);
+
+		// Push out to radius dist.
+		vecDest = vecSrc + vecDest * 80.1f;
+
+		UTIL_Beam(vecSrc,
+			vecDest,
+			m_immobeamIndex,
+			0,		//halo index
+			0,		//frame start
+			2.0f,	//framerate
+			0.15f,	//life
+			20,		// width
+			1.75,	// endwidth
+			0.75,	// fadelength,
+			15,		// noise
+
+			0,		// red
+			255,	// green
+			0,	// blue,
+
+			128, // bright
+			100  // speed
+			);
+	}
+
+//	CEntitySphereQuery sphere(vecSrc, flRadius);
+//	CBaseEntity *pEntity = sphere.GetCurrentEntity();
+
+	// iterate on all entities in the vicinity.
+	for ( CEntitySphereQuery sphere( vecSrc, flRadius ); (pEntity = sphere.GetCurrentEntity()) != NULL; sphere.NextEntity() )
+	{
+		CBaseCombatCharacter *pBCC = pEntity->MyCombatCharacterPointer();
+		if ( pBCC && pBCC->IsAlive() && !pBCC->IsOnFire() )
+		{
+			// UNDONE: this should check a damage mask, not an ignore
+			if ( iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore )
+			{
+				continue;
+			}
+		
+			float lifetime = random->RandomFloat( 3, 5 );
+
+			CEntityFlame *pFlame = CEntityFlame::Create( pBCC, true );
+			if (pFlame)
+			{
+				pFlame->SetLifetime( lifetime );
+				pBCC->AddFlag( FL_ONFIRE );
+			}
+		}
+	}
+}
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 {
-
-
-		RadiusDamage( CTakeDamageInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_PLASMA ), GetAbsOrigin(), 100,  CLASS_NONE, NULL ); //changed from 256 to 128 to correspond with noisebeams
-
-
+	if (!pOther->IsSolid())
+		return;
+		
 	if ( pOther->IsSolidFlagSet(FSOLID_VOLUME_CONTENTS | FSOLID_TRIGGER) )
 	{
 		// Some NPCs are triggers that can take damage (like antlion grubs). We should hit them.
@@ -229,6 +303,9 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 			return;
 	}
 
+		RadiusDamage( CTakeDamageInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_DISSOLVE | DMG_PLASMA | DMG_BURN ), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL, NULL ); //changed from 256 to 128 to correspond with noisebeams
+		ImmolationDamage(CTakeDamageInfo(this, GetOwnerEntity(), 1, DMG_PLASMA), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL);
+	/*
 	if ( pOther->m_takedamage != DAMAGE_NO )
 	{
 		trace_t	tr, tr2;
@@ -240,7 +317,7 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 
 		if( GetOwnerEntity() && GetOwnerEntity()->IsPlayer() && pOther->IsNPC() )
 		{
-			CTakeDamageInfo	dmgInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_PLASMA );
+			CTakeDamageInfo	dmgInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_DISSOLVE | DMG_PLASMA | DMG_BURN );
 			dmgInfo.AdjustPlayerDamageInflictedForSkillLevel();
 			CalculateMeleeDamageForce( &dmgInfo, vecNormalizedVel, tr.endpos, 0.7f );
 			dmgInfo.SetDamagePosition( tr.endpos );
@@ -255,7 +332,7 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 		}
 		else
 		{
-			CTakeDamageInfo	dmgInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_PLASMA | DMG_NEVERGIB );
+			CTakeDamageInfo	dmgInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_DISSOLVE | DMG_PLASMA | DMG_BURN  );
 			CalculateMeleeDamageForce( &dmgInfo, vecNormalizedVel, tr.endpos, 0.7f );
 			dmgInfo.SetDamagePosition( tr.endpos );
 			pOther->DispatchTraceAttack( dmgInfo, vecNormalizedVel, &tr );
@@ -315,7 +392,9 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 						}
 
 				DispatchEffect( "BoltImpact", data );
+				UTIL_Remove(this);
 			}
+			UTIL_Remove(this);
 		}
 		
 		SetTouch( NULL );
@@ -356,6 +435,8 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 
 				// Start to sink faster
 				SetGravity( 1.0f );
+
+				UTIL_Remove(this);
 			}
 			else
 			{
@@ -376,49 +457,11 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 				data.m_vNormal = vForward;
 				data.m_nEntIndex = 0;
 			
-				DispatchEffect( "BoltImpact", data );
+				//DispatchEffect( "BoltImpact", data );
 				
 				UTIL_ImpactTrace( &tr, DMG_BULLET );
 
-				//epicplayer - cursed immolator fadskjajs effect here
-				int beams;
-
-				for (beams = 0; beams < 5; beams++)
-				{
-					Vector vecDest;
-
-					// Random unit vector
-					vecDest.x = random->RandomFloat(-1, 1);
-					vecDest.y = random->RandomFloat(-1, 1);
-					vecDest.z = random->RandomFloat(0, 1);
-
-					// Push out to radius dist.
-					vecDest = tr.endpos + vecDest * 80.1f;
-
-					UTIL_Beam(tr.endpos,
-						vecDest,
-						m_immobeamIndex,
-						0,		//halo index
-						0,		//frame start
-						2.0f,	//framerate
-						0.15f,	//life
-						20,		// width
-						1.75,	// endwidth
-						0.75,	// fadelength,
-						15,		// noise
-
-						//	0,		// red
-						//	255,	// green
-						//	0,		// blue,
-
-						0,		// red
-						255,	// green
-						0,	// blue,
-
-						128, // bright
-						100  // speed
-						);
-				}
+				
 
 				AddEffects( EF_NODRAW );
 				SetTouch( NULL );
@@ -439,6 +482,8 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 			{
 				g_pEffects->Sparks( GetAbsOrigin() );
 			}
+
+			UTIL_Remove(this);
 		}
 		else
 		{
@@ -447,10 +492,10 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 			{
 				UTIL_ImpactTrace( &tr, DMG_BULLET );
 			}
-
+			*/
 			UTIL_Remove( this );
-		}
-	}
+//		}
+//	}
 }
 
 //-----------------------------------------------------------------------------
@@ -558,8 +603,10 @@ IMPLEMENT_ACTTABLE( CWeaponImmolator );
 //-----------------------------------------------------------------------------
 CWeaponImmolator::CWeaponImmolator( void )
 {
-	m_fMaxRange1 = 4096;
-	StopImmolating();
+	m_fMaxRange1 = 1200;
+	m_fMinRange1 = 200;
+
+//	StopImmolating();
 }
 
 void CWeaponImmolator::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator )
@@ -568,7 +615,45 @@ void CWeaponImmolator::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseComba
 	{
 		case EVENT_WEAPON_SMG1:
 		{
-		Operator_ForceNPCFire( pOperator, 0 );
+//		Operator_ForceNPCFire( pOperator, 0 );
+		Vector	muzzlePoint;
+		QAngle	vecAngles;
+
+		muzzlePoint = GetOwner()->Weapon_ShootPosition();
+
+		CAI_BaseNPC *npc = pOperator->MyNPCPointer();
+
+
+		Vector vecShootDir = npc->GetActualShootTrajectory(muzzlePoint);
+
+		// Fire!
+		Vector vecSrc;
+		Vector vecAiming;
+
+		QAngle	angShootDir;
+		GetAttachment(LookupAttachment("muzzle"), vecSrc, angShootDir);
+		AngleVectors(angShootDir, &vecAiming);
+
+		// look for a better launch location
+		Vector altLaunchPoint;
+		if (GetAttachment("muzzle", altLaunchPoint))
+		{
+			// check to see if it's relativly free
+			trace_t tr;
+			AI_TraceHull(altLaunchPoint, altLaunchPoint + vecShootDir * (10.0f*12.0f), Vector(-24, -24, -24), Vector(24, 24, 24), MASK_NPCSOLID, NULL, &tr);
+
+			if (tr.fraction == 1.0)
+			{
+				muzzlePoint = altLaunchPoint;
+			}
+		}
+
+		vecShootDir = npc->GetActualShootTrajectory(muzzlePoint);
+		VectorAngles(vecShootDir, vecAngles);
+
+		//	pViewModel->GetAttachment( pViewModel->LookupAttachment( "muzzle" ), beamSrc );
+		CImmolatorBeam *pBeamer = CImmolatorBeam::BoltCreate(vecSrc, angShootDir, pOperator);
+		pBeamer->SetAbsVelocity(vecAiming * BEAM_AIR_VELOCITY);
 		}
 		break;
 		default:
@@ -592,6 +677,10 @@ void CWeaponImmolator::Operator_ForceNPCFire( CBaseCombatCharacter *pOperator, b
 	Vector vecShootDir = npc->GetActualShootTrajectory( muzzlePoint );
 	VectorAngles(vecShootDir, vecAngles);
 
+	//	pViewModel->GetAttachment( pViewModel->LookupAttachment( "muzzle" ), beamSrc );
+	CImmolatorBeam *pBeamer = CImmolatorBeam::BoltCreate(muzzlePoint, vecAngles, pOperator);
+	pBeamer->SetAbsVelocity(muzzlePoint * BEAM_AIR_VELOCITY);
+	/*
 	Vector	impactPoint	= muzzlePoint + ( vecShootDir * MAX_TRACE_LENGTH );
 
 	trace_t	tr;
@@ -664,7 +753,7 @@ void CWeaponImmolator::Operator_ForceNPCFire( CBaseCombatCharacter *pOperator, b
 	{
 		// The attack beam struck some kind of entity directly.
 	}
-	}
+	}*/
 }
 
 bool CWeaponImmolator::Deploy( void )
@@ -837,12 +926,12 @@ void CWeaponImmolator::PrimaryAttack( void )
 bool CWeaponImmolator::WeaponLOSCondition( const Vector &ownerPos, const Vector &targetPos, bool bSetConditions )
 {
 	CAI_BaseNPC* npcOwner = GetOwner()->MyNPCPointer();
-
+	
 	if( !npcOwner )
 	{
 		return false;
 	}
-
+	/*
 	if( IsImmolating() )
 	{
 		// Don't update while Immolating. This is a committed attack.
@@ -892,6 +981,8 @@ bool CWeaponImmolator::WeaponLOSCondition( const Vector &ownerPos, const Vector 
 	}
 
 	return false;
+	*/
+	return true;
 }
 
 
@@ -900,6 +991,7 @@ bool CWeaponImmolator::WeaponLOSCondition( const Vector &ownerPos, const Vector 
 //-----------------------------------------------------------------------------
 int CWeaponImmolator::WeaponRangeAttack1Condition( float flDot, float flDist )
 {
+	/*
 	if( m_flNextPrimaryAttack > gpGlobals->curtime )
 	{
 		// Too soon to attack!
@@ -911,13 +1003,13 @@ int CWeaponImmolator::WeaponRangeAttack1Condition( float flDot, float flDist )
 		// Once is enough!
 		return COND_NONE;
 	}
-
+	
 	if(	m_vecImmolatorTarget == IMMOLATOR_TARGET_INVALID )
 	{
 		// No target!
 		return COND_NONE;
 	}
-
+	
 	if ( flDist > m_fMaxRange1 )
 	{
 		return COND_TOO_FAR_TO_ATTACK;
@@ -926,10 +1018,49 @@ int CWeaponImmolator::WeaponRangeAttack1Condition( float flDot, float flDist )
 	{
 		return COND_NOT_FACING_ATTACK;
 	}
+	*/
+	// Ignore vertical distance when doing our RPG distance calculations
+	CAI_BaseNPC *pNPC = GetOwner()->MyNPCPointer();
+	if (pNPC)
+	{
+		CBaseEntity *pEnemy = pNPC->GetEnemy();
+		Vector vecToTarget = (pEnemy->GetAbsOrigin() - pNPC->GetAbsOrigin());
+		vecToTarget.z = 0;
+		flDist = vecToTarget.Length();
+	}
+	
+	if (flDist < MIN(m_fMinRange1, m_fMinRange2))
+		return COND_TOO_CLOSE_TO_ATTACK;
+
+	if (m_flNextPrimaryAttack > gpGlobals->curtime)
+		return 0;
+	/*
+	// See if there's anyone in the way!
+	CAI_BaseNPC *pOwner = GetOwner()->MyNPCPointer();
+	ASSERT(pOwner != NULL);
+
+	if (pOwner)
+	{
+		// Make sure I don't shoot the world!
+		trace_t tr;
+
+		Vector vecMuzzle = pOwner->Weapon_ShootPosition();
+		Vector vecShootDir = pOwner->GetActualShootTrajectory(vecMuzzle);
+
+		// Make sure I have a good 10 feet of wide clearance in front, or I'll blow my teeth out.
+		AI_TraceHull(vecMuzzle, vecMuzzle + vecShootDir * (10.0f*12.0f), Vector(-24, -24, -24), Vector(24, 24, 24), MASK_NPCSOLID, NULL, &tr);
+
+		if (tr.fraction != 1.0)
+		{
+			return COND_WEAPON_SIGHT_OCCLUDED;
+		}
+	}
+	*/
+	return COND_CAN_RANGE_ATTACK1;
 
 	// !!!HACKHACK this makes the strider work! 
 	// It's the Immolator's RangeAttack1, but it's the Strider's Range Attack 2.
-	return COND_CAN_RANGE_ATTACK2;
+//	return COND_CAN_RANGE_ATTACK2;
 }
 
 void CWeaponImmolator::UpdateThink( void )
@@ -1127,7 +1258,7 @@ void CWeaponImmolator::ImmolationDamage( const CTakeDamageInfo &info, const Vect
 				continue;
 			}
 		
-			float lifetime = random->RandomFloat( 15, 20 );
+			float lifetime = random->RandomFloat( 3, 5 );
 
 			CEntityFlame *pFlame = CEntityFlame::Create( pBCC, true );
 			if (pFlame)
@@ -1155,7 +1286,7 @@ void CWeaponImmolator::WeaponIdle( void )
 //-----------------------------------------------------------------------------
 void CWeaponImmolator::SecondaryAttack( void )
 {
-	FireBeam();
+//	FireBeam();
 }
 
 //-----------------------------------------------------------------------------
@@ -1177,7 +1308,17 @@ void CWeaponImmolator::FireBeam( void )
 	QAngle angAiming;
 	VectorAngles( vecAiming, angAiming );
 
-	CImmolatorBeam *pBeam = CImmolatorBeam::BoltCreate( vecSrc, angAiming, pOwner );
+//	Vector beamSrc;
+//	CBaseViewModel *pViewModel = pOwner->GetViewModel();
+//	pViewModel->GetAttachment( pViewModel->LookupAttachment( "muzzle" ), beamSrc );
+
+	Vector	vForward, vRight, vUp;
+
+	pOwner->EyeVectors( &vForward, &vRight, &vUp );
+
+	Vector muzzlePoint = pOwner->Weapon_ShootPosition() + vForward * 27.0f + vRight * 7.5f + vUp * -5.0f;
+
+	CImmolatorBeam *pBeam = CImmolatorBeam::BoltCreate(muzzlePoint, angAiming, pOwner);
 
 //	if ( pOwner->GetWaterLevel() == 3 )
 //	{

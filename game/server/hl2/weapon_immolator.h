@@ -58,7 +58,7 @@ public:
 //	bool HasAmmo( void );
 	void UseAmmo( int count );
 
-	float GetFireRate( void ) { return 1.0f; }
+	float GetFireRate( void ) { return 0.1f; }
 
 	void	FireBeam( void );
 
