@@ -274,6 +274,8 @@ public:
 
 	void InputDisplay( inputdata_t &inputdata );
 	void Display( CBaseEntity *pActivator );
+	void InputSetText ( inputdata_t &inputdata );
+	void SetText( const char* pszStr );
 
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 	{
@@ -307,6 +309,7 @@ BEGIN_DATADESC( CGameText )
 
 	// Inputs
 	DEFINE_INPUTFUNC( FIELD_VOID, "Display", InputDisplay ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetText", InputSetText ),
 
 END_DATADESC()
 
@@ -418,6 +421,15 @@ void CGameTeamSet::InputTrigger( inputdata_t &inputdata )
 }
 */
 
+void CGameText::InputSetText( inputdata_t &inputdata )
+{
+	SetText( inputdata.value.String() );
+}
+
+void CGameText::SetText( const char* pszStr )
+{
+	m_iszMessage = AllocPooledString( pszStr );
+}
 
 //
 // CGamePlayerZone / game_player_zone -- players in the zone fire my target when I'm fired

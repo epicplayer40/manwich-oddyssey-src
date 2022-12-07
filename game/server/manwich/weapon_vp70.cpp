@@ -294,3 +294,57 @@ bool CWeaponSilencedPistol::Reload(void)
 	}
 	return fRet;
 }
+
+class CWeaponVP70 : public CWeaponSilencedPistol
+{
+public:
+	DECLARE_CLASS(CWeaponVP70, CWeaponSilencedPistol);
+
+	CWeaponVP70();
+
+	DECLARE_SERVERCLASS();
+
+//	virtual const Vector& GetBulletSpread(void);
+
+	float			GetFireRate(void);
+	float			GetBurstCycleRate(void) { return 0.2f; }
+
+	virtual int	GetMinBurst()
+	{
+		return 1;
+	}
+
+	virtual int	GetMaxBurst()
+	{
+		return 1;
+	}
+
+	void SecondaryAttack(void);
+
+};
+
+CWeaponVP70::CWeaponVP70( )
+{
+	m_fMaxRange1		= 1000;
+	m_fMinRange1		= 32;
+
+	m_iFireMode			= FIREMODE_SEMI;
+	m_bIsSilenced		= false;
+
+}
+
+float CWeaponVP70::GetFireRate(void)
+{
+	return 0.5f;
+}
+
+void CWeaponVP70::SecondaryAttack(void)
+{
+
+}
+
+IMPLEMENT_SERVERCLASS_ST(CWeaponVP70, DT_WeaponVP70)
+END_SEND_TABLE()
+
+LINK_ENTITY_TO_CLASS(weapon_vp70, CWeaponVP70);
+PRECACHE_WEAPON_REGISTER(weapon_vp70);
