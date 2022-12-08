@@ -279,11 +279,12 @@ void CImmolatorBeam::ImmolationDamage( const CTakeDamageInfo &info, const Vector
 		
 			float lifetime = random->RandomFloat( 3, 5 );
 
-			CEntityFlame *pFlame = CEntityFlame::Create( pBCC, true );
+			CEntityFlame* pFlame = CEntityFlame::Create(pBCC, true, true);
 			if (pFlame)
 			{
 				pFlame->SetLifetime( lifetime );
 				pBCC->AddFlag( FL_ONFIRE );
+
 			}
 		}
 	}
@@ -303,7 +304,8 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 			return;
 	}
 
-		RadiusDamage( CTakeDamageInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_DISSOLVE | DMG_PLASMA | DMG_BURN ), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL, NULL ); //changed from 256 to 128 to correspond with noisebeams
+		//Lychy: Decided to remove DMG_BURN since it created a red fade that didnt work well with the blu one
+		RadiusDamage( CTakeDamageInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_DISSOLVE | DMG_PLASMA /* | DMG_BURN*/), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL, NULL); //changed from 256 to 128 to correspond with noisebeams
 		ImmolationDamage(CTakeDamageInfo(this, GetOwnerEntity(), 1, DMG_PLASMA), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL);
 	/*
 	if ( pOther->m_takedamage != DAMAGE_NO )

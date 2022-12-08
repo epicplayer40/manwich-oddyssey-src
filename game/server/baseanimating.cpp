@@ -303,6 +303,7 @@ void CBaseAnimating::Precache()
 #if !defined( TF_DLL )
 	// Anything derived from this class can potentially burn - true, but do we want it to!
 	PrecacheParticleSystem( "burning_character" );
+	PrecacheParticleSystem( "burning_character_plasma" );
 #endif
 
 	BaseClass::Precache();

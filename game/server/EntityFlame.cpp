@@ -38,6 +38,7 @@ END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST( CEntityFlame, DT_EntityFlame )
 	SendPropEHandle( SENDINFO( m_hEntAttached ) ),
+	SendPropBool(SENDINFO(m_bIsPlasma)),
 END_SEND_TABLE()
 
 LINK_ENTITY_TO_CLASS( entityflame, CEntityFlame );
@@ -63,6 +64,7 @@ void CEntityFlame::UpdateOnRemove()
 	if ( m_bPlayingSound )
 	{
 		EmitSound( "General.StopBurning" );
+		StopSound("Player.PlasmaDamage");
 		m_bPlayingSound = false;
 	}
 
@@ -114,7 +116,7 @@ void CEntityFlame::InputIgnite( inputdata_t &inputdata )
 // Purpose: Creates a flame and attaches it to a target entity.
 // Input  : pTarget - 
 //-----------------------------------------------------------------------------
-CEntityFlame *CEntityFlame::Create( CBaseEntity *pTarget, bool useHitboxes )
+CEntityFlame *CEntityFlame::Create( CBaseEntity *pTarget, bool useHitboxes, bool isPlasma  )
 {
 	CEntityFlame *pFlame = (CEntityFlame *) CreateEntityByName( "entityflame" );
 
@@ -132,6 +134,10 @@ CEntityFlame *CEntityFlame::Create( CBaseEntity *pTarget, bool useHitboxes )
 	}
 
 	UTIL_SetOrigin( pFlame, pTarget->GetAbsOrigin() );
+
+
+	//Lychy: will this be a plasma flame?
+	pFlame->m_bIsPlasma = isPlasma;
 
 	pFlame->m_flSize = size;
 	pFlame->SetThink( &CEntityFlame::FlameThink );
@@ -158,9 +164,12 @@ void CEntityFlame::AttachToEntity( CBaseEntity *pTarget )
 	// For networking to the client.
 	m_hEntAttached = pTarget;
 
-	if( pTarget->IsNPC() )
+	if( pTarget->IsNPC() || pTarget->IsPlayer() )
 	{
-		EmitSound( "General.BurningFlesh" );
+		if(m_bIsPlasma)
+			EmitSound("Player.PlasmaDamage");
+		else
+			EmitSound( "General.BurningFlesh" );
 	}
 	else
 	{
@@ -278,6 +287,7 @@ void CEntityFlame::FlameThink( void )
 	if ( m_flLifetime < gpGlobals->curtime || m_hEntAttached == NULL )
 	{
 		EmitSound( "General.StopBurning" );
+		StopSound("Player.PlasmaDamage");
 		m_bPlayingSound = false;
 		SetThink( &CEntityFlame::SUB_Remove );
 		SetNextThink( gpGlobals->curtime + 0.5f );
@@ -299,13 +309,27 @@ void CEntityFlame::FlameThink( void )
 
 	if ( m_hEntAttached )
 	{
-		// Do radius damage ignoring the entity I'm attached to. This will harm things around me.
-		RadiusDamage( CTakeDamageInfo( this, this, 4.0f, DMG_BURN ), GetAbsOrigin(), m_flSize/2, CLASS_NONE, m_hEntAttached );
+		if (m_bIsPlasma)
+		{
+			// Do radius damage ignoring the entity I'm attached to. This will harm things around me.
+			RadiusDamage(CTakeDamageInfo(this, this, 4.0f, DMG_PLASMA), GetAbsOrigin(), m_flSize / 2, CLASS_NONE, m_hEntAttached);
 
-		// Directly harm the entity I'm attached to. This is so we can precisely control how much damage the entity
-		// that is on fire takes without worrying about the flame's position relative to the bodytarget (which is the
-		// distance that the radius damage code uses to determine how much damage to inflict)
-		m_hEntAttached->TakeDamage( CTakeDamageInfo( this, this, FLAME_DIRECT_DAMAGE, DMG_BURN | DMG_DIRECT ) );
+			// Directly harm the entity I'm attached to. This is so we can precisely control how much damage the entity
+			// that is on fire takes without worrying about the flame's position relative to the bodytarget (which is the
+			// distance that the radius damage code uses to determine how much damage to inflict)
+			m_hEntAttached->TakeDamage(CTakeDamageInfo(this, this, FLAME_DIRECT_DAMAGE, DMG_PLASMA | DMG_DIRECT));
+		}
+		else
+		{
+			// Do radius damage ignoring the entity I'm attached to. This will harm things around me.
+			RadiusDamage(CTakeDamageInfo(this, this, 4.0f, DMG_BURN), GetAbsOrigin(), m_flSize / 2, CLASS_NONE, m_hEntAttached);
+
+			// Directly harm the entity I'm attached to. This is so we can precisely control how much damage the entity
+			// that is on fire takes without worrying about the flame's position relative to the bodytarget (which is the
+			// distance that the radius damage code uses to determine how much damage to inflict)
+			m_hEntAttached->TakeDamage(CTakeDamageInfo(this, this, FLAME_DIRECT_DAMAGE, DMG_BURN | DMG_DIRECT));
+		}
+
 
 		if( !m_hEntAttached->IsNPC() && hl2_episodic.GetBool() )
 		{

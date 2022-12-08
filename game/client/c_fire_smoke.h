@@ -293,6 +293,8 @@ public:
 	EHANDLE				m_hEntAttached;		// The entity that we are burning (attached to).
 	EHANDLE				m_hOldAttached;
 
+	bool m_bIsPlasma; //Lychy: da plasma
+
 protected:
 
 	void	CreateEffect( void );

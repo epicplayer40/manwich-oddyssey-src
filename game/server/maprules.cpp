@@ -276,6 +276,8 @@ public:
 	void Display( CBaseEntity *pActivator );
 	void InputSetText ( inputdata_t &inputdata );
 	void SetText( const char* pszStr );
+	void InputSetTextInt ( inputdata_t &inputdata );
+	void SetTextInt( int pszStr );
 
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 	{
@@ -310,6 +312,7 @@ BEGIN_DATADESC( CGameText )
 	// Inputs
 	DEFINE_INPUTFUNC( FIELD_VOID, "Display", InputDisplay ),
 	DEFINE_INPUTFUNC( FIELD_STRING, "SetText", InputSetText ),
+	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetTextInt", InputSetTextInt ),
 
 END_DATADESC()
 
@@ -429,6 +432,26 @@ void CGameText::InputSetText( inputdata_t &inputdata )
 void CGameText::SetText( const char* pszStr )
 {
 	m_iszMessage = AllocPooledString( pszStr );
+}
+
+void CGameText::InputSetTextInt( inputdata_t &inputdata )
+{
+	SetTextInt( inputdata.value.Int() );
+}
+
+void CGameText::SetTextInt( int pszStr )
+{
+	//I'm gonna pull a child's organs out of I have to make this work again - epicplayer
+	char stringsize[256];
+//	string_t balls = MAKE_STRING(itoa(pszStr, stringsize, 10));
+	itoa(pszStr, stringsize, 10);
+//	string_t balls = MAKE_STRING(stringsize);
+//	m_iszMessage.ToCStr();
+//	strcpy(m_iszMessage.ToCStr(), stringsize);
+	strcpy(const_cast<char*>(m_iszMessage.ToCStr()), stringsize);
+
+//	Q_strncpy(szMapName, STRING(pszStr), sizeof(szMapName));
+//	m_iszMessage = balls;
 }
 
 //

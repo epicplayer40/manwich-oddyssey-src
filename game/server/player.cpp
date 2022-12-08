@@ -986,8 +986,8 @@ void CBasePlayer::DamageEffect(float flDamage, int fDamageType)
 	else if (fDamageType & DMG_PLASMA)
 	{
 		// Blue screen fade
-		color32 blue = {0,0,255,100};
-		UTIL_ScreenFade( this, blue, 0.2, 0.4, FFADE_MODULATE );
+		color32 blue = {0,255,255,50};
+		UTIL_ScreenFade( this, blue, 0.2, 0.4, FFADE_IN );
 
 		// Very small screen shake
 		// Both -0.1 and 0.1 map to 0 when converted to integer, so all of these RandomInt
@@ -997,7 +997,7 @@ void CBasePlayer::DamageEffect(float flDamage, int fDamageType)
 		//ViewPunch(QAngle(random->RandomInt(-0.1,0.1), random->RandomInt(-0.1,0.1), random->RandomInt(-0.1,0.1)));
 
 		// Burn sound 
-		EmitSound( "Player.PlasmaDamage" );
+		//EmitSound( "Player.PlasmaDamage" ); //Lychy: This sound effect loops forever and is stopped by footstep sounds, the sounds is now made by entityflame instead
 	}
 	else if (fDamageType & DMG_SONIC)
 	{

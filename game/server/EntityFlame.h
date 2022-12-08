@@ -27,7 +27,7 @@ public:
 
 	CEntityFlame( void );
 
-	static CEntityFlame	*Create( CBaseEntity *pTarget, bool useHitboxes = true );
+	static CEntityFlame	*Create( CBaseEntity *pTarget, bool useHitboxes = true, bool isPlasma = false );
 
 	void	AttachToEntity( CBaseEntity *pTarget );
 	void	SetLifetime( float lifetime );
@@ -60,6 +60,7 @@ protected:
 	CNetworkVar( float, m_flHitboxFireScale );
 
 	CNetworkVar( float, m_flLifetime );
+	CNetworkVar(bool, m_bIsPlasma); //Lychy
 	bool	m_bPlayingSound;
 };
 

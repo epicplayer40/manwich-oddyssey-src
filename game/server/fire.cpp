@@ -632,6 +632,7 @@ void CFire::Precache( void )
 
 	if ( m_nFireType == FIRE_PLASMA )
 	{
+		PrecacheParticleSystem("burning_character_plasma");
 		UTIL_PrecacheOther("_plasma");
 	}
 

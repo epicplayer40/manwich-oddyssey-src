@@ -269,6 +269,7 @@ void C_FireSmoke::SpawnSmoke( void )
 
 IMPLEMENT_CLIENTCLASS_DT( C_EntityFlame, DT_EntityFlame, CEntityFlame )
 	RecvPropEHandle(RECVINFO(m_hEntAttached)),
+	RecvPropBool(RECVINFO(m_bIsPlasma)), //Lychy: client needs to know whether to use normal or plasma particle
 END_RECV_TABLE()
 
 //-----------------------------------------------------------------------------
@@ -331,11 +332,11 @@ void C_EntityFlame::CreateEffect( void )
 		m_hEffect->SetControlPointEntity( 1, NULL );
 		m_hEffect = NULL;
 	}
-
+	const char* szEffectName = m_bIsPlasma ? "burning_character_plasma" : "burning_character";
 #ifdef TF_CLIENT_DLL
 	m_hEffect = ParticleProp()->Create( "burningplayer_red", PATTACH_ABSORIGIN_FOLLOW );
 #else
-	m_hEffect = ParticleProp()->Create( "burning_character", PATTACH_ABSORIGIN_FOLLOW );
+	m_hEffect = ParticleProp()->Create( szEffectName, PATTACH_ABSORIGIN_FOLLOW );
 #endif
 
 	if ( m_hEffect )
