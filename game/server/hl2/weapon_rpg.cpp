@@ -166,12 +166,14 @@ void CMissile::Spawn( void )
 	SetThink( &CMissile::IgniteThink );
 	
 	SetNextThink( gpGlobals->curtime + 0.3f );
-	SetDamage( 200.0f );
+	SetDamage(200.0f);
 
 	m_takedamage = DAMAGE_YES;
 	m_iHealth = m_iMaxHealth = 100;
 	m_bloodColor = DONT_BLEED;
 	m_flGracePeriodEndsAt = 0;
+
+
 
 	AddFlag( FL_OBJECT );
 }
@@ -1531,6 +1533,7 @@ void CWeaponRPG::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatChara
 
 			m_hMissile = CMissile::Create( muzzlePoint, vecAngles, GetOwner()->edict() );		
 			m_hMissile->m_hOwner = this;
+			m_hMissile->SetDamage(APC_MISSILE_DAMAGE);
 
 			// NPCs always get a grace period
 			m_hMissile->SetGracePeriod( 0.5 );
