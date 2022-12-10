@@ -2795,6 +2795,9 @@ void CNPC_CombineDropship::UpdateContainerGunFacing( Vector &vecMuzzle, Vector &
 {
 	Assert( m_hContainer );
 
+	m_poseWeapon_Pitch = m_hContainer->LookupPoseParameter("weapon_pitch");
+	m_poseWeapon_Yaw = m_hContainer->LookupPoseParameter("weapon_yaw");
+
 	// Get the desired aim vector
 	vecToTarget = GetEnemy()->WorldSpaceCenter( );
 
