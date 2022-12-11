@@ -1653,7 +1653,7 @@ void CNPC_Barnacle::BitePrey( void )
 	// In episodic, bite the zombie's headcrab off & drop the body
 #ifdef HL2_EPISODIC
 
-	if ( enemyClass == CLASS_ZOMBIE )
+	if ( enemyClass == CLASS_ZOMBIE && m_hRagdoll->GetBodygroup( ZOMBIE_BODYGROUP_HEADCRAB ) )
 	{
 		if ( m_hRagdoll )
 		{
@@ -1675,7 +1675,8 @@ void CNPC_Barnacle::BitePrey( void )
 
 	// in episodic, where barnacles can eat antlions, vanish the ragdoll because the gibs will spray everywhere
 	// and hide it.
-	if ( enemyClass == CLASS_ANTLION )
+//	if ( enemyClass == CLASS_ANTLION )
+	if (enemyClass == CLASS_ANTLION || pVictim->ShouldGib(CTakeDamageInfo( this, this, nDamage, iDamageType | DMG_CRUSH )) )
 	{
 		
 #ifndef _XBOX
