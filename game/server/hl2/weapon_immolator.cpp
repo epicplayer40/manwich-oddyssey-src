@@ -284,6 +284,7 @@ void CImmolatorBeam::ImmolationDamage( const CTakeDamageInfo &info, const Vector
 			{
 				pFlame->SetLifetime( lifetime );
 				pBCC->AddFlag( FL_ONFIRE );
+				pBCC->SetEffectEntity(pFlame);
 
 			}
 		}

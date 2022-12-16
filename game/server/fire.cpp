@@ -796,6 +796,7 @@ void CFire::SpawnEffect( fireType_e type, float scale )
 		{
 			CPlasma	*plasma = (CPlasma *) CreateEntityByName( "_plasma" );
 			plasma->EnableSmoke( true );
+			plasma->EnableGlow( ( m_spawnflags & SF_FIRE_NO_GLOW )==false );
 		
 			pEffect			= plasma;
 			m_nFireType		= FIRE_PLASMA;

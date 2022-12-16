@@ -26,6 +26,7 @@ public:
 	CPlasma( void );
 	virtual	~CPlasma( void );
 	void	EnableSmoke( int state );
+	void	EnableGlow( int state = true );
 
 	void	Precache( void );
 

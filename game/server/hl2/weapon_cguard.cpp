@@ -205,6 +205,8 @@ public:
 	void ItemPostFrame( void );
 	void AlertTargets( void );
 	void UpdateLasers( void );
+	bool Holster(CBaseCombatWeapon* pSwitchingTo);
+
 
 	float m_flLastRangeTime;
 
@@ -582,4 +584,10 @@ void CWeaponCGuard::AddViewKick( void )
 	pPlayer->SnapEyeAngles( angles );
 	
 	pPlayer->ViewPunch( QAngle( random->RandomInt( -8, -12 ), random->RandomInt( -2, 2 ), random->RandomInt( -8, 8 ) ) );
+}
+
+bool CWeaponCGuard::Holster(CBaseCombatWeapon* pSwitchingTo)
+{
+	m_bFired = true;
+	return BaseClass::Holster(pSwitchingTo);
 }

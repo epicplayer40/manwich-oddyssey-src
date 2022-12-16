@@ -307,6 +307,7 @@ void C_EntityFlame::StopEffect( void )
 		m_hEntAttached->RemoveFlag( FL_ONFIRE );
 		m_hEntAttached->SetEffectEntity( NULL );
 		m_hEntAttached->StopSound( "General.BurningFlesh" );
+		m_hEntAttached->StopSound( "Player.PlasmaDamage");
 		m_hEntAttached->StopSound( "General.BurningObject" );
 		
 		
@@ -338,7 +339,6 @@ void C_EntityFlame::CreateEffect( void )
 #else
 	m_hEffect = ParticleProp()->Create( szEffectName, PATTACH_ABSORIGIN_FOLLOW );
 #endif
-
 	if ( m_hEffect )
 	{
 		C_BaseEntity *pEntity = m_hEntAttached;
@@ -390,9 +390,19 @@ void C_EntityFlame::Simulate( void )
 		dlight_t *dl = effects->CL_AllocDlight ( index );
 		dl->origin = GetAbsOrigin();
  		dl->origin[2] += 16;
-		dl->color.r = 254;
-		dl->color.g = 174;
-		dl->color.b = 10;
+		
+		if (m_bIsPlasma)
+		{ 
+			dl->color.r = 60;
+			dl->color.g = 200;
+			dl->color.b = 200;
+		} 
+		else 
+		{
+			dl->color.r = 254;
+			dl->color.g = 174;
+			dl->color.b = 10;
+		}
 		dl->radius = random->RandomFloat(400,431);
 		dl->die = gpGlobals->curtime + 0.001;
 	}

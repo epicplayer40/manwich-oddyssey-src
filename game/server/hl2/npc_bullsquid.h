@@ -1,4 +1,9 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//=========== (C) Copyright 1999 Valve, L.L.C. All rights reserved. ===========
+//
+// The copyright to the contents herein is the property of Valve, L.L.C.
+// The contents may be used and/or copied only with the written permission of
+// Valve, L.L.C., or in accordance with the terms and conditions stipulated in
+// the agreement/contract under which the contents have been supplied.
 //
 // Purpose:		Base combat character with no AI
 //
@@ -9,17 +14,17 @@
 // $Log: $
 //
 // $NoKeywords: $
-//=============================================================================//
+//=============================================================================
 
-#ifndef NPC_BULLSQUID_H
-#define NPC_BULLSQUID_H
+#ifndef NPC_HL2BULLSQUID_H
+#define NPC_HL2BULLSQUID_H
 
-#include "ai_basenpc.h"
+#include "AI_BaseNPC.h"
 
 
-class CNPC_Bullsquid : public CAI_BaseNPC
+class CNPC_HL2Bullsquid : public CAI_BaseNPC
 {
-	DECLARE_CLASS( CNPC_Bullsquid, CAI_BaseNPC );
+	DECLARE_CLASS( CNPC_HL2Bullsquid, CAI_BaseNPC );
 	DECLARE_DATADESC();
 
 public:
@@ -28,8 +33,8 @@ public:
 	Class_T	Classify( void );
 	
 	void IdleSound( void );
-	void PainSound( const CTakeDamageInfo &info );
 	void AlertSound( void );
+	void PainSound( const CTakeDamageInfo &info );
 	void DeathSound( const CTakeDamageInfo &info );
 	void AttackSound( void );
 	void GrowlSound( void );
@@ -53,6 +58,7 @@ public:
 
 	int SelectSchedule( void );
 	bool FInViewCone ( Vector pOrigin );
+	bool FVisible ( Vector vecOrigin );
 
 	void StartTask ( const Task_t *pTask );
 	void RunTask ( const Task_t *pTask );
@@ -70,5 +76,8 @@ private:
 	float m_flHungryTime;// set this is a future time to stop the monster from eating for a while. 
 
 	float m_nextSquidSoundTime;
+
+	virtual bool GetSpitVector( const Vector &vecStartPos, const Vector &vecTarget, Vector *vecOut );
+	Vector	m_vecSaveBullsquidSpitVelocity;	// Saved when we start to attack and used if we failed to get a clear shot once we release
 };
-#endif // NPC_BULLSQUID_H
+#endif // NPC_HL2BULLSQUID_H

@@ -1123,7 +1123,9 @@ C_EntityDissolve *DissolveEffect( C_BaseEntity *pTarget, float flTime )
 C_EntityFlame *FireEffect( C_BaseAnimating *pTarget, C_BaseEntity *pServerFire, float *flScaleEnd, float *flTimeStart, float *flTimeEnd )
 {
 	C_EntityFlame *pFire = new C_EntityFlame;
+	C_EntityFlame* pOldFire = dynamic_cast<C_EntityFlame*>(pServerFire);
 
+	const char* szSoundEffect = "General.BurningFlesh";
 	if ( pFire->InitializeAsClientEntity( NULL, RENDER_GROUP_TRANSLUCENT_ENTITY ) == false )
 	{
 		pFire->Release();
@@ -1137,6 +1139,12 @@ C_EntityFlame *FireEffect( C_BaseAnimating *pTarget, C_BaseEntity *pServerFire, 
 		pTarget->AddFlag( FL_ONFIRE );
 		pFire->SetParent( pTarget );
 		pFire->m_hEntAttached = (C_BaseEntity *) pTarget;
+
+		if (pOldFire && pOldFire->m_bIsPlasma)
+		{
+			pFire->m_bIsPlasma = true;
+			szSoundEffect = "Player.PlasmaDamage";
+		}
 
 		pFire->OnDataChanged( DATA_UPDATE_CREATED );
 		pFire->SetAbsOrigin( pTarget->GetAbsOrigin() );
@@ -1155,9 +1163,11 @@ C_EntityFlame *FireEffect( C_BaseAnimating *pTarget, C_BaseEntity *pServerFire, 
 		}
 #endif
 
+
+
 		//Play a sound
 		CPASAttenuationFilter filter( pTarget );
-		pTarget->EmitSound( filter, pTarget->GetSoundSourceIndex(), "General.BurningFlesh" );
+		pTarget->EmitSound( filter, pTarget->GetSoundSourceIndex(), szSoundEffect );
 
 		pFire->SetNextClientThink( gpGlobals->curtime + 7.0f );
 	}

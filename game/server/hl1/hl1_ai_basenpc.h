@@ -52,6 +52,8 @@ public:
 	void	EjectShell( const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int iType );
 
 	virtual int		SelectDeadSchedule();
+
+	virtual void		Ignite(float flFlameLifetime, bool bNPCOnly = true, float flSize = 0.0f, bool bCalledByLevelDesigner = false);
 };
 
 #endif //HL1_AI_BASENPC_H

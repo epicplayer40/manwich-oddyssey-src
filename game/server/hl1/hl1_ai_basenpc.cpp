@@ -18,6 +18,7 @@
 #include "vstdlib/random.h"
 #include "engine/IEngineSound.h"
 #include "NPCevent.h"
+#include "hl2_gamerules.h"
 
 #include "effect_dispatch_data.h"
 #include "te_effect_dispatch.h"
@@ -164,6 +165,18 @@ bool CHL1BaseNPC::HasCrematorGibs( void )
 	return false;
 }
 
+void CHL1BaseNPC::Ignite( float flFlameLifetime, bool bNPCOnly, float flSize, bool bCalledByLevelDesigner )
+{
+	BaseClass::Ignite( flFlameLifetime, bNPCOnly, flSize, bCalledByLevelDesigner );
+
+#ifdef HL2_EPISODIC
+	if ( HL2GameRules()->IsAlyxInDarknessMode() == true && GetEffectEntity() != NULL )
+	{
+		GetEffectEntity()->AddEffects( EF_DIMLIGHT );
+	}
+#endif // HL2_EPISODIC
+
+}
 
 void CHL1BaseNPC::Precache( void )
 {
