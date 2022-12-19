@@ -57,6 +57,7 @@ public:
 	virtual void		RunTask( const Task_t *pTask );
 	virtual void		StartTask( const Task_t *pTask );
 	virtual bool		CanEnterVehicle( void );
+//	virtual void		EnterVehicle( void );
 	virtual void		ExitVehicle( void );
 	virtual void		HandleAnimEvent( animevent_t *pEvent );
 	virtual Activity	NPC_TranslateActivity( Activity activity );
@@ -87,7 +88,7 @@ private:
 	bool				EnemyInVehicle( void );
 	void				GetAttachmentPoint( Vector *vecPoint );
 	bool				CanJumpToAttachToVehicle( void );
-	//bool				WithinAttachRange( void );
+//	bool				WithinAttachRange( void );
 
 	float				m_flLastLateralLean;
 	float				m_flLastVerticalLean;

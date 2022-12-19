@@ -446,6 +446,20 @@ int CFastZombie::SelectSchedule ( void )
 // ========================================================
 #ifdef HL2_EPISODIC
 
+		// If our enemy is in a vehicle, we want to attach to that vehicle, code taken from ep1 sdk branch to fix fast zombie passenger AI - epicplayer
+	if ( GetEnemy() != NULL )
+	{
+		CBaseCombatCharacter *pCCEnemy = GetEnemy()->MyCombatCharacterPointer();	
+		if ( pCCEnemy != NULL && pCCEnemy->IsInAVehicle() )
+		{
+			CPropJeepEpisodic *pVehicle = dynamic_cast<CPropJeepEpisodic *>(pCCEnemy->GetVehicleEntity() );
+			if ( pVehicle && CanEnterVehicle( pVehicle ) )
+			{
+				m_PassengerBehavior.Enable( pVehicle );
+			}
+		}
+	}
+
 	// Defer all decisions to the behavior if it's running
 	if ( m_PassengerBehavior.CanSelectSchedule() )
 	{

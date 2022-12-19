@@ -375,6 +375,38 @@ void CAI_PassengerBehaviorZombie::GetAttachmentPoint( Vector *vecPoint )
 	*vecPoint = ( m_hVehicle->GetAbsOrigin() + vecFinalOffset );
 }
 
+/*
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Output : Returns true on success, false on failure.
+//-----------------------------------------------------------------------------
+bool CAI_PassengerBehaviorZombie::WithinAttachRange( void )
+{
+	// Target's predicted position
+	Vector vecPredictedTargetPos;
+	UTIL_PredictedPosition( GetEnemy(), ATTACH_PREDICTION_INTERVAL, &vecPredictedTargetPos );
+	// Our predicted position
+	Vector vecPredictedPos;
+	UTIL_PredictedPosition( GetOuter(), ATTACH_PREDICTION_INTERVAL, &vecPredictedPos );
+	// Get our target position
+	Vector vecAttachPoint;
+	GetAttachmentPoint( &vecAttachPoint );
+	// Get our current velocity and direction to the target position
+	Vector vecVelocity = GetOuter()->GetAbsVelocity();
+	Vector vecTargetDir = vecAttachPoint - GetOuter()->GetAbsOrigin();
+	VectorNormalize( vecVelocity );
+	float flDist = VectorNormalize( vecTargetDir );
+	float flDot = vecVelocity.Dot( vecTargetDir );
+	// Must be close enough to the target and also mostly moving towards it
+	if ( ( flDot > ATTACH_PREDICTION_FACING_THRESHOLD ) && ( flDist < ATTACH_PREDICTION_DIST_THRESHOLD ) )
+	{
+		return true;
+	}
+	// Not there yet
+	return false;
+}
+*/
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Output : Returns true on success, false on failure.
@@ -421,7 +453,10 @@ void CAI_PassengerBehaviorZombie::StartDismount( void )
 	// Detach from the parent
 	GetOuter()->SetParent( NULL );
 	GetOuter()->SetMoveType( MOVETYPE_STEP );
-	GetMotor()->SetYawLocked( false );
+//	GetMotor()->SetYawLocked( false );
+//	GetOuter()->RemoveFlag( FL_FLY );
+	GetOuter()->GetMotor()->SetYawLocked( false ); //Properly fixes rotation once jumping out of the car - epicplayer
+	GetOuter()->SetCollisionGroup( COLLISION_GROUP_NPC ); //Fixes collision once the zombie jumps out of the car - epicplayer
 
 	QAngle vecAngles = GetAbsAngles();
 	vecAngles.z = 0.0f;
@@ -644,6 +679,44 @@ int CAI_PassengerBehaviorZombie::FindEntrySequence( bool bNearest /*= false*/ )
 
 	return nBestSequence;
 }
+
+/*
+//-----------------------------------------------------------------------------
+// Purpose: Enter the vehicle
+//-----------------------------------------------------------------------------
+void CAI_PassengerBehaviorZombie::EnterVehicle( void )
+{
+	if ( m_hVehicle->NPC_CanEnterVehicle( GetOuter(), false ) == false )
+		return;
+	
+	// Reserve the seat
+	if ( ReserveEntryPoint( VEHICLE_SEAT_ANY ) == false )
+		return;
+
+	// Get a list of all our animations
+	const PassengerSeatAnims_t *pEntryAnims = m_hVehicle->GetServerVehicle()->NPC_GetPassengerSeatAnims( GetOuter(), PASSENGER_SEAT_ENTRY );
+	if ( pEntryAnims == NULL )
+		return;
+
+	// Test each animation (sorted by priority) for the best match
+	for ( int i = 0; i < pEntryAnims->Count(); i++ )
+	{
+		// Find the activity for this animation name
+		const CPassengerSeatTransition *pTransition = &pEntryAnims->Element(i);
+		int nSequence = GetOuter()->LookupSequence( STRING( pTransition->GetAnimationName() ) );
+
+		Assert( nSequence != -1 );
+		if ( nSequence == -1 )
+			continue;
+
+		SetTransitionSequence( nSequence );
+		break;
+	}
+
+	// Get in the vehicle
+	BaseClass::EnterVehicle();
+}
+*/
 
 //-----------------------------------------------------------------------------
 // Purpose: 
