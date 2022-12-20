@@ -825,6 +825,10 @@ void CAI_PassengerBehaviorZombie::HandleAnimEvent( animevent_t *pEvent )
 //-----------------------------------------------------------------------------
 bool CAI_PassengerBehaviorZombie::AttachToVehicle( void )
 {
+	//Lychy: prevents crashes when the vehicle is lost for whatever reason
+	if (!m_hVehicle)
+		return false;
+
 	// Must be able to enter the vehicle
 	if ( m_hVehicle->NPC_CanEnterVehicle( GetOuter(), false ) == false )
 		return false;
