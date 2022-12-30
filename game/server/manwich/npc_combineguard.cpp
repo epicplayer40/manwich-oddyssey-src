@@ -1131,7 +1131,7 @@ int	CNPC_CombineGuard::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 
 	}
 
-	if ( (info.GetDamageType() & DMG_BLAST) && ( info.GetDamage() >= sk_combineguard_blastdamage.GetFloat() && gpGlobals->curtime > m_flNextClobberTime ) ) //React to explosive damage - epicplayer
+	if ( (info.GetDamageType() & DMG_BLAST) && ( info.GetDamage() >= sk_combineguard_blastdamage.GetFloat() && gpGlobals->curtime > m_flNextClobberTime ) && !AllArmorDestroyed() ) //React to explosive damage - epicplayer
 	{
 		SetCondition( COND_COMBINEGUARD_CLOBBERED );
 		m_flNextClobberTime = gpGlobals->curtime + 0.5;
