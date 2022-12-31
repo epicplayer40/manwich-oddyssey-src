@@ -540,7 +540,8 @@ void CNPC_Conscript::Spawn()
 	SetBloodColor( BLOOD_COLOR_RED );
 	m_iHealth			= sk_conscript_health.GetFloat();
 	SetViewOffset( Vector ( 0, 0, 50 ) );// position of the eyes relative to monster's origin.
-	m_flFieldOfView		= VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so npc will notice player and say hello
+//	m_flFieldOfView		= VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so npc will notice player and say hello
+	m_flFieldOfView		= -0.1f;
 	m_NPCState			= NPC_STATE_NONE;
 
 	m_nBody			= 0; // gun in holster

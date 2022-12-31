@@ -354,7 +354,8 @@ void CNPC_CombineGuard::Spawn( void )
 //	m_iHealth				= 100;
 	m_iHealth = sk_combineguard_health.GetFloat();
 	m_iMaxHealth			= m_iHealth;
-	m_flFieldOfView			= 0.1f;
+//	m_flFieldOfView			= 0.1f;
+	m_flFieldOfView			= -0.4f; //Wider FOV - epicplayer
 	
 	SetSolid( SOLID_BBOX );
 	AddSolidFlags( FSOLID_NOT_STANDABLE );
@@ -639,6 +640,11 @@ int CNPC_CombineGuard::SelectSchedule( void )
 
 		if( m_fOffBalance )
 		{
+			if ( !m_fHasInitedArmor )
+			{
+				InitArmorPieces();
+			}
+
 			//Randomly destroy an armor piece
 			int iArmorPiece;
 			do 
@@ -667,6 +673,15 @@ int CNPC_CombineGuard::SelectSchedule( void )
 		{
 			return SCHED_COMBINEGUARD_CLOBBERED;
 		}
+	}
+
+	if ( m_flLastRangeTime > gpGlobals->curtime && !HasCondition( COND_CAN_RANGE_ATTACK1 ) && !HasCondition( COND_CAN_MELEE_ATTACK1 ) )
+	{
+	
+//		return SCHED_PATROL_RUN;
+		return SCHED_CHASE_ENEMY;
+//		return SCHED_MOVE_TO_WEAPON_RANGE;
+	
 	}
 
 	//Otherwise just walk around a little
@@ -702,11 +717,13 @@ void CNPC_CombineGuard::StartTask( const Task_t *pTask )
 			Vector flEnemyLKP = GetEnemyLKP();
 			GetMotor()->SetIdealYawToTarget( flEnemyLKP );
 		}
-		SetActivity( ACT_RANGE_ATTACK1 );
-		return;
+//		SetActivity( ACT_RANGE_ATTACK1 );
+//		return;
+		SetIdealActivity( ACT_RANGE_ATTACK1 );
+		break;
 
 
-		case TASK_COMBINEGUARD_DIE_INSTANTLY:
+	case TASK_COMBINEGUARD_DIE_INSTANTLY:
 		{
 			CTakeDamageInfo info;
 
@@ -1080,12 +1097,12 @@ void CNPC_CombineGuard::TraceAttack( CBaseEntity *pAttacker, float flDamage, con
 //-----------------------------------------------------------------------------
 int	CNPC_CombineGuard::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 {
-
+	/*
 	if ( !m_fHasInitedArmor )
 	{
 		InitArmorPieces();
 	}
-
+	*/
 	CTakeDamageInfo newInfo = info;
 	int nDamageTaken = BaseClass::OnTakeDamage_Alive( newInfo );
 
@@ -1211,21 +1228,28 @@ void CNPC_CombineGuard::FireRangeWeapon( void )
 	trace_t	tr;
 
 	Vector vecSrc, vecAiming;
-	vecAiming = GetShootEnemyDir( vecSrc );
+//	vecAiming = GetShootEnemyDir( vecSrc );
+	vecAiming = GetActualShootTrajectory( vecSrc );
 
 	Vector forward, right, up;
 	AngleVectors( GetAbsAngles(), &forward, &right, &up );
 
-	float deflection = 0.01;
-	vecAiming = vecAiming + 1 * right * random->RandomFloat( 0, deflection ) + up * random->RandomFloat( -deflection, deflection );
+//	float deflection = 0.01;
+	vecAiming = vecAiming + 1 * right + up;
 
 //	UTIL_TraceLine ( vecSrc, vecSrc + vecAiming * 1024, MASK_SOLID, this, COLLISION_GROUP_NONE, &tr);
 
 	GetVectors( &vecAiming, NULL, NULL );
+//	GetVectors( &vecAiming, &right, &up );
 	vecSrc = WorldSpaceCenter() + vecAiming * 64;
 	
 	Vector	impactPoint	= vecSrc + ( vecAiming * MAX_TRACE_LENGTH );
 
+	/*	Vector vecShootDir;
+	vecShootDir = m_hCannonTarget->WorldSpaceCenter() - vecShootPos;
+	float flDist = VectorNormalize( vecShootDir );
+
+	AI_TraceLine( vecShootPos, vecShootPos + vecShootDir * flDist, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );*/
 
 	AI_TraceLine( vecSrc, impactPoint, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
 
@@ -1321,6 +1345,10 @@ void CNPC_CombineGuard::BuildScheduleTestBits( void )
 {
 	//Interrupt any schedule if I get clobbered
 	SetCustomInterruptCondition( COND_COMBINEGUARD_CLOBBERED );
+
+	ClearCustomInterruptCondition( COND_LIGHT_DAMAGE ); //don't react to flinches - epicplayer
+	ClearCustomInterruptCondition( COND_HEAVY_DAMAGE );
+
 }
 
 //-----------------------------------------------------------------------------
@@ -1472,7 +1500,7 @@ AI_BEGIN_CUSTOM_NPC( npc_combineguard, CNPC_CombineGuard )
 		"	Tasks"
 		"		TASK_STOP_MOVING			0"
 		"		TASK_FACE_ENEMY				0"
-		"		TASK_ANNOUNCE_ATTACK		1"
+//		"		TASK_ANNOUNCE_ATTACK		1"
 		"		TASK_CGUARD_RANGE_ATTACK1	0"
 		"	"
 		"	Interrupts"
