@@ -1197,8 +1197,12 @@ bool CPropCombineBall::DissolveEntity( CBaseEntity *pEntity )
 void CPropCombineBall::OnHitEntity( CBaseEntity *pHitEntity, float flSpeed, int index, gamevcollisionevent_t *pEvent )
 {
 	// Detonate on the strider + the bone followers in the strider
-	if ( FClassnameIs( pHitEntity, "npc_strider" ) || 
-		(pHitEntity->GetOwnerEntity() && FClassnameIs( pHitEntity->GetOwnerEntity(), "npc_strider" )) )
+	if (( FClassnameIs( pHitEntity, "npc_strider" ) || 
+		(pHitEntity->GetOwnerEntity() && FClassnameIs( pHitEntity->GetOwnerEntity(), "npc_strider" )) ) 
+		
+		|| ( FClassnameIs( pHitEntity, "npc_combineguard" ) || 
+		(pHitEntity->GetOwnerEntity() && FClassnameIs( pHitEntity->GetOwnerEntity(), "npc_combineguard" )) )
+		)
 	{
 		DoExplosion();
 		return;

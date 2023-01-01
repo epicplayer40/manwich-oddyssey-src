@@ -32,6 +32,7 @@
 #include "vstdlib/random.h"
 #include "engine/IEngineSound.h"
 #include "props.h"
+#include "prop_combine_ball.h"
 
 class CSprite;
 
@@ -116,7 +117,8 @@ public:
 	void			Precache( void );
 	void			Spawn( void );
 	void			PrescheduleThink( void );
-	void			TraceAttack( CBaseEntity *pAttacker, float flDamage, const Vector &vecDir, trace_t *ptr, int bitsDamageType );
+//	void			TraceAttack( CBaseEntity *pAttacker, float flDamage, const Vector &vecDir, trace_t *ptr, int bitsDamageType );
+	void			TraceAttack( const CTakeDamageInfo &info, const Vector &vecDir, trace_t *ptr, CDmgAccumulator *pAccumulator );
 	void			HandleAnimEvent( animevent_t *pEvent );
 	void			StartTask( const Task_t *pTask );
 	void			RunTask( const Task_t *pTask );
@@ -182,6 +184,7 @@ private:
 ConVar	sk_combineguard_health( "sk_combineguard_health", "0" );
 ConVar	sk_combineguard_donkdamage( "sk_combineguard_donkdamage", "0" );
 ConVar	sk_combineguard_blastdamage("sk_combineguard_blastdamage", "0");
+ConVar  combineguard_tumble_blast( "combineguard_tumble_blast", "0" );
 
 //FIXME: Make a cvar
 #define	CGUARD_DEFAULT_ARMOR_HEALTH		50
@@ -360,6 +363,7 @@ void CNPC_CombineGuard::Spawn( void )
 	SetSolid( SOLID_BBOX );
 	AddSolidFlags( FSOLID_NOT_STANDABLE );
 	SetMoveType( MOVETYPE_STEP );
+	AddEFlags( EFL_NO_DISSOLVE | EFL_NO_MEGAPHYSCANNON_RAGDOLL ); //make him not look stupid - epicplayer
 
 	m_flGlowTime			= gpGlobals->curtime;
 	m_flLastRangeTime		= gpGlobals->curtime;
@@ -1027,12 +1031,12 @@ void CNPC_CombineGuard::DamageArmorPiece(int pieceID, float damage, const Vector
 //			*ptr - 
 //			bitsDamageType - 
 //-----------------------------------------------------------------------------
-void CNPC_CombineGuard::TraceAttack( CBaseEntity *pAttacker, float flDamage, const Vector &vecDir, trace_t *ptr, int bitsDamageType )
+void CNPC_CombineGuard::TraceAttack( const CTakeDamageInfo &inputInfo, const Vector &vecDir, trace_t *ptr, CDmgAccumulator *pAccumulator )
 {
 	Vector	vecDamagePoint = ptr->endpos;
 
 	//Approximate explosive damage
-	if ( bitsDamageType & ( DMG_BLAST ) )
+	if ( inputInfo.GetDamageType() & ( DMG_BLAST ) && !combineguard_tumble_blast.GetBool() )
 	{
 		Vector	vecOrigin;
 		QAngle  vecAngles;
@@ -1040,7 +1044,7 @@ void CNPC_CombineGuard::TraceAttack( CBaseEntity *pAttacker, float flDamage, con
 		float	flDist;
 		int		nReferencePoint;
 		int		nNearestGroup = CGUARD_BGROUP_MAIN;
-		float	flAdjustedDamage = flDamage;
+		float	flAdjustedDamage = inputInfo.GetDamage();
 
 		//Check all pieces to find the nearest one
 		for ( int i = 1; i < NUM_CGUARD_BODYGROUPS; i++ )
@@ -1048,7 +1052,7 @@ void CNPC_CombineGuard::TraceAttack( CBaseEntity *pAttacker, float flDamage, con
 			if ( m_armorPieces[i].destroyed )
 			{
 				//Lose 10% (dodgy falloff approximation)
-//				flAdjustedDamage *= 0.9f; //making sure that the damage actually has a chance to happen - epicplayer
+				flAdjustedDamage *= 0.9f; //making sure that the damage actually has a chance to happen - epicplayer
 				continue;
 			}
 
@@ -1075,17 +1079,25 @@ void CNPC_CombineGuard::TraceAttack( CBaseEntity *pAttacker, float flDamage, con
 			DamageArmorPiece( nNearestGroup, flAdjustedDamage, vecDamagePoint, vecDir );
 			return;
 		}
-	}
+	}// else BaseClass::TraceAttack( inputInfo, vecDir, ptr, pAccumulator );
 	
+	if ( AllArmorDestroyed() && gpGlobals->curtime > m_flNextClobberTime ) 
+	{
+		m_flNextClobberTime = gpGlobals->curtime + 10;		
+		SetSchedule( SCHED_COMBINEGUARD_HELPLESS );
+	}
+
 	//Damage the hitgroup
 	if ( ptr->hitgroup != CGUARD_BGROUP_MAIN )
 	{
-		DamageArmorPiece( ptr->hitgroup, flDamage, vecDamagePoint, vecDir );
+		DamageArmorPiece( ptr->hitgroup, inputInfo.GetDamage(), vecDamagePoint, vecDir );
 	}
 	else
 	{
 		//UTIL_Ricochet( vecDamagePoint, (vecDir*-1.0f) );
 	}
+
+	BaseClass::TraceAttack( inputInfo, vecDir, ptr, pAccumulator );
 }
 
 //-----------------------------------------------------------------------------
@@ -1148,17 +1160,18 @@ int	CNPC_CombineGuard::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 
 	}
 
-	if ( (info.GetDamageType() & DMG_BLAST) && ( info.GetDamage() >= sk_combineguard_blastdamage.GetFloat() && gpGlobals->curtime > m_flNextClobberTime ) && !AllArmorDestroyed() ) //React to explosive damage - epicplayer
+	if ( ((info.GetDamageType() & DMG_BLAST) || UTIL_IsCombineBall( info.GetInflictor() ) ) && ( info.GetDamage() >= sk_combineguard_blastdamage.GetFloat() && gpGlobals->curtime > m_flNextClobberTime ) && !AllArmorDestroyed() ) //React to explosive damage - epicplayer
 	{
 		SetCondition( COND_COMBINEGUARD_CLOBBERED );
 		m_flNextClobberTime = gpGlobals->curtime + 0.5;
-		return 0;
+		newInfo.ScaleDamage( 0.5f );
+		return nDamageTaken;
 	}
 
-	if ( newInfo.GetInflictor() && newInfo.GetInflictor()->GetOwnerEntity() == this )
+	if ( info.GetInflictor() && info.GetInflictor()->GetOwnerEntity() == this )
 		return 0;
 
-	if ( info.GetDamageType() & ( DMG_BUCKSHOT || DMG_BLAST ) )
+	if ( info.GetDamageType() & DMG_BUCKSHOT )
 	{
 		newInfo.ScaleDamage( 0.5f );
 		return nDamageTaken;
