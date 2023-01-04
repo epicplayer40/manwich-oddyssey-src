@@ -185,6 +185,7 @@ ConVar	sk_combineguard_health( "sk_combineguard_health", "0" );
 ConVar	sk_combineguard_donkdamage( "sk_combineguard_donkdamage", "0" );
 ConVar	sk_combineguard_blastdamage("sk_combineguard_blastdamage", "0");
 ConVar  combineguard_tumble_blast( "combineguard_tumble_blast", "0" );
+ConVar  combineguard_recharge_delay("combineguard_recharge_delay", "0");
 
 //FIXME: Make a cvar
 #define	CGUARD_DEFAULT_ARMOR_HEALTH		50
@@ -336,7 +337,7 @@ void CNPC_CombineGuard::InitArmorPieces( void )
 		}
 	}
 	SetBodygroup(CGUARD_BGROUP_MAIN, true);
-	Msg(" ARMOR INITALIZED \n");
+	DevMsg(" ARMOR INITALIZED \n");
 }
 
 //-----------------------------------------------------------------------------
@@ -348,7 +349,8 @@ void CNPC_CombineGuard::Spawn( void )
 
 	SetModel( COMBINEGUARD_MODEL );
 
-	SetHullType(HULL_LARGE);
+//	SetHullType(HULL_LARGE); //Hull is often too large for the Guard to fit into areas it probably should, so changing - epicplayer
+	SetHullType(HULL_WIDE_HUMAN);
 	
 	SetNavType(NAV_GROUND);
 	m_NPCState				= NPC_STATE_NONE;
@@ -420,7 +422,7 @@ void CNPC_CombineGuard::PrescheduleThink( void )
 	if( HasCondition( COND_COMBINEGUARD_CLOBBERED ) )
 	{
 		EmitSound( "NPC_CombineGuard.Alert" );
-		Msg( "CLOBBERED!\n" );
+		DevMsg( "CLOBBERED!\n" );
 	}
 
 	for ( int i = 1; i < NUM_CGUARD_ATTACHMENTS; i++ )
@@ -514,12 +516,14 @@ void CNPC_CombineGuard::HandleAnimEvent( animevent_t *pEvent )
 
 	case CGUARD_AE_LEFTFOOT:
 		{
+			UTIL_ScreenShake( GetAbsOrigin(), 5.0, 50.0, 0.2, 750, SHAKE_START );
 			EmitSound( "NPC_CombineGuard.FootstepLeft" );
 		}
 		break;
 
 	case CGUARD_AE_RIGHTFOOT:
 		{
+			UTIL_ScreenShake(GetAbsOrigin(), 5.0, 50.0, 0.2, 750, SHAKE_START);
 			EmitSound( "NPC_CombineGuard.FootstepRight" );
 		}
 		break;
@@ -542,7 +546,7 @@ void CNPC_CombineGuard::HandleAnimEvent( animevent_t *pEvent )
 
 	case CGUARD_AE_FIRE:
 		{
-			m_flLastRangeTime = gpGlobals->curtime + 9.0f; //used to be 6 - epicplayer
+			m_flLastRangeTime = gpGlobals->curtime + combineguard_recharge_delay.GetFloat(); //used to be 6 - epicplayer
 			FireRangeWeapon();
 			
 			EmitSound( "NPC_CombineGuard.Fire" );
@@ -660,12 +664,12 @@ int CNPC_CombineGuard::SelectSchedule( void )
 
 			DestroyArmorPiece( iArmorPiece );
 
-			Msg("DESTROYING PIECE:%d\n", iArmorPiece );
+			DevMsg("DESTROYING PIECE:%d\n", iArmorPiece );
 
 			if( AllArmorDestroyed() )
 			{
 				//go into die schedule
-				Msg(" NO!!!!!!!! I'M DEADZ0R!!\n" );
+				DevMsg(" NO!!!!!!!! I'M DEADZ0R!!\n" );
 				return SCHED_COMBINEGUARD_HELPLESS;
 			}
 			else
@@ -1126,14 +1130,14 @@ int	CNPC_CombineGuard::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 
 		if( pPhysObject )
 		{
-			Msg(" HIT by DMG: %f\n", info.GetDamage() );
+			DevMsg(" HIT by DMG: %f\n", info.GetDamage() );
 
 			// Smacked by a physics object
 //			if( info.GetDamage() >= 50.0 && gpGlobals->curtime > m_flNextClobberTime )
 			if ( info.GetDamage() >= sk_combineguard_donkdamage.GetFloat() && gpGlobals->curtime > m_flNextClobberTime )
 			{
 				// Hit hard enough to knock me
-				Msg(" DONK \n" );
+				DevMsg(" DONK \n" );
 				SetCondition( COND_COMBINEGUARD_CLOBBERED );
 
 				// !!!HACKHACK - stop from being hit twice by the same object
@@ -1229,7 +1233,7 @@ int CNPC_CombineGuard::RangeAttack1Conditions( float flDot, float flDist )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CNPC_CombineGuard::FireRangeWeapon( void )
+void CNPC_CombineGuard::FireRangeWeapon( void ) //Credit to Lychy for fixing aiming up and down
 {
 	//FIXME: E3 HACK - For now just trigger our target
 	if ( ( GetEnemy() != NULL ) && ( GetEnemy()->Classify() == CLASS_BULLSEYE ) )
@@ -1242,19 +1246,26 @@ void CNPC_CombineGuard::FireRangeWeapon( void )
 
 	Vector vecSrc, vecAiming;
 //	vecAiming = GetShootEnemyDir( vecSrc );
-	vecAiming = GetActualShootTrajectory( vecSrc );
+	//vecAiming = GetActualShootTrajectory( vecSrc );
 
-	Vector forward, right, up;
-	AngleVectors( GetAbsAngles(), &forward, &right, &up );
+	//Vector forward, right, up;	
+	//AngleVectors( GetAbsAngles(), &forward, &right, &up );
 
 //	float deflection = 0.01;
-	vecAiming = vecAiming + 1 * right + up;
+	//vecAiming = vecAiming + 1 * right + up;
 
 //	UTIL_TraceLine ( vecSrc, vecSrc + vecAiming * 1024, MASK_SOLID, this, COLLISION_GROUP_NONE, &tr);
 
 	GetVectors( &vecAiming, NULL, NULL );
 //	GetVectors( &vecAiming, &right, &up );
 	vecSrc = WorldSpaceCenter() + vecAiming * 64;
+	QAngle angleLooking;
+	VectorAngles(vecAiming, angleLooking);	
+	QAngle qShootPoint;
+	VectorAngles((vecSrc - GetEnemyLKP()).Normalized(), qShootPoint);
+	angleLooking.x = -qShootPoint.x;
+	AngleVectors(angleLooking, &vecAiming);
+
 	
 	Vector	impactPoint	= vecSrc + ( vecAiming * MAX_TRACE_LENGTH );
 
