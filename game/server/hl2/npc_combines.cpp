@@ -24,6 +24,7 @@
 #include "hl2_gamerules.h"
 #include "gameweaponmanager.h"
 #include "vehicle_base.h"
+#include "globalstate.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -148,9 +149,25 @@ void CNPC_CombineS::Precache()
 		m_fHasjetpack = false;
 	}
 
+	//Early Combine should be determined by an env_global
+	if ( GlobalEntity_GetState("mo_early_timeline") == GLOBAL_ON )
+	{
+		m_fIsEarlyCombine = true;
+	}
+	else m_fIsEarlyCombine = false;
+
 	if( !GetModelName() )
 	{
-		SetModelName( MAKE_STRING( "models/combine_soldier.mdl" ) );
+		if ( m_fIsEarlyCombine == true )
+		{
+			SetModelName( MAKE_STRING( "models/combine_soldier_early.mdl" ) );
+		}
+		else SetModelName( MAKE_STRING( "models/combine_soldier.mdl" ) );
+	}
+
+	if ( !Q_stricmp( pModelName, "models/combine_soldier.mdl" ) && m_fIsEarlyCombine == true ) //Override maps with default Combine models to use early model if the global is set - epicplayer
+	{ 
+		SetModelName( MAKE_STRING( "models/combine_soldier_early.mdl" ) ); 
 	}
 
 	PrecacheModel( STRING( GetModelName() ) );

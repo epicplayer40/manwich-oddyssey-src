@@ -383,7 +383,6 @@ void CNPC_Combine::Spawn( void )
 		Takeoff();
 	}
 
-
 	if( HasDbarrel() )
 		{
 			CapabilitiesRemove( bits_CAP_INNATE_MELEE_ATTACK1 );
@@ -3457,6 +3456,7 @@ WeaponProficiency_t CNPC_Combine::CalcWeaponProficiency( CBaseCombatWeapon *pWea
 		if( m_nSkin != COMBINE_SKIN_SHOTGUNNER )
 		{
 			m_nSkin = COMBINE_SKIN_SHOTGUNNER;
+			if (m_fIsEarlyCombine == true ) m_nBody = COMBINE_SKIN_SHOTGUNNER; //Early Combine use a bodygroup mesh for the shotgunner - epicplayer
 		}
 
 		return WEAPON_PROFICIENCY_PERFECT;
@@ -3466,6 +3466,7 @@ WeaponProficiency_t CNPC_Combine::CalcWeaponProficiency( CBaseCombatWeapon *pWea
 		if( m_nSkin != COMBINE_SKIN_SHOTGUNNER )
 		{
 			m_nSkin = COMBINE_SKIN_SHOTGUNNER;
+			if (m_fIsEarlyCombine == true ) m_nBody = COMBINE_SKIN_SHOTGUNNER;
 		}
 		return WEAPON_PROFICIENCY_VERY_GOOD;
 	}

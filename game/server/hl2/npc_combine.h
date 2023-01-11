@@ -329,6 +329,7 @@ public:
 	bool			m_fIsMossman;
 	bool			m_fIsTsoLing;
 	bool			m_fHasjetpack;
+	bool			m_fIsEarlyCombine;
 	Vector			m_vecAltFireTarget;
 
 	int				m_iTacticalVariant;
