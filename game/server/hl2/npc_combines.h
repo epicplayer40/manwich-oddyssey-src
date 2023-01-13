@@ -44,6 +44,7 @@ public:
 	bool		IsHeavyDamage( const CTakeDamageInfo &info );
 
 	virtual	bool		AllowedToIgnite( void ) { return true; }
+	virtual	void		Wake(bool bFireOutput = true);
 
 private:
 	bool		ShouldHitPlayer( const Vector &targetDir, float targetDist );

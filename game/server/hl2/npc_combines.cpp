@@ -60,6 +60,14 @@ extern Activity ACT_WALK_MARCH;
 //-----------------------------------------------------------------------------
 void CNPC_CombineS::Spawn( void )
 {
+
+	//Early Combine should be determined by an env_global
+	if (GlobalEntity_GetState("mo_early_timeline") == GLOBAL_ON)
+	{
+		m_fIsEarlyCombine = true;
+	}
+	else m_fIsEarlyCombine = false;
+
 	Precache();
 	SetModel( STRING( GetModelName() ) );
 
@@ -96,6 +104,12 @@ void CNPC_CombineS::Spawn( void )
 	CapabilitiesAdd( bits_CAP_DOORS_GROUP );
 
 	BaseClass::Spawn();
+
+	if ( !IsElite() && !Hasjetpack() && m_fIsEarlyCombine ) //Override maps with default Combine models to use early model if the global is set - epicplayer
+	{ 
+		SetModelName( MAKE_STRING( "models/combine_soldier_early.mdl" ) ); 
+		SetModel( "models/combine_soldier_early.mdl" );
+	}
 
 #if HL2_EPISODIC
 	if (m_iUseMarch && !HasSpawnFlags(SF_NPC_START_EFFICIENT))
@@ -149,13 +163,6 @@ void CNPC_CombineS::Precache()
 		m_fHasjetpack = false;
 	}
 
-	//Early Combine should be determined by an env_global
-	if ( GlobalEntity_GetState("mo_early_timeline") == GLOBAL_ON )
-	{
-		m_fIsEarlyCombine = true;
-	}
-	else m_fIsEarlyCombine = false;
-
 	if( !GetModelName() )
 	{
 		if ( m_fIsEarlyCombine == true )
@@ -165,9 +172,10 @@ void CNPC_CombineS::Precache()
 		else SetModelName( MAKE_STRING( "models/combine_soldier.mdl" ) );
 	}
 
-	if ( !Q_stricmp( pModelName, "models/combine_soldier.mdl" ) && m_fIsEarlyCombine == true ) //Override maps with default Combine models to use early model if the global is set - epicplayer
+	if ( !IsElite() && !Hasjetpack() && m_fIsEarlyCombine ) //Override maps with default Combine models to use early model if the global is set - epicplayer
 	{ 
 		SetModelName( MAKE_STRING( "models/combine_soldier_early.mdl" ) ); 
+//		SetModel( "models/combine_soldier_early.mdl" );
 	}
 
 	PrecacheModel( STRING( GetModelName() ) );
@@ -179,7 +187,23 @@ void CNPC_CombineS::Precache()
 	BaseClass::Precache();
 }
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
+//Carter puts a lot of sleeping Combine in his maps, which means the early model and bodygroup doesn't get set when it should.
+void CNPC_CombineS::Wake( bool bFireOutput )
+{
+	//Early Combine should be determined by an env_global
+	if (GlobalEntity_GetState("mo_early_timeline") == GLOBAL_ON)
+	{
+		m_fIsEarlyCombine = true;
+	}
+	else m_fIsEarlyCombine = false;
+
+	if (m_fIsEarlyCombine == true && (HasShotgun() || HasDbarrel())) m_nBody = 1; SetModelName(MAKE_STRING("models/combine_soldier_early.mdl")); SetModel("models/combine_soldier_early.mdl");
+
+	BaseClass::Wake();
+}
 
 void CNPC_CombineS::DeathSound( const CTakeDamageInfo &info )
 {
