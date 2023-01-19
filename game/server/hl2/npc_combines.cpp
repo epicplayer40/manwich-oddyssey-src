@@ -109,6 +109,7 @@ void CNPC_CombineS::Spawn( void )
 	{ 
 		SetModelName( MAKE_STRING( "models/combine_soldier_early.mdl" ) ); 
 		SetModel( "models/combine_soldier_early.mdl" );
+		if (HasShotgun()) m_nBody = 1;
 	}
 
 #if HL2_EPISODIC
@@ -178,6 +179,7 @@ void CNPC_CombineS::Precache()
 //		SetModel( "models/combine_soldier_early.mdl" );
 	}
 
+	PrecacheModel( "models/combine_soldier_early.mdl" ); //Fixes crash
 	PrecacheModel( STRING( GetModelName() ) );
 
 	UTIL_PrecacheOther( "item_healthkit" );
@@ -194,15 +196,18 @@ void CNPC_CombineS::Precache()
 void CNPC_CombineS::Wake( bool bFireOutput )
 {
 	//Early Combine should be determined by an env_global
-	if (GlobalEntity_GetState("mo_early_timeline") == GLOBAL_ON)
+	if (GlobalEntity_GetState("mo_early_timeline") == GLOBAL_ON && bFireOutput)
 	{
 		m_fIsEarlyCombine = true;
+		SetModel( "models/combine_soldier_early.mdl" );
+		SetModelName(MAKE_STRING("models/combine_soldier_early.mdl"));
+		if (HasShotgun() || HasDbarrel()) m_nBody = 1;
 	}
 	else m_fIsEarlyCombine = false;
 
-	if (m_fIsEarlyCombine == true && (HasShotgun() || HasDbarrel())) m_nBody = 1; SetModelName(MAKE_STRING("models/combine_soldier_early.mdl")); SetModel("models/combine_soldier_early.mdl");
+//	if (m_fIsEarlyCombine == true && (HasShotgun() || HasDbarrel())) m_nBody = 1; SetModelName(MAKE_STRING("models/combine_soldier_early.mdl")); SetModel("models/combine_soldier_early.mdl");
 
-	BaseClass::Wake();
+	BaseClass::Wake( bFireOutput );
 }
 
 void CNPC_CombineS::DeathSound( const CTakeDamageInfo &info )

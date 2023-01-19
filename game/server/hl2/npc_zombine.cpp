@@ -34,6 +34,7 @@
 #include "grenade_frag.h"
 
 #include "ai_interactions.h"
+#include "globalstate.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -146,6 +147,8 @@ public:
 
 	virtual bool HandleInteraction( int interactionType, void *data, CBaseCombatCharacter *sourceEnt );
 
+	virtual	void		Wake(bool bFireOutput = true);
+
 	enum
 	{
 		COND_ZOMBINE_GRENADE = LAST_BASE_ZOMBIE_CONDITION,
@@ -216,6 +219,12 @@ void CNPC_Zombine::Spawn( void )
 
 	CapabilitiesClear();
 
+	//Early Zombine skin should be determined by an env_global
+	if ( GlobalEntity_GetState("mo_early_timeline") == GLOBAL_ON )
+	{
+		m_nSkin = 1;
+	}
+
 	BaseClass::Spawn();
 
 	m_flSprintTime = 0.0f;
@@ -250,6 +259,16 @@ void CNPC_Zombine::Precache( void )
 	PrecacheScriptSound( "ATV_engine_null" );
 	PrecacheScriptSound( "Zombine.Charge" );
 	PrecacheScriptSound( "Zombie.Attack" );
+}
+
+void CNPC_Zombine::Wake( bool bFireOutput )
+{
+	if ( GlobalEntity_GetState("mo_early_timeline") == GLOBAL_ON && bFireOutput)
+	{
+		m_nSkin = 1;
+	}
+
+	BaseClass::Wake( bFireOutput );
 }
 
 void CNPC_Zombine::SetZombieModel( void )
