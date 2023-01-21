@@ -108,7 +108,7 @@ void CNPC_CombineS::Spawn( void )
 	if ( !IsElite() && !Hasjetpack() && m_fIsEarlyCombine ) //Override maps with default Combine models to use early model if the global is set - epicplayer
 	{ 
 		SetModelName( MAKE_STRING( "models/combine_soldier_early.mdl" ) ); 
-		SetModel( "models/combine_soldier_early.mdl" );
+//		SetModel( "models/combine_soldier_early.mdl" );
 		if (HasShotgun()) m_nBody = 1;
 	}
 
@@ -199,7 +199,7 @@ void CNPC_CombineS::Wake( bool bFireOutput )
 	if (GlobalEntity_GetState("mo_early_timeline") == GLOBAL_ON && bFireOutput)
 	{
 		m_fIsEarlyCombine = true;
-		SetModel( "models/combine_soldier_early.mdl" );
+//		SetModel( "models/combine_soldier_early.mdl" );
 		SetModelName(MAKE_STRING("models/combine_soldier_early.mdl"));
 		if (HasShotgun() || HasDbarrel()) m_nBody = 1;
 	}
