@@ -284,6 +284,7 @@ public:
 
 	CSoundPatch *m_sndLeeches;
 	CSoundPatch *m_sndWaterSplashes;
+	Class_T				m_nControlClass;			// Class when player is controlling another entity
 
 protected:
 	virtual void		PreThink( void );
@@ -300,7 +301,7 @@ private:
 
 	void				OnSquadMemberKilled( inputdata_t &data );
 
-	Class_T				m_nControlClass;			// Class when player is controlling another entity
+
 	// This player's HL2 specific data that should only be replicated to 
 	//  the player and not to other players.
 	CNetworkVarEmbedded( CHL2PlayerLocalData, m_HL2Local );
