@@ -27,7 +27,7 @@
 #include "hl2_shareddefs.h"
 #include "rumble_shared.h"
 #include "gamestats.h"
-//#include "player_missile.h"
+#include "player_missile.h"
 
 #ifdef HL2_DLL
 	extern int g_interactionPlayerLaunchedML;
@@ -241,7 +241,7 @@ bool CWeaponMissileLauncher::WeaponShouldBeLowered( void )
 void CWeaponMissileLauncher::PrimaryAttack( void )
 {
 	// Can't have an active missile out
-	if ( m_hMissile != NULL )
+	if ( m_hMissile && m_hMissile->m_bActive)
 		return;
 
 	// Can't be reloading
@@ -266,14 +266,21 @@ void CWeaponMissileLauncher::PrimaryAttack( void )
 
 	QAngle vecAngles;
 	VectorAngles( vForward, vecAngles );
-//	m_hMissile = CPlayer_Missile::Create("missile", muzzlePoint, vecAngles, GetOwner());
-	m_hMissile = (CBaseAnimating*)CreateEntityByName("player_missile");
 
-//	m_hMissile->m_hOwner = this;
-	m_hMissile->SetOwnerEntity(this);
-	m_hMissile->Spawn();
-//	pBattery->m_vSpawnPos = muzzlePoint;
-//	pBattery->m_vSpawnAng = vecAngles;
+
+	if (!m_hMissile)
+	{
+		m_hMissile = dynamic_cast<CPlayer_Missile*>(CreateEntityByName("player_missile"));
+	}
+	m_hMissile->SetOwnerEntity(GetOwner());
+	m_hMissile->SetAbsOrigin(muzzlePoint);
+	m_hMissile->SetAbsAngles(vecAngles);
+	m_hMissile->SetDamage(3500);
+	m_hMissile->m_flDamageRadius = 250;
+	m_hMissile->SetHealth(200);
+	DispatchSpawn(m_hMissile);
+	m_hMissile->InputActivate(inputdata_t{ this,this });
+
 
 	// If the shot is clear to the player, give the missile a grace period
 	trace_t	tr;
@@ -409,7 +416,7 @@ bool CWeaponMissileLauncher::Deploy( void )
 bool CWeaponMissileLauncher::Holster( CBaseCombatWeapon *pSwitchingTo )
 {
 	//Can't have an active missile out
-	if ( m_hMissile != NULL )
+	if ( m_hMissile && m_hMissile->m_bActive )
 		return false;
 
 	StopGuiding();

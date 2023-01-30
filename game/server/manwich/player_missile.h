@@ -4,7 +4,7 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-
+#pragma once
 #include "cbase.h"
 #include "player_control.h"
 #include "hl2_player.h"
