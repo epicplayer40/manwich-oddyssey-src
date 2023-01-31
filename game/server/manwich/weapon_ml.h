@@ -16,9 +16,9 @@
 #include "Sprite.h"
 #include "npcevent.h"
 #include "beam_shared.h"
-//#include "player_missile.h"
+#include "player_missile.h"
 
-class CWeaponMissileLauncher;
+
  
 //-----------------------------------------------------------------------------
 // RPG
@@ -78,7 +78,7 @@ public:
 		return cone;
 	}
 	
-	CBaseEntity *GetMissile(void) { return m_hMissile; }
+	CBaseEntity *GetMissile(void) { return m_hMissile.Get(); }
 
 	DECLARE_ACTTABLE();
 	DECLARE_DATADESC();
@@ -89,9 +89,9 @@ protected:
 	bool				m_bGuiding;
 	bool				m_bHideGuiding;		//User to override the player's wish to guide under certain circumstances
 	Vector				m_vecNPCLaserDot;
-//	CHandle<CPlayer_Missile>	m_hMissile;
-	CHandle<CBaseAnimating>	m_hMissile;
-//	CHandle<CPlayer_Missile>	m_hMissilehandle;
+	CHandle<CLaserDot>	m_hLaserDot;
+	CHandle<CPlayer_Missile>	m_hMissile;
+	CHandle<CAPCMissile>	m_hNpcMissile;
 	CHandle<CSprite>	m_hLaserMuzzleSprite;
 	CHandle<CBeam>		m_hLaserBeam;
 };
