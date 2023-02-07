@@ -72,5 +72,7 @@ public:
 	float			m_flStatic;
 	float			m_flNextDangerTime;
 
+	bool			m_bUseGenericDamage;
+
 	DECLARE_DATADESC();
 };

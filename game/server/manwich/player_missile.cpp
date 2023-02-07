@@ -89,6 +89,7 @@ void CPlayer_Missile::Spawn( void )
 	m_bActive	= false;
 	m_vSpawnPos = GetLocalOrigin();
 	m_vSpawnAng = GetLocalAngles();
+	m_bUseGenericDamage = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -241,6 +242,15 @@ void CPlayer_Missile::Event_Killed( const CTakeDamageInfo &info )
 //-----------------------------------------------------------------------------
 void CPlayer_Missile::FlyTouch(CBaseEntity *pOther)
 {
+		// If we hit a strider then deal generic damage instead of blast damage, so we deal the right amount of damage to the strider. - epicplayer
+	if (( FClassnameIs( pOther, "npc_strider" ) || 
+		(pOther->GetOwnerEntity() && FClassnameIs( pOther->GetOwnerEntity(), "npc_strider" )) ) 
+		)
+	{
+		m_bUseGenericDamage = true;
+//		return;
+	}
+
 	BlowUp();
 }
 
@@ -280,7 +290,8 @@ void CPlayer_Missile::BlowUp(void)
 	UTIL_ScreenShake( GetAbsOrigin(), 25.0, 150.0, 1.0, 750, SHAKE_START );
 	CSoundEnt::InsertSound ( SOUND_DANGER, GetAbsOrigin(), 1024, 3.0 );
 
-	RadiusDamage ( CTakeDamageInfo( this, this, m_flDamage, DMG_BLAST ), GetAbsOrigin(), m_flDamageRadius, CLASS_NONE, NULL );
+	if (m_bUseGenericDamage) RadiusDamage ( CTakeDamageInfo( this, this, m_flDamage, DMG_GENERIC ), GetAbsOrigin(), m_flDamageRadius, CLASS_NONE, NULL ); //Make strider go boom - epicplayer
+	else RadiusDamage ( CTakeDamageInfo( this, this, m_flDamage, DMG_BLAST ), GetAbsOrigin(), m_flDamageRadius, CLASS_NONE, NULL );
 
 	SetThink(&CPlayer_Missile::ExplodeThink);
 	SetTouch(NULL);
