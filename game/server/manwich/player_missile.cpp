@@ -195,7 +195,9 @@ void CPlayer_Missile::ControlDeactivate( void )
 		pPlayer->GetActiveWeapon()->Deploy();
 	}
 
-	pPlayer->m_Local.m_iHideHUD &= ~HIDEHUD_WEAPONSELECTION;
+	pPlayer->m_Local.m_iHideHUD &= ~HIDEHUD_WEAPONSELECTION;	
+
+	pPlayer->ClearZoomOwner();
 
 	SetAbsVelocity( vec3_origin );
 	SetLocalAngles( m_vSpawnAng );
@@ -257,7 +259,7 @@ void CPlayer_Missile::BlowUp(void)
 	StopSound( "Player_Manhack.Fly" );
 	StopSound( "Player_Manhack.Fire" );
 
-	CPASFilter filter( GetAbsOrigin() );
+	CPASFilter filter( GetAbsOrigin()	);
 	te->Explosion( filter, 0.0,
 		&GetAbsOrigin(), 
 		g_sModelIndexFireball,

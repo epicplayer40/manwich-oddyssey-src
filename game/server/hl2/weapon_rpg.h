@@ -98,6 +98,8 @@ private:
 	float					m_flGracePeriodEndsAt;
 	bool					m_bCreateDangerSounds;
 
+	//Lychy
+public:	bool m_bIsStinger;
 	DECLARE_DATADESC();
 };
 
@@ -119,7 +121,7 @@ class CAPCMissile : public CMissile
 	DECLARE_DATADESC();
 
 public:
-	static CAPCMissile *Create( const Vector &vecOrigin, const QAngle &vecAngles, const Vector &vecVelocity, CBaseEntity *pOwner );
+	static CAPCMissile *Create( const Vector &vecOrigin, const QAngle &vecAngles, const Vector &vecVelocity, CBaseEntity *pOwner, bool isStinger = false );
 
 	CAPCMissile();
 	~CAPCMissile();

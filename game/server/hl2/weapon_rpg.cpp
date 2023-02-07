@@ -165,6 +165,8 @@ void CMissile::Spawn( void )
 	SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_BOUNCE );
 	SetThink( &CMissile::IgniteThink );
 	
+	if (m_bIsStinger)
+		EmitSound("Player_Manhack.Fire");
 	SetNextThink( gpGlobals->curtime + 0.3f );
 	SetDamage(200.0f);
 
@@ -446,7 +448,10 @@ void CMissile::IgniteThink( void )
 
 	Vector vecForward;
 
-	EmitSound( "Missile.Ignite" );
+	if(m_bIsStinger)
+		EmitSound( "Player_Manhack.Fly" );
+	else
+		EmitSound( "Missile.Ignite" );
 
 	AngleVectors( GetLocalAngles(), &vecForward );
 	SetAbsVelocity( vecForward * RPG_SPEED );
@@ -960,9 +965,10 @@ END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( apc_missile, CAPCMissile );
 
-CAPCMissile *CAPCMissile::Create( const Vector &vecOrigin, const QAngle &vecAngles, const Vector &vecVelocity, CBaseEntity *pOwner )
+CAPCMissile *CAPCMissile::Create( const Vector &vecOrigin, const QAngle &vecAngles, const Vector &vecVelocity, CBaseEntity *pOwner, bool isStinger )
 {
 	CAPCMissile *pMissile = (CAPCMissile *)CBaseEntity::Create( "apc_missile", vecOrigin, vecAngles, pOwner );
+	pMissile->m_bIsStinger = isStinger;
 	pMissile->SetOwnerEntity( pOwner );
 	pMissile->Spawn();
 	pMissile->SetAbsVelocity( vecVelocity );
@@ -1146,6 +1152,7 @@ void CAPCMissile::SetGuidanceHint( const char *pHintName )
 //-----------------------------------------------------------------------------
 void CAPCMissile::DoExplosion( void )
 {
+	StopSound("Player_Manhack.Fly");	
 	if ( GetWaterLevel() != 0 )
 	{
 		CEffectData data;

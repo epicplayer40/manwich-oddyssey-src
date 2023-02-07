@@ -89,7 +89,9 @@ protected:
 	bool				m_bGuiding;
 	bool				m_bHideGuiding;		//User to override the player's wish to guide under certain circumstances
 	Vector				m_vecNPCLaserDot;
+	CHandle<CLaserDot>	m_hLaserDot;
 	CHandle<CPlayer_Missile>	m_hMissile;
+	CHandle<CAPCMissile>	m_hNpcMissile;
 	CHandle<CSprite>	m_hLaserMuzzleSprite;
 	CHandle<CBeam>		m_hLaserBeam;
 };

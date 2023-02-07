@@ -28,6 +28,10 @@
 #include "rumble_shared.h"
 #include "gamestats.h"
 #include "player_missile.h"
+#include "props.h"
+
+extern ConVar sk_plr_dmg_ml_grenade;
+extern ConVar sk_npc_dmg_ml_grenade;
 
 #ifdef HL2_DLL
 	extern int g_interactionPlayerLaunchedML;
@@ -189,9 +193,14 @@ void CWeaponMissileLauncher::Operator_HandleAnimEvent( animevent_t *pEvent, CBas
 
 			VectorAngles( vecShootDir, vecAngles );
 
-//			m_hMissile = new CPlayer_Missile::Spawn( muzzlePoint, vecAngles, GetOwner()->edict() );		
-	//		m_hMissile->m_hOwner = this;
-		//	m_hMissile->SetDamage(APC_MISSILE_DAMAGE);
+			m_hNpcMissile = CAPCMissile::Create( muzzlePoint, vecAngles, vecShootDir * PMISSILE_SPEED,this,true );
+			if (!m_hNpcMissile)
+				return;
+			CBaseEntity* pTarget = GetOwner()->GetEnemy();
+
+			m_hNpcMissile->AimAtSpecificTarget(pTarget);
+			m_hNpcMissile->SetOwnerEntity(GetOwner());
+			m_hNpcMissile->SetDamage(sk_npc_dmg_ml_grenade.GetFloat());
 
 			// NPCs always get a grace period
 			//m_hMissile->SetGracePeriod( 0.5 );
@@ -216,7 +225,7 @@ void CWeaponMissileLauncher::Operator_HandleAnimEvent( animevent_t *pEvent, CBas
 //-----------------------------------------------------------------------------
 bool CWeaponMissileLauncher::HasAnyAmmo( void )
 {
-	if ( m_hMissile != NULL )
+	if ( m_hMissile && m_hMissile->m_bActive != NULL )
 		return true;
 
 	return BaseClass::HasAnyAmmo();
@@ -269,13 +278,12 @@ void CWeaponMissileLauncher::PrimaryAttack( void )
 
 
 	if (!m_hMissile)
-	{
 		m_hMissile = dynamic_cast<CPlayer_Missile*>(CreateEntityByName("player_missile"));
-	}
+
 	m_hMissile->SetOwnerEntity(GetOwner());
 	m_hMissile->SetAbsOrigin(muzzlePoint);
 	m_hMissile->SetAbsAngles(vecAngles);
-	m_hMissile->SetDamage(3500);
+	m_hMissile->m_flDamage = sk_plr_dmg_ml_grenade.GetFloat();
 	m_hMissile->m_flDamageRadius = 250;
 	m_hMissile->SetHealth(200);
 	DispatchSpawn(m_hMissile);
@@ -406,6 +414,28 @@ bool CWeaponMissileLauncher::IsGuiding( void )
 bool CWeaponMissileLauncher::Deploy( void )
 {
 	m_bInitialStateUpdate = true;
+	CBaseCombatCharacter* pOwner = GetOwner();
+	if (pOwner && pOwner->GetAmmoCount(m_iPrimaryAmmoType) <= 0)
+	{
+		Holster();
+
+		//Lychy: cant use Drop() it sux
+		CPhysicsProp* pProp = (CPhysicsProp*)(CreateEntityByName("prop_physics_override"));
+
+		pProp->SetModel(GetWorldModel());
+
+		pProp->SetCollisionGroup(COLLISION_GROUP_WEAPON);
+		pProp->SetAbsOrigin(pOwner->Weapon_ShootPosition());
+		pProp->SetAbsAngles(pOwner->EyeAngles() + QAngle(0, 180, 0));
+		DispatchSpawn(pProp);
+		UTIL_Remove(this);
+		//ReloadOrSwitchWeapons();
+		//g_pGameRules->SwitchToNextBestWeapon(pOwner, this);
+		CBaseCombatWeapon* pWeapon = g_pGameRules->GetNextBestWeapon(pOwner, this);
+		if (pWeapon != this)
+			pOwner->Weapon_Switch(pWeapon);
+		return false;
+	}
 
 	return BaseClass::Deploy();
 }
