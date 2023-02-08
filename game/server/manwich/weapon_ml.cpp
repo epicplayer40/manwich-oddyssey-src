@@ -414,11 +414,12 @@ bool CWeaponMissileLauncher::IsGuiding( void )
 bool CWeaponMissileLauncher::Deploy( void )
 {
 	m_bInitialStateUpdate = true;
+	WeaponSound(SPECIAL1);
 	CBaseCombatCharacter* pOwner = GetOwner();
 	if (pOwner && pOwner->GetAmmoCount(m_iPrimaryAmmoType) <= 0)
 	{
 		Holster();
-
+		WeaponSound(SPECIAL2);
 		//Lychy: cant use Drop() it sux
 		CPhysicsProp* pProp = (CPhysicsProp*)(CreateEntityByName("prop_physics_override"));
 
@@ -464,7 +465,7 @@ void CWeaponMissileLauncher::StartGuiding( void )
 
 	m_bGuiding = true;
 
-	WeaponSound(SPECIAL1);
+//	WeaponSound(SPECIAL1);
 
 }
 
@@ -475,7 +476,7 @@ void CWeaponMissileLauncher::StopGuiding( void )
 {
 	m_bGuiding = false;
 
-	WeaponSound( SPECIAL2 );
+//	WeaponSound( SPECIAL2 );
 
 }
 
