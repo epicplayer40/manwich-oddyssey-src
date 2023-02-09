@@ -37,6 +37,8 @@ PMaterialHandle g_Blood_Core = NULL;
 PMaterialHandle g_Blood_Gore = NULL;
 PMaterialHandle g_Blood_Drops = NULL;
 
+ConVar manod_old_blood("manod_old_blood", "0");
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : bloodtype - 
@@ -505,17 +507,18 @@ void BloodImpactCallback( const CEffectData & data )
 	bool bFoundBlood = false;
 
 	// Find which sort of blood we are
-	for ( int i = 0; i < ARRAYSIZE( bloodCallbacks ); i++ )
-	{
-		if ( bloodCallbacks[i].nColor == data.m_nColor )
+	if (!manod_old_blood.GetBool())
+		for (int i = 0; i < ARRAYSIZE(bloodCallbacks); i++)
 		{
-			QAngle	vecAngles;
-			VectorAngles( -data.m_vNormal, vecAngles );
-			DispatchParticleEffect( bloodCallbacks[i].lpszParticleSystemName, data.m_vOrigin, vecAngles );
-			bFoundBlood = true;
-			break;
+			if (bloodCallbacks[i].nColor == data.m_nColor)
+			{
+				QAngle	vecAngles;
+				VectorAngles(-data.m_vNormal, vecAngles);
+				DispatchParticleEffect(bloodCallbacks[i].lpszParticleSystemName, data.m_vOrigin, vecAngles);
+				bFoundBlood = true;
+				break;
+			}
 		}
-	}
 
 	if ( bFoundBlood == false )
 	{

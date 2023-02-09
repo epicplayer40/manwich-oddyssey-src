@@ -241,6 +241,8 @@ void CPlayer_Missile::Event_Killed( const CTakeDamageInfo &info )
 //-----------------------------------------------------------------------------
 void CPlayer_Missile::FlyTouch(CBaseEntity *pOther)
 {
+	if (!pOther->IsSolid())
+		return;
 	BlowUp();
 }
 

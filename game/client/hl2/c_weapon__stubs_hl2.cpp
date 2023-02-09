@@ -44,7 +44,7 @@ STUB_WEAPON_CLASS(weapon_alyxgun, WeaponAlyxGun, C_HLSelectFireMachineGun);
 //STUB_WEAPON_CLASS(weapon_proto1, WeaponProto1, C_BaseHLCombatWeapon );
 //STUB_WEAPON_CLASS(weapon_physcannon, WeaponPhysCannon, C_BaseHLCombatWeapon);
 STUB_WEAPON_CLASS(weapon_ar1, WeaponAR1, C_HLMachineGun);
-//STUB_WEAPON_CLASS(weapon_brickbat, WeaponBrickbat, C_BaseHLCombatWeapon);
+STUB_WEAPON_CLASS(weapon_brickbat, WeaponBrickbat, C_BaseHLCombatWeapon);
 STUB_WEAPON_CLASS(weapon_cguard, WeaponCGuard, C_BaseHLCombatWeapon);
 STUB_WEAPON_CLASS(weapon_immolator, WeaponImmolator, C_BaseHLCombatWeapon);
 //STUB_WEAPON_CLASS(weapon_extinguisher, WeaponExtinguisher, C_HLSelectFireMachineGun);

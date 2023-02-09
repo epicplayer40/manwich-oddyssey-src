@@ -1,3 +1,4 @@
+#if 0 //lychy: why we using this doods flare gun, use the beta flaregun at weapon_flaregun.cpp
 //========= Copyright Valve Corporation, All rights reserved. ============//
 // Purpose:		Flare gun (fffsssssssssss!!)
 //
@@ -361,3 +362,4 @@ void CFlareGunProjectile::IgniteOtherIfAllowed(CBaseEntity * pOther)
 		pOther->TakeDamage(CTakeDamageInfo(this, m_pOwner, sk_npc_dmg_flare_round.GetFloat(), (DMG_BULLET | DMG_BURN)));
 
 }
+#endif

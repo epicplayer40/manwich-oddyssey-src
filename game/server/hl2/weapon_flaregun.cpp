@@ -388,8 +388,8 @@ void CFlare::FlareTouch( CBaseEntity *pOther )
 	//If the flare hit a person or NPC, do damage here.
 	if ( pOther && pOther->m_takedamage )
 	{
-		/*
-			The Flare is the iRifle round right now. No damage, just ignite. (sjb)
+		///*
+			//The Flare is the iRifle round right now. No damage, just ignite. (sjb)
 
 		//Damage is a function of how fast the flare is flying.
 		int iDamage = GetAbsVelocity().Length() / 50.0f;
@@ -403,7 +403,7 @@ void CFlare::FlareTouch( CBaseEntity *pOther )
 		//Use m_pOwner, not GetOwnerEntity()
 		pOther->TakeDamage( CTakeDamageInfo( this, m_pOwner, iDamage, (DMG_BULLET|DMG_BURN) ) );
 		m_flNextDamage = gpGlobals->curtime + 1.0f;
-		*/
+		//*/
 
 		CBaseAnimating *pAnim;
 
@@ -545,10 +545,14 @@ void CFlare::Start( float lifeTime )
 //-----------------------------------------------------------------------------
 void CFlare::Die( float fadeTime )
 {
-	m_flTimeBurnOut = gpGlobals->curtime + fadeTime;
+	if (!m_bHasCalledDie)
+	{
+		m_bHasCalledDie = true;
+		m_flTimeBurnOut = gpGlobals->curtime + fadeTime;
 
-	SetThink( &CFlare::FlareThink );
-	SetNextThink( gpGlobals->curtime + 0.1f );
+		SetThink(&CFlare::FlareThink);
+		SetNextThink(gpGlobals->curtime + 0.1f);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -657,7 +661,7 @@ void CFlare::AddToActiveFlares( void )
 	}
 }
 
-#if 0
+#if 1
 
 IMPLEMENT_SERVERCLASS_ST(CFlaregun, DT_Flaregun)
 END_SEND_TABLE()

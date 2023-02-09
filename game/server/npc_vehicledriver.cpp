@@ -865,6 +865,7 @@ void CNPC_VehicleDriver::DriveVehicle( void )
 		{
 			m_pVehicleInterface->NPC_Brake();
 		}
+		m_pVehicleInterface->NPC_TurnCenter();
 		return;
 	}
 

@@ -28,6 +28,7 @@
 #include "rumble_shared.h"
 #include "gamestats.h"
 #include "player_missile.h"
+#include "props.h"
 
 extern ConVar sk_plr_dmg_ml_grenade;
 extern ConVar sk_npc_dmg_ml_grenade;
@@ -224,7 +225,7 @@ void CWeaponMissileLauncher::Operator_HandleAnimEvent( animevent_t *pEvent, CBas
 //-----------------------------------------------------------------------------
 bool CWeaponMissileLauncher::HasAnyAmmo( void )
 {
-	if ( m_hMissile != NULL )
+	if ( m_hMissile && m_hMissile->m_bActive != NULL )
 		return true;
 
 	return BaseClass::HasAnyAmmo();
@@ -413,6 +414,28 @@ bool CWeaponMissileLauncher::IsGuiding( void )
 bool CWeaponMissileLauncher::Deploy( void )
 {
 	m_bInitialStateUpdate = true;
+	CBaseCombatCharacter* pOwner = GetOwner();
+	if (pOwner && pOwner->GetAmmoCount(m_iPrimaryAmmoType) <= 0)
+	{
+		Holster();
+
+		//Lychy: cant use Drop() it sux
+		CPhysicsProp* pProp = (CPhysicsProp*)(CreateEntityByName("prop_physics_override"));
+
+		pProp->SetModel(GetWorldModel());
+
+		pProp->SetCollisionGroup(COLLISION_GROUP_WEAPON);
+		pProp->SetAbsOrigin(pOwner->Weapon_ShootPosition());
+		pProp->SetAbsAngles(pOwner->EyeAngles() + QAngle(0, 180, 0));
+		DispatchSpawn(pProp);
+		UTIL_Remove(this);
+		//ReloadOrSwitchWeapons();
+		//g_pGameRules->SwitchToNextBestWeapon(pOwner, this);
+		CBaseCombatWeapon* pWeapon = g_pGameRules->GetNextBestWeapon(pOwner, this);
+		if (pWeapon != this)
+			pOwner->Weapon_Switch(pWeapon);
+		return false;
+	}
 
 	return BaseClass::Deploy();
 }

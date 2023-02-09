@@ -83,6 +83,8 @@ public:
 	bool		m_bInActiveList;
 	CFlare *	m_pNextFlare;
 
+	bool m_bHasCalledDie;
+
 	void		RemoveFromActiveFlares( void );
 	void		AddToActiveFlares( void );
 };

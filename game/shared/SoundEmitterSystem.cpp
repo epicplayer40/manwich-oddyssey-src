@@ -783,6 +783,7 @@ public:
 
 		bool fromplayer = false;
 		CBaseEntity *ent = CBaseEntity::Instance( entindex );
+		CBaseEntity* oldEnt = ent; 
 		if ( ent )
 		{
 			while ( ent )
@@ -792,8 +793,10 @@ public:
 					fromplayer = true;
 					break;
 				}
-
+				oldEnt = ent;
 				ent = ent->GetOwnerEntity();
+				if (ent == oldEnt)
+					break;
 			}
 		}
 		EmitCloseCaption( filter, entindex, fromplayer, ep.m_pSoundName, ep.m_UtlVecSoundOrigin, duration, ep.m_bWarnOnMissingCloseCaption );
