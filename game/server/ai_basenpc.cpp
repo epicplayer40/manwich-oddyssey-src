@@ -86,6 +86,7 @@
 #include "death_pose.h"
 #include "datacache/imdlcache.h"
 #include "vstdlib/jobthread.h"
+#include "explode.h"
 
 #ifdef HL2_EPISODIC
 #include "npc_alyx_episodic.h"
@@ -151,6 +152,8 @@ ConVar	ai_frametime_limit( "ai_frametime_limit", "50", FCVAR_NONE, "frametime li
 ConVar	ai_use_think_optimizations( "ai_use_think_optimizations", "1" );
 
 ConVar	ai_test_moveprobe_ignoresmall( "ai_test_moveprobe_ignoresmall", "0" );
+
+ConVar	ai_explode_on_fail( "ai_explode_on_fail", "0" ); //something rather devious - epicplayer
 
 #ifdef HL2_EPISODIC
 extern ConVar ai_vehicle_avoidance;
@@ -7573,6 +7576,8 @@ int CAI_BaseNPC::TaskIsRunning( void )
 void CAI_BaseNPC::TaskFail( AI_TaskFailureCode_t code )
 {
 	EndTaskOverlay();
+
+	if (ai_explode_on_fail.GetBool() == true) { ExplosionCreate(GetAbsOrigin(), GetAbsAngles(), GetOwnerEntity(), (GetMaxHealth() * 2 + 10), 100, SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE, 0.0f, this); } //Explode for the funny, explosion damage is taken from entity's health - epicplayer
 
 	// Handy tool for debugging
 	//if (IsCurSchedule(SCHED_PUT_NAME_HERE))
