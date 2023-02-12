@@ -161,23 +161,28 @@ void CBaseCombatWeapon::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseComb
 {
 	if ( (pEvent->type & AE_TYPE_NEWEVENTSYSTEM) && (pEvent->type & AE_TYPE_SERVER) )
 	{
-		if ( pEvent->event == AE_NPC_WEAPON_FIRE )
+		if (pEvent->event == AE_NPC_WEAPON_FIRE)
 		{
-			bool bSecondary = (atoi( pEvent->options ) != 0);
-			Operator_ForceNPCFire( pOperator, bSecondary );
+			bool bSecondary = (atoi(pEvent->options) != 0);
+			Operator_ForceNPCFire(pOperator, bSecondary);
 			return;
 		}
-		else if ( pEvent->event == AE_WPN_PLAYWPNSOUND )
+		else if (pEvent->event == AE_WPN_PLAYWPNSOUND)
 		{
 			int iSnd = GetWeaponSoundFromString(pEvent->options);
-			if ( iSnd != -1 )
+			if (iSnd != -1)
 			{
-				WeaponSound( (WeaponSound_t)iSnd );
+				WeaponSound((WeaponSound_t)iSnd);
 			}
 		}
+		return;
 	}
-
-	DevWarning( 2, "Unhandled animation event %d from %s --> %s\n", pEvent->event, pOperator->GetClassname(), GetClassname() );
+	if (pEvent->event == EVENT_WEAPON_DROP) //Lychy: drop the weapon whenever an anim tells it to
+	{
+		Drop(vec3_origin);
+	}
+	else
+		DevWarning( 2, "Unhandled animation event %d from %s --> %s\n", pEvent->event, pOperator->GetClassname(), GetClassname() );
 }
 
 // NOTE: This should never be called when a character is operating the weapon.  Animation events should be

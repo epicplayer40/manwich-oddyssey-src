@@ -66,3 +66,4 @@ config.cfg
 
 *.pdb
 *.txt
+*.enc

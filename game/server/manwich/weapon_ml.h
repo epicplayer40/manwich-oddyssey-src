@@ -48,7 +48,6 @@ public:
 	bool	WeaponShouldBeLowered( void );
 	bool	Lower( void );
 
-	virtual void Drop( const Vector &vecVelocity );
 
 	int		GetMinBurst() { return 1; }
 	int		GetMaxBurst() { return 1; }
@@ -71,6 +70,7 @@ public:
 	void	SuppressGuiding( bool state = true );
 
 	int		CapabilitiesGet( void ) { return bits_CAP_WEAPON_RANGE_ATTACK1; }
+	void			Drop(const Vector& vecVelocity);
 
 	virtual const Vector& GetBulletSpread( void )
 	{
@@ -88,6 +88,7 @@ protected:
 	bool				m_bInitialStateUpdate;
 	bool				m_bGuiding;
 	bool				m_bHideGuiding;		//User to override the player's wish to guide under certain circumstances
+	bool				m_bIsDropping; 
 	Vector				m_vecNPCLaserDot;
 	CHandle<CLaserDot>	m_hLaserDot;
 	CHandle<CPlayer_Missile>	m_hMissile;

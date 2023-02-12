@@ -126,7 +126,8 @@ void CWeaponMissileLauncher::Precache( void )
 	// Laser dot...
 	PrecacheModel( "sprites/redglow1.vmt" );
 
-	UTIL_PrecacheOther( "rpg_missile" );
+	UTIL_PrecacheOther( "player_missile" );
+	UTIL_PrecacheOther( "apc_missile" );
 }
 
 
@@ -214,6 +215,9 @@ void CWeaponMissileLauncher::Operator_HandleAnimEvent( animevent_t *pEvent, CBas
 		}
 		break;
 
+		case EVENT_WEAPON_SEQUENCE_FINISHED:
+			UTIL_Remove(this);
+			break;
 		default:
 			BaseClass::Operator_HandleAnimEvent( pEvent, pOperator );
 			break;
@@ -418,23 +422,10 @@ bool CWeaponMissileLauncher::Deploy( void )
 	CBaseCombatCharacter* pOwner = GetOwner();
 	if (pOwner && pOwner->GetAmmoCount(m_iPrimaryAmmoType) <= 0)
 	{
-		Holster();
+		//Holster();
+		m_bIsDropping = true;
+		SendWeaponAnim(ACT_VM_DROP_WEAPON);
 		WeaponSound(SPECIAL2);
-		//Lychy: cant use Drop() it sux
-		CPhysicsProp* pProp = (CPhysicsProp*)(CreateEntityByName("prop_physics_override"));
-
-		pProp->SetModel(GetWorldModel());
-		
-		pProp->SetCollisionGroup(COLLISION_GROUP_WEAPON);
-		pProp->SetAbsOrigin(pOwner->Weapon_ShootPosition());
-		pProp->SetAbsAngles(pOwner->EyeAngles() + QAngle(0, 180, 0));
-		DispatchSpawn(pProp);
-		UTIL_Remove(this);
-		//ReloadOrSwitchWeapons();
-		//g_pGameRules->SwitchToNextBestWeapon(pOwner, this);
-		CBaseCombatWeapon* pWeapon = g_pGameRules->GetNextBestWeapon(pOwner, this);
-		if (pWeapon != this)
-			pOwner->Weapon_Switch(pWeapon);
 		return false;
 	}
 	return BaseClass::Deploy();
@@ -447,8 +438,10 @@ bool CWeaponMissileLauncher::Deploy( void )
 bool CWeaponMissileLauncher::Holster( CBaseCombatWeapon *pSwitchingTo )
 {
 	//Can't have an active missile out
-	if ( m_hMissile && m_hMissile->m_bActive )
+	//Lychy: or the weapon is being dropped
+	if ( ( m_hMissile && m_hMissile->m_bActive ) || m_bIsDropping)
 		return false;
+
 
 	StopGuiding();
 	return BaseClass::Holster( pSwitchingTo );
@@ -501,8 +494,23 @@ void CWeaponMissileLauncher::ToggleGuiding( void )
 void CWeaponMissileLauncher::Drop( const Vector &vecVelocity )
 {
 	StopGuiding();
+	SetWeaponVisible(false);
+	CBaseCombatCharacter* pOwner = GetOwner();
+	if (!pOwner)
+		return;
+	CPhysicsProp* pProp = (CPhysicsProp*)(CreateEntityByName("prop_physics_override"));
 
-	BaseClass::Drop( vecVelocity );
+	pProp->SetModel(GetWorldModel());
+
+	pProp->SetCollisionGroup(COLLISION_GROUP_WEAPON);
+	pProp->SetAbsOrigin(pOwner->Weapon_ShootPosition());
+	pProp->SetAbsAngles(pOwner->EyeAngles() + QAngle(0, 180, 0));
+	DispatchSpawn(pProp);
+
+	CBaseCombatWeapon* pWeapon = g_pGameRules->GetNextBestWeapon(pOwner, this);
+	if (pWeapon != this)
+		pOwner->Weapon_Switch(pWeapon);
+
 }
 
 //-----------------------------------------------------------------------------
