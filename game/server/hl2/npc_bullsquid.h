@@ -77,7 +77,7 @@ private:
 
 	float m_nextSquidSoundTime;
 
-	virtual bool GetSpitVector( const Vector &vecStartPos, const Vector &vecTarget, Vector *vecOut );
+	//virtual bool GetSpitVector( const Vector &vecStartPos, const Vector &vecTarget, Vector *vecOut );
 	Vector	m_vecSaveBullsquidSpitVelocity;	// Saved when we start to attack and used if we failed to get a clear shot once we release
 };
 #endif // NPC_HL2BULLSQUID_H

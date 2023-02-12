@@ -5,12 +5,12 @@
 #include "npc_vehicledriver.h"
 #include "smoke_trail.h"
 
-#define TEMPJEEP
 
-#ifdef TEMPJEEP
+
+
 #define JEEP_GUN_YAW				"vehicle_weapon_yaw"
 #define JEEP_GUN_PITCH				"vehicle_weapon_pitch"
-#endif // TEMPJEEP
+
 
 
 #define CANNON_MAX_UP_PITCH			70
@@ -43,7 +43,6 @@ END_DATADESC()
 void CTankShell::Precache()
 {
 	PrecacheModel(TANKSHELLMODEL);
-
 }
 
 void CTankShell::Spawn()
@@ -158,8 +157,8 @@ public:
 		m_hTank->AimPrimaryWeapon();
 	}
 
-
-	void			NPC_ThrottleReverse(void)
+	//Lychy: The tank should not move if the NPC driver has a good aiming vector
+	void NPC_ThrottleReverse(void)
 	{
 		if (!m_hTank)
 			m_hTank = dynamic_cast<CVehicleTank*>(GetVehicleEnt());
@@ -168,7 +167,7 @@ public:
 		else
 			BaseClass::NPC_ThrottleReverse();
 	}
-	void			NPC_ThrottleForward(void)
+	void NPC_ThrottleForward(void)
 	{
 		if (!m_hTank)
 			m_hTank = dynamic_cast<CVehicleTank*>(GetVehicleEnt());
@@ -177,7 +176,7 @@ public:
 		else
 			BaseClass::NPC_ThrottleForward();
 	}
-	void			NPC_TurnLeft(float flDegrees)
+	void NPC_TurnLeft(float flDegrees)
 	{
 		if (!m_hTank)
 			m_hTank = dynamic_cast<CVehicleTank*>(GetVehicleEnt());
@@ -186,7 +185,7 @@ public:
 		else
 			BaseClass::NPC_TurnLeft(flDegrees);
 	}
-	void			NPC_TurnRight(float flDegrees)
+	void NPC_TurnRight(float flDegrees)
 	{
 		if (!m_hTank)
 			m_hTank = dynamic_cast<CVehicleTank*>(GetVehicleEnt());
@@ -195,6 +194,7 @@ public:
 		else
 			BaseClass::NPC_TurnRight(flDegrees);
 	}
+
 	CHandle<CVehicleTank> m_hTank;
 	float m_flNextAimTime;
 };
@@ -202,9 +202,8 @@ public:
 
 void CVehicleTank::Precache()
 {
-#ifdef TEMPJEEP
+	if(!GetModelName())
 	PrecacheModel("models/vehicles/merkava.mdl");
-#endif
 	PrecacheSound("vehicles/tank_readyfire1.wav");
 	PrecacheScriptSound("Weapon_Mortar.Single");
 	PrecacheSound("vehicles/tank_shellcasing1.wav");
@@ -213,14 +212,14 @@ void CVehicleTank::Spawn()
 {
 	Precache();
 
-#ifdef TEMPJEEP
+if(!m_vehicleScript)
 	m_vehicleScript = MAKE_STRING("scripts/vehicles/jeep_test.txt");
+if(!GetModelName())
 	SetModel("models/vehicles/merkava.mdl");
 
 	//SetBodygroup(1, true);
 	SetPoseParameter(JEEP_GUN_YAW, 0);
 	SetPoseParameter(JEEP_GUN_PITCH, 0);
-#endif // TEMPJEEP
 	SetVehicleType(VEHICLE_TYPE_AIRBOAT_RAYCAST);
 	RegisterThinkContext("ShootThink");
 	SetContextThink(&CVehicleTank::ShootThink, TICK_NEVER_THINK, "ShootThink");
@@ -383,14 +382,7 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 		aimPos = WorldSpaceCenter() + (v_forward * -32.0f) - Vector(0, 0, 128.0f);
 	}
 		
-	//Lychy: compensate for gravity
-	if (isNpc)
-	{
-		//shit calculation
-		//aimPos.z += Vector2D(aimPos.x, aimPos.y).Length() * 0.02f;//(aimPos.z - GetAbsOrigin().z);
-		aimPos = VecCheckThrow(this, GetAbsOrigin(), aimPos, 3500.0f);
-		NDebugOverlay::Cross3D(aimPos, 5, 255, 0, 0, 0, 0.5f);
-	}
+
 
 	matrix3x4_t gunMatrix;
 	GetAttachment(LookupAttachment("gun_ref"), gunMatrix);
@@ -398,6 +390,15 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 	// transform the enemy into gun space
 	Vector localEnemyPosition;
 	VectorITransform(aimPos, gunMatrix, localEnemyPosition);
+
+	//Lychy: compensate for gravity
+	if (isNpc)
+	{
+		//shit calculation
+		aimPos.z += Vector2D(aimPos.x, aimPos.y).Length() * 0.02f;//(aimPos.z - GetAbsOrigin().z);
+		//localEnemyPosition = VecCheckThrow(this, GetAbsOrigin(), localEnemyPosition, 3500.0f);
+		NDebugOverlay::Cross3D(localEnemyPosition, 5, 255, 0, 0, 0, 0.5f);
+	}
 
 	// do a look at in gun space (essentially a delta-lookat)
 	QAngle localEnemyAngles;
@@ -549,9 +550,6 @@ void CVehicleTank::Restore()
 	SetNextThink(TICK_NEVER_THINK, "NPCAimThink");
 }
 #pragma endregion
-
-
-
 
 class CNPC_TankDriver : public CNPC_VehicleDriver
 {

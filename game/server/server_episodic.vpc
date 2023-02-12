@@ -40,6 +40,7 @@ $Project "Server (Mambridge)"
 			$File "hl2/npc_bullsquid.cpp"
 			$File "hl2/npc_bullsquid.h"
 			$File "hl2/grenade_spit_beta.cpp"
+			
 		}
 
 		$File	"ai_eventresponse.cpp"
