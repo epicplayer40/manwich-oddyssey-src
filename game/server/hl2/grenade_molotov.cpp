@@ -27,7 +27,7 @@
 extern short	g_sModelIndexFireball;
 
 //extern ConVar    sk_plr_dmg_molotov;
-ConVar    sk_npc_dmg_molotov		( "sk_npc_dmg_molotov", "40");
+extern ConVar    sk_npc_dmg_molotov;//		("sk_npc_dmg_molotov", "40");
 ConVar    sk_molotov_radius			( "sk_molotov_radius","12");
 
 #define MOLOTOV_EXPLOSION_VOLUME	1024

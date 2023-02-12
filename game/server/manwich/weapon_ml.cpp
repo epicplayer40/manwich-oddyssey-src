@@ -424,7 +424,7 @@ bool CWeaponMissileLauncher::Deploy( void )
 		CPhysicsProp* pProp = (CPhysicsProp*)(CreateEntityByName("prop_physics_override"));
 
 		pProp->SetModel(GetWorldModel());
-
+		
 		pProp->SetCollisionGroup(COLLISION_GROUP_WEAPON);
 		pProp->SetAbsOrigin(pOwner->Weapon_ShootPosition());
 		pProp->SetAbsAngles(pOwner->EyeAngles() + QAngle(0, 180, 0));
