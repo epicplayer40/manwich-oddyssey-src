@@ -756,4 +756,18 @@ void CFlaregun::SecondaryAttack( void )
 	WeaponSound( SINGLE );
 }
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+bool CFlaregun::Reload( void )
+{
+	bool fRet;
+
+	fRet = DefaultReload( GetMaxClip1(), GetMaxClip2(), ACT_VM_RELOAD );
+	if ( fRet )
+	{
+		WeaponSound( RELOAD );
+	}
+
+	return fRet;
+}
 #endif

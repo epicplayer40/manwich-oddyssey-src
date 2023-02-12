@@ -1,4 +1,4 @@
-#if 0 //lychy: why we using this doods flare gun, use the beta flaregun at weapon_flaregun.cpp
+
 //========= Copyright Valve Corporation, All rights reserved. ============//
 // Purpose:		Flare gun (fffsssssssssss!!)
 //
@@ -36,7 +36,7 @@ ConVar	flaregun_dynamic_lights("sv_flaregun_dynamic_lights", "1");
 
 ConVar    sk_plr_dmg_flare_round ("sk_plr_dmg_flare_round", "30" );
 ConVar    sk_npc_dmg_flare_round ("sk_npc_dmg_flare_round", "30" );
-
+#if 0 //lychy: why we using this doods flare gun, use the beta flaregun at weapon_flaregun.cpp
 // Custom derived class for flare gun projectiles
 class CFlareGunProjectile : public CFlare
 {
