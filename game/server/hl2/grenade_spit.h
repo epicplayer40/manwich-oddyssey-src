@@ -18,14 +18,21 @@
 
 class CParticleSystem;
 
+
+#ifndef GRENADESPITBETA_H
 enum SpitSize_e
 {
 	SPIT_SMALL,
 	SPIT_MEDIUM,
 	SPIT_LARGE,
 };
+#endif
 
+#ifndef GRENADESPITBETA_H
 #define SPIT_GRAVITY 600
+#endif // !GRENADESPITBETA_H
+
+
 
 class CGrenadeSpit : public CBaseGrenade
 {

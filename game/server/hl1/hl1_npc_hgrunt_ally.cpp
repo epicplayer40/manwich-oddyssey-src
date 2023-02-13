@@ -2090,7 +2090,7 @@ public:
 	DECLARE_DATADESC();
 };
 
-LINK_ENTITY_TO_CLASS(monster_grunt_repel, CNPC_FHGruntRepel);
+LINK_ENTITY_TO_CLASS(monster_fhgrunt_repel, CNPC_FHGruntRepel);
 
 
 

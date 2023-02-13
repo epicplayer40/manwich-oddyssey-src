@@ -16,11 +16,12 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef	GRENADESPIT_H
-#define	GRENADESPIT_H
+#ifndef	GRENADESPITBETA_H
+#define	GRENADESPITBETA_H
 
 #include "basegrenade_shared.h"
 
+#ifndef GRENADESPIT_H
 enum SpitSize_e
 {
 	SPIT_SMALL,
@@ -28,7 +29,11 @@ enum SpitSize_e
 	SPIT_LARGE,
 };
 
-#define SPIT_GRAVITY 0.5
+#endif // !GRENADESPIT_H
+
+#define SPIT_GRAVITY 1
+
+
 
 class CGrenadeSpitBeta : public CBaseGrenade
 {

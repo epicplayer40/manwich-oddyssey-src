@@ -35,9 +35,9 @@ BEGIN_DATADESC( CGrenadeSpitBeta )
 
 END_DATADESC()
 
-LINK_ENTITY_TO_CLASS( grenade_spit_beta, CGrenadeSpitBeta );
+LINK_ENTITY_TO_CLASS(grenade_spit_bs, CGrenadeSpitBeta );
 
-void CGrenadeSpitBeta::Spawn( void )
+void CGrenadeSpitBeta::Spawn( void ) 
 {
 	Precache( );
 	SetSolid( SOLID_BBOX );
@@ -64,7 +64,7 @@ void CGrenadeSpitBeta::Spawn( void )
 
 	SetGravity( SPIT_GRAVITY );
 	SetFriction( 0.8 );
-	SetSequence( 1 );
+	SetSequence( 0 );
 
 	SetCollisionGroup( HL2COLLISION_GROUP_SPIT );
 }

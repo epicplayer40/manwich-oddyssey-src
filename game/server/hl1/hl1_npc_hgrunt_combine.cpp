@@ -2059,7 +2059,7 @@ public:
 	DECLARE_DATADESC();
 };
 
-LINK_ENTITY_TO_CLASS(monster_grunt_repel, CNPC_CGruntRepel);
+LINK_ENTITY_TO_CLASS(monster_cgrunt_repel, CNPC_CGruntRepel);
 
 
 

@@ -965,7 +965,7 @@ bool CNPC_DeadMetrocop::KeyValue( const char *szKeyName, const char *szValue )
 	return true;
 }
 
-LINK_ENTITY_TO_CLASS( monster_barney_dead, CNPC_DeadMetrocop );
+LINK_ENTITY_TO_CLASS( monster_metrocop_dead, CNPC_DeadMetrocop );
 
 BEGIN_DATADESC( CNPC_DeadMetrocop )
 END_DATADESC()

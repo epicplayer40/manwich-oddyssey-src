@@ -2271,7 +2271,7 @@ public:
 	DECLARE_DATADESC();
 };
 
-LINK_ENTITY_TO_CLASS(monster_grunt_repel, CNPC_STrooperRepel);
+LINK_ENTITY_TO_CLASS(monster_strooper_repel, CNPC_STrooperRepel);
 
 
 

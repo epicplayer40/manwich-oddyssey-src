@@ -67,3 +67,4 @@ config.cfg
 *.pdb
 *.txt
 *.enc
+enc_temp_folder/

@@ -2257,7 +2257,7 @@ public:
 	DECLARE_DATADESC();
 };
 
-LINK_ENTITY_TO_CLASS(monster_grunt_repel, CNPC_ArmyMenRepel);
+LINK_ENTITY_TO_CLASS(monster_armymen_repel, CNPC_ArmyMenRepel);
 
 
 

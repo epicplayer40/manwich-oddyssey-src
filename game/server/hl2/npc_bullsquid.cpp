@@ -23,6 +23,7 @@
 #include "gamerules.h"		// For g_pGameRules
 #include "ammodef.h"
 #include "grenade_spit_beta.h"
+#include "grenade_spit.h"
 #include "grenade_brickbat.h"
 #include "entitylist.h"
 #include "shake.h"
@@ -39,6 +40,9 @@
 ConVar sk_bullsquid_health("sk_bullsquid_health", "0");
 ConVar sk_bullsquid_dmg_bite("sk_bullsquid_dmg_bite", "0");
 ConVar sk_bullsquid_dmg_whip("sk_bullsquid_dmg_whip", "0");
+ConVar sk_bullsquid_beta_spit("sk_bullsquid_beta_spit", "0");
+
+Vector VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance);
 
 //=========================================================
 // monster-specific schedule types
@@ -87,6 +91,7 @@ int	g_interactionBullsquidThrow = 0;
 #define		BSQUID_AE_WHIP_SND	( 7 )
 
 LINK_ENTITY_TO_CLASS(npc_bullsquid, CNPC_HL2Bullsquid);
+LINK_ENTITY_TO_CLASS(monster_bullchicken, CNPC_HL2Bullsquid);
 
 int ACT_SQUID_EXCITED;
 int ACT_SQUID_EAT;
@@ -128,7 +133,7 @@ void CNPC_HL2Bullsquid::Spawn()
 	SetRenderColor(255, 255, 255, 255);
 
 	m_iHealth = sk_bullsquid_health.GetFloat();
-	m_flFieldOfView = 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
+	m_flFieldOfView = VIEW_FIELD_FULL;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_NPCState = NPC_STATE_NONE;
 
 	CapabilitiesClear();
@@ -139,7 +144,7 @@ void CNPC_HL2Bullsquid::Spawn()
 
 	NPCInit();
 
-	m_flDistTooFar = 784;
+	m_flDistTooFar = 3500;
 }
 
 //=========================================================
@@ -150,7 +155,8 @@ void CNPC_HL2Bullsquid::Precache()
 	engine->PrecacheModel("models/bullsquid.mdl");
 	m_nSquidSpitSprite = engine->PrecacheModel("sprites/greenspit1.vmt");// client side spittle.
 
-	UTIL_PrecacheOther("grenade_spit_beta");
+	UTIL_PrecacheOther("grenade_spit");
+	UTIL_PrecacheOther("grenade_spit_bs");
 	PrecacheScriptSound("NPC_Bullsquid.Idle");
 	PrecacheScriptSound("NPC_Bullsquid.Pain");
 	PrecacheScriptSound("NPC_Bullsquid.Alert");
@@ -266,34 +272,54 @@ void CNPC_HL2Bullsquid::HandleAnimEvent(animevent_t* pEvent)
 
 			GetAttachment("Mouth", vSpitPos, vSpitAngle);
 
-			Vector			vTarget = GetEnemy()->GetAbsOrigin();
+			Vector			vTarget = GetEnemy()->EyePosition();
 			Vector			vToss;
 			CBaseEntity* pBlocker;
 			float flGravity = sv_gravity.GetFloat() * SPIT_GRAVITY;
-			ThrowLimit(vSpitPos, vTarget, flGravity, 3, Vector(0, 0, 0), Vector(0, 0, 0), GetEnemy(), &vToss, &pBlocker);
+			vToss = VecCheckThrowTolerance(this, vSpitPos, vTarget, 600, 100);
+			if(vToss == vec3_origin)
+				ThrowLimit(vSpitPos, vTarget, flGravity, 3, Vector(0, 0, 0), Vector(0, 0, 0), GetEnemy(), &vToss, &pBlocker);
+			if (!sk_bullsquid_beta_spit.GetBool())
+			{
+				CGrenadeSpit* pGrenade = (CGrenadeSpit*)CreateNoSpawn("grenade_spit", vSpitPos, vec3_angle, this);
+				pGrenade->Spawn();
+				pGrenade->SetOwnerEntity(this);
+				pGrenade->SetSpitSize(2);
+				pGrenade->SetAbsVelocity(vToss);
 
-			CGrenadeSpitBeta* pGrenade = (CGrenadeSpitBeta*)CreateNoSpawn("grenade_spit_beta", vSpitPos, vec3_angle, this);
-			//pGrenade->KeyValue( "velocity", vToss );
-			pGrenade->Spawn();
-			//pGrenade->SetOwner(this);
-			pGrenade->SetOwnerEntity(this);
-			pGrenade->SetSpitSize(2);
-			pGrenade->SetAbsVelocity(vToss);
+				// Tumble through the air
+				pGrenade->SetLocalAngularVelocity(
+					QAngle(
+						random->RandomFloat(-100, -500),
+						random->RandomFloat(-100, -500),
+						random->RandomFloat(-100, -500)
+					)
+				);
+			}
+			else
+			{
+				CGrenadeSpitBeta* pGrenade = (CGrenadeSpitBeta*)CreateNoSpawn("grenade_spit_bs", vSpitPos, vec3_angle, this);
+				pGrenade->Spawn();
+				pGrenade->SetOwnerEntity(this);
+				pGrenade->SetSpitSize(2);
+				pGrenade->SetAbsVelocity(vToss);
 
-			// Tumble through the air
-			pGrenade->SetLocalAngularVelocity(
-				QAngle(
-					random->RandomFloat(-100, -500),
-					random->RandomFloat(-100, -500),
-					random->RandomFloat(-100, -500)
-				)
-			);
+				// Tumble through the air
+				pGrenade->SetLocalAngularVelocity(
+					QAngle(
+						random->RandomFloat(-100, -500),
+						random->RandomFloat(-100, -500),
+						random->RandomFloat(-100, -500)
+					)
+				);
+				CPVSFilter filter(vSpitPos);
+				te->SpriteSpray(filter, 0.0,
+					&vSpitPos, &vToss, m_nSquidSpitSprite, 5, 10, 15);
+			}
 
 			AttackSound();
 
-			CPVSFilter filter(vSpitPos);
-			te->SpriteSpray(filter, 0.0,
-				&vSpitPos, &vToss, m_nSquidSpitSprite, 5, 10, 15);
+
 		}
 	}
 	break;
@@ -413,11 +439,11 @@ int CNPC_HL2Bullsquid::RangeAttack1Conditions(float flDot, float flDist)
 		return (COND_NONE);
 	}
 
-	if (flDist > 85 && flDist <= 784 && flDot >= 0.5 && gpGlobals->curtime >= m_flNextSpitTime)
+	if (flDist > 85 && flDist <= 3500 && flDot >= 0.5 && gpGlobals->curtime >= m_flNextSpitTime)
 	{
 		if (GetEnemy() != NULL)
 		{
-			if (fabs(GetAbsOrigin().z - GetEnemy()->GetAbsOrigin().z) > 256)
+			if (fabs(GetAbsOrigin().z - GetEnemy()->GetAbsOrigin().z) > 512)
 			{
 				// don't try to spit at someone up really high or down really low.
 				return(COND_NONE);

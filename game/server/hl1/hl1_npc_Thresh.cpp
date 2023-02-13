@@ -2184,7 +2184,7 @@ public:
 	DECLARE_DATADESC();
 };
 
-LINK_ENTITY_TO_CLASS(monster_grunt_repel, CNPC_HGangRepel);
+LINK_ENTITY_TO_CLASS(monster_thresh_repel, CNPC_HGangRepel);
 
 
 

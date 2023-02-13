@@ -150,6 +150,7 @@ CWeaponTommyGun::CWeaponTommyGun( )
 void CWeaponTommyGun::Precache( void )
 {
 	UTIL_PrecacheOther("grenade_ar2");
+	UTIL_PrecacheOther("grenade_molotov");
 
 	BaseClass::Precache();
 }
