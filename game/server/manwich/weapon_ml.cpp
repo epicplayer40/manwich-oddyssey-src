@@ -161,6 +161,7 @@ void CWeaponMissileLauncher::Activate( void )
 //-----------------------------------------------------------------------------
 void CWeaponMissileLauncher::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator )
 {
+	float cycle = ((CBasePlayer*)(GetOwner()))->GetViewModel()->GetCycle();
 	switch( pEvent->event )
 	{
 		case EVENT_WEAPON_SMG1:
@@ -215,7 +216,8 @@ void CWeaponMissileLauncher::Operator_HandleAnimEvent( animevent_t *pEvent, CBas
 		}
 		break;
 
-		case EVENT_WEAPON_SEQUENCE_FINISHED:
+		case EVENT_WEAPON_DROP:
+			Drop(vec3_origin);
 			UTIL_Remove(this);
 			break;
 		default:
@@ -499,12 +501,14 @@ void CWeaponMissileLauncher::Drop( const Vector &vecVelocity )
 	if (!pOwner)
 		return;
 	CPhysicsProp* pProp = (CPhysicsProp*)(CreateEntityByName("prop_physics_override"));
+	QAngle angle = pOwner->EyeAngles();
+	angle.y -= 90;
+	angle.x = 0;
 
 	pProp->SetModel(GetWorldModel());
-
 	pProp->SetCollisionGroup(COLLISION_GROUP_WEAPON);
 	pProp->SetAbsOrigin(pOwner->Weapon_ShootPosition());
-	pProp->SetAbsAngles(pOwner->EyeAngles() + QAngle(0, 180, 0));
+	pProp->SetAbsAngles(angle);
 	DispatchSpawn(pProp);
 
 	CBaseCombatWeapon* pWeapon = g_pGameRules->GetNextBestWeapon(pOwner, this);
