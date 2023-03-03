@@ -180,6 +180,7 @@ void CBaseCombatWeapon::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseComb
 	if (pEvent->event == EVENT_WEAPON_DROP) //Lychy: drop the weapon whenever an anim tells it to
 	{
 		Drop(vec3_origin);
+		UTIL_Remove(this);
 	}
 	else
 		DevWarning( 2, "Unhandled animation event %d from %s --> %s\n", pEvent->event, pOperator->GetClassname(), GetClassname() );

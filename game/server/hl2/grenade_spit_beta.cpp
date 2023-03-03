@@ -24,7 +24,7 @@
 ConVar    sk_dmg_spit_grenade		( "sk_dmg_spit_grenade","0");
 ConVar	  sk_spit_grenade_radius	( "sk_spit_grenade_radius","0");
 
-BEGIN_DATADESC( CGrenadeSpitBeta )
+BEGIN_DATADESC( CGrenadeSpitBullsquid )
 
 	DEFINE_FIELD(  m_nSquidSpitSprite, FIELD_INTEGER ),
 	DEFINE_FIELD(  m_fSpitDeathTime, FIELD_FLOAT ),
@@ -35,9 +35,9 @@ BEGIN_DATADESC( CGrenadeSpitBeta )
 
 END_DATADESC()
 
-LINK_ENTITY_TO_CLASS(grenade_spit_bs, CGrenadeSpitBeta );
+LINK_ENTITY_TO_CLASS(grenade_spit_bs, CGrenadeSpitBullsquid );
 
-void CGrenadeSpitBeta::Spawn( void ) 
+void CGrenadeSpitBullsquid::Spawn( void ) 
 {
 	Precache( );
 	SetSolid( SOLID_BBOX );
@@ -52,9 +52,9 @@ void CGrenadeSpitBeta::Spawn( void )
 	SetRenderColor( 255, 255, 255, 255 );
 	m_nRenderFX		= kRenderFxNone;
 
-	SetThink( &CGrenadeSpitBeta::SpitThink );
+	SetThink( &CGrenadeSpitBullsquid::SpitThink );
 	SetUse( &CBaseGrenade::DetonateUse );
-	SetTouch( &CGrenadeSpitBeta::GrenadeSpitTouch );
+	SetTouch( &CGrenadeSpitBullsquid::GrenadeSpitTouch );
 	SetNextThink( gpGlobals->curtime + 0.1f );
 
 	m_flDamage		= sk_dmg_spit_grenade.GetFloat();
@@ -70,7 +70,7 @@ void CGrenadeSpitBeta::Spawn( void )
 }
 
 
-void CGrenadeSpitBeta::SetSpitSize(int nSize)
+void CGrenadeSpitBullsquid::SetSpitSize(int nSize)
 {
 	switch (nSize)
 	{
@@ -92,12 +92,12 @@ void CGrenadeSpitBeta::SetSpitSize(int nSize)
 	}
 }
 
-void CGrenadeSpitBeta::Event_Killed( const CTakeDamageInfo &info )
+void CGrenadeSpitBullsquid::Event_Killed( const CTakeDamageInfo &info )
 {
 	Detonate( );
 }
 
-void CGrenadeSpitBeta::GrenadeSpitTouch( CBaseEntity *pOther )
+void CGrenadeSpitBullsquid::GrenadeSpitTouch( CBaseEntity *pOther )
 {
 	if (m_fSpitDeathTime != 0)
 	{
@@ -122,13 +122,13 @@ void CGrenadeSpitBeta::GrenadeSpitTouch( CBaseEntity *pOther )
 	}
 	else
 	{
-		RadiusDamage ( CTakeDamageInfo( this, GetOwnerEntity(), m_flDamage, DMG_BLAST ), GetAbsOrigin(), m_DmgRadius, CLASS_NONE ,this);
+		RadiusDamage ( CTakeDamageInfo( this, GetOwnerEntity(), m_flDamage, /*DMG_BLAST*/ DMG_ACID), GetAbsOrigin(), m_DmgRadius, CLASS_NONE, this);
 	}
 
 	Detonate();
 }
 
-void CGrenadeSpitBeta::SpitThink( void )
+void CGrenadeSpitBullsquid::SpitThink( void )
 {
 	if (m_fSpitDeathTime != 0 &&
 		m_fSpitDeathTime < gpGlobals->curtime)
@@ -138,7 +138,7 @@ void CGrenadeSpitBeta::SpitThink( void )
 	SetNextThink( gpGlobals->curtime + 0.1f );
 }
 
-void CGrenadeSpitBeta::Detonate(void)
+void CGrenadeSpitBullsquid::Detonate(void)
 {
 	m_takedamage	= DAMAGE_NO;	
 
@@ -147,13 +147,13 @@ void CGrenadeSpitBeta::Detonate(void)
 	// splat sound
 	iPitch = random->RandomFloat( 90, 110 );
 
-	EmitSound( "GrenadeSpitBeta.Acid" );	
-	EmitSound( "GrenadeSpitBeta.Hit" );	
+	EmitSound( "GrenadeSpitBullsquid.Acid" );	
+	EmitSound( "GrenadeSpitBullsquid.Hit" );	
 
 	UTIL_Remove( this );
 }
 
-void CGrenadeSpitBeta::Precache( void )
+void CGrenadeSpitBullsquid::Precache( void )
 {
 	m_nSquidSpitSprite = engine->PrecacheModel("sprites/greenglow1.vmt");// client side spittle.
 
@@ -162,11 +162,11 @@ void CGrenadeSpitBeta::Precache( void )
 	engine->PrecacheModel("models/spitball_medium.mdl"); 
 	engine->PrecacheModel("models/spitball_small.mdl"); 
 
-	PrecacheScriptSound("GrenadeSpitBeta.Acid");
-	PrecacheScriptSound("GrenadeSpitBeta.Hit");
+	PrecacheScriptSound("GrenadeSpitBullsquid.Acid");
+	PrecacheScriptSound("GrenadeSpitBullsquid.Hit");
 }
 
 
-CGrenadeSpitBeta::CGrenadeSpitBeta(void)
+CGrenadeSpitBullsquid::CGrenadeSpitBullsquid(void)
 {
 }

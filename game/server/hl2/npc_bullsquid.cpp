@@ -298,7 +298,7 @@ void CNPC_HL2Bullsquid::HandleAnimEvent(animevent_t* pEvent)
 			}
 			else
 			{
-				CGrenadeSpitBeta* pGrenade = (CGrenadeSpitBeta*)CreateNoSpawn("grenade_spit_bs", vSpitPos, vec3_angle, this);
+				CGrenadeSpitBullsquid* pGrenade = (CGrenadeSpitBullsquid*)CreateNoSpawn("grenade_spit_bs", vSpitPos, vec3_angle, this);
 				pGrenade->Spawn();
 				pGrenade->SetOwnerEntity(this);
 				pGrenade->SetSpitSize(2);

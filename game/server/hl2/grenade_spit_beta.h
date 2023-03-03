@@ -16,8 +16,8 @@
 // $NoKeywords: $
 //=============================================================================
 
-#ifndef	GRENADESPITBETA_H
-#define	GRENADESPITBETA_H
+#ifndef	GrenadeSpitBullsquid_H
+#define	GrenadeSpitBullsquid_H
 
 #include "basegrenade_shared.h"
 
@@ -35,10 +35,10 @@ enum SpitSize_e
 
 
 
-class CGrenadeSpitBeta : public CBaseGrenade
+class CGrenadeSpitBullsquid : public CBaseGrenade
 {
 public:
-	DECLARE_CLASS( CGrenadeSpitBeta, CBaseGrenade );
+	DECLARE_CLASS( CGrenadeSpitBullsquid, CBaseGrenade );
 
 	void		Spawn( void );
 	void		Precache( void );
@@ -51,7 +51,7 @@ public:
 	float		m_fSpitDeathTime;		// If non-zero won't detonate
 
 	void EXPORT				Detonate(void);
-	CGrenadeSpitBeta(void);
+	CGrenadeSpitBullsquid(void);
 
 	DECLARE_DATADESC();
 };

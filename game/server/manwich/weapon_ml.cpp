@@ -161,7 +161,6 @@ void CWeaponMissileLauncher::Activate( void )
 //-----------------------------------------------------------------------------
 void CWeaponMissileLauncher::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator )
 {
-	float cycle = ((CBasePlayer*)(GetOwner()))->GetViewModel()->GetCycle();
 	switch( pEvent->event )
 	{
 		case EVENT_WEAPON_SMG1:
@@ -215,11 +214,6 @@ void CWeaponMissileLauncher::Operator_HandleAnimEvent( animevent_t *pEvent, CBas
 			m_bGuiding = false;
 		}
 		break;
-
-		case EVENT_WEAPON_DROP:
-			Drop(vec3_origin);
-			UTIL_Remove(this);
-			break;
 		default:
 			BaseClass::Operator_HandleAnimEvent( pEvent, pOperator );
 			break;

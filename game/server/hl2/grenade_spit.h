@@ -19,7 +19,7 @@
 class CParticleSystem;
 
 
-#ifndef GRENADESPITBETA_H
+#ifndef GrenadeSpitBullsquid_H
 enum SpitSize_e
 {
 	SPIT_SMALL,
@@ -28,9 +28,9 @@ enum SpitSize_e
 };
 #endif
 
-#ifndef GRENADESPITBETA_H
+#ifndef GrenadeSpitBullsquid_H
 #define SPIT_GRAVITY 600
-#endif // !GRENADESPITBETA_H
+#endif // !GrenadeSpitBullsquid_H
 
 
 
