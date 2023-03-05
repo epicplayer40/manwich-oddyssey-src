@@ -489,6 +489,7 @@ void CWeaponMissileLauncher::ToggleGuiding( void )
 //-----------------------------------------------------------------------------
 void CWeaponMissileLauncher::Drop( const Vector &vecVelocity )
 {
+	m_bIsDropping = false;
 	StopGuiding();
 	SetWeaponVisible(false);
 	CBaseCombatCharacter* pOwner = GetOwner();
