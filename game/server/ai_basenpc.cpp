@@ -7577,7 +7577,11 @@ void CAI_BaseNPC::TaskFail( AI_TaskFailureCode_t code )
 {
 	EndTaskOverlay();
 
-	if (ai_explode_on_fail.GetBool() == true) { ExplosionCreate(GetAbsOrigin(), GetAbsAngles(), GetOwnerEntity(), (GetMaxHealth() * 2 + 10), 100, SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE, 0.0f, this); } //Explode for the funny, explosion damage is taken from entity's health - epicplayer
+	if (ai_explode_on_fail.GetBool() == true) {
+		ExplosionCreate(GetAbsOrigin(), GetAbsAngles(), GetOwnerEntity(), (GetMaxHealth() * 2 + 10), 100, SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE, 0.0f, this);
+		EmitSound("BaseExplosionEffect.FunnySound");
+	} //Explode for the funny, explosion damage is taken from entity's health - epicplayer
+
 
 	// Handy tool for debugging
 	//if (IsCurSchedule(SCHED_PUT_NAME_HERE))
@@ -10913,6 +10917,8 @@ void CAI_BaseNPC::Precache( void )
 	PrecacheScriptSound( "AI_BaseNPC.BodyDrop_Heavy" );
 	PrecacheScriptSound( "AI_BaseNPC.BodyDrop_Light" );
 	PrecacheScriptSound( "AI_BaseNPC.SentenceStop" );
+
+	if ( ai_explode_on_fail.GetBool() == true ) { PrecacheScriptSound( "BaseExplosionEffect.FunnySound" ); }
 
 	BaseClass::Precache();
 }
