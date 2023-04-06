@@ -183,6 +183,9 @@ public:
 	virtual bool			NPC_HasSecondaryWeapon( void ) { return false; }
 	virtual void			NPC_AimPrimaryWeapon( Vector vecTarget ) { return; }
 	virtual void			NPC_AimSecondaryWeapon( Vector vecTarget ) { return; }
+	
+	//Lychy
+	virtual bool			NPC_IsOmniDirectional() { return false; }
 
 	// Weapon handling
 	virtual void			Weapon_PrimaryRanges( float *flMinRange, float *flMaxRange );

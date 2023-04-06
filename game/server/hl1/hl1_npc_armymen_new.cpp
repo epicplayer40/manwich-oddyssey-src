@@ -236,6 +236,8 @@ DEFINE_FIELD(m_flLastEnemySightTime, FIELD_TIME),
 DEFINE_FIELD(m_flTalkWaitTime, FIELD_TIME),
 //DEFINE_FIELD( m_iAmmoType, FIELD_INTEGER ),
 
+DEFINE_USEFUNC(FollowerUse),
+
 END_DATADESC()
 
 

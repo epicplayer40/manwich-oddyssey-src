@@ -1,3 +1,5 @@
+//Lychy world...
+
 #include "cbase.h"
 #include "vehicle_base.h"
 #include "in_buttons.h"
@@ -5,23 +7,19 @@
 #include "npc_vehicledriver.h"
 #include "smoke_trail.h"
 
-
-
+ConVar tank_shell_speed("tank_shell_speed", "10000");
 
 #define JEEP_GUN_YAW				"vehicle_weapon_yaw"
 #define JEEP_GUN_PITCH				"vehicle_weapon_pitch"
-
-
 
 #define CANNON_MAX_UP_PITCH			70
 #define CANNON_MAX_DOWN_PITCH		20
 #define CANNON_MAX_LEFT_YAW			180
 #define CANNON_MAX_RIGHT_YAW		180
 
-
 #pragma region Tank Shell
-#define SHELL_SPEED 3500
 #define TANKSHELLMODEL "models/shell_casings/missilecasing01.mdl"
+
 class CTankShell : public CBaseAnimating
 {
 	DECLARE_DATADESC();
@@ -102,99 +100,128 @@ public:
 	void ShootThink();
 	void AimGunAt(Vector* endPos);
 	void AimPrimaryWeapon();
-	void NPCAimThink();
 	void Restore();
+	int DrawDebugTextOverlays();
+	void NPCAimThink();
+	bool ShouldNPCFire();
+	CNPC_VehicleDriver* GetNPCDriver();
+
 
 	float			m_aimYaw;
 	float			m_aimPitch;
-	float	m_flNextAllowedShootTime;
-	bool m_bIsFiring;
-	bool m_bIsGoodAimVector;
+	float			m_flNextAllowedShootTime;
+	bool			m_bIsFiring;
+	bool			m_bIsGoodAimVector;
 
-	Vector m_vecNPCTarget;
+	Vector			m_vecNPCTarget;
 
 };
 
 BEGIN_DATADESC(CVehicleTank)
 	DEFINE_THINKFUNC(ShootThink),
 	DEFINE_THINKFUNC(NPCAimThink),
-	DEFINE_FIELD(m_aimYaw,FIELD_FLOAT),
-	DEFINE_FIELD(m_aimPitch,FIELD_FLOAT),
-	DEFINE_FIELD(m_bIsGoodAimVector,FIELD_BOOLEAN),
-	DEFINE_FIELD(m_vecNPCTarget,FIELD_VECTOR),
+	DEFINE_FIELD(m_aimYaw, FIELD_FLOAT),
+	DEFINE_FIELD(m_aimPitch, FIELD_FLOAT),
+	DEFINE_FIELD(m_bIsGoodAimVector, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_vecNPCTarget, FIELD_VECTOR),
+
 END_DATADESC()
+
 LINK_ENTITY_TO_CLASS(prop_vehicle_tank, CVehicleTank);
+
 
 
 class CTankFourWheelServerVehicle : public CFourWheelServerVehicle
 {
 	typedef CFourWheelServerVehicle BaseClass;
+
 public:
+
 	CTankFourWheelServerVehicle()
 	{
 		m_flNextAimTime = 0.0f;
 	}
-	void		Weapon_PrimaryRanges(float* flMinRange, float* flMaxRange)
+
+	void Weapon_PrimaryRanges(float* flMinRange, float* flMaxRange) override
 	{
 		*flMinRange = 5.0f;
 		*flMaxRange = 9999.0f;
 	}
+	bool NPC_IsOmniDirectional() override { return true; }
+	CVehicleTank* GetTank() { return m_hTank;}
+
+	void CheckAndSetTank()
+	{
+		if (!GetTank())
+			m_hTank = dynamic_cast<CVehicleTank*>(GetVehicleEnt());
+	}
+	
+	void NPC_DriveVehicle() override
+	{
+		//If the tank is unable to get a shot, then dont try fire
+		CheckAndSetTank();
+		if(!GetTank()->ShouldNPCFire())
+			m_nNPCButtons &= ~IN_ATTACK;
+
+		BaseClass::NPC_DriveVehicle();
+	}
 	bool NPC_HasPrimaryWeapon() { return true; }
-	void NPC_TurnCenter()
+
+	void NPC_TurnCenter() override
 	{
 		m_flTurnDegrees = 0.0f;
 		BaseClass::NPC_TurnCenter();
 	}
-	void NPC_AimPrimaryWeapon(Vector vecTarget)
+
+	void NPC_AimPrimaryWeapon(Vector vecTarget) override
 	{
-		if (!m_hTank)
-			m_hTank = dynamic_cast<CVehicleTank*>(GetVehicleEnt());
+		CheckAndSetTank();
 		if (gpGlobals->curtime > m_flNextAimTime)
 		{
-			m_hTank->m_vecNPCTarget = vecTarget;
-			m_flNextAimTime = gpGlobals->curtime + 0.5f;
+			GetTank()->m_vecNPCTarget = vecTarget;
+			m_flNextAimTime = gpGlobals->curtime + 0.25f;
 		}
-		m_hTank->AimPrimaryWeapon();
+		GetTank()->AimPrimaryWeapon();
 	}
 
 	//Lychy: The tank should not move if the NPC driver has a good aiming vector
-	void NPC_ThrottleReverse(void)
+	void NPC_ThrottleReverse(void) override
 	{
-		if (!m_hTank)
-			m_hTank = dynamic_cast<CVehicleTank*>(GetVehicleEnt());
-		if (m_hTank->m_bIsGoodAimVector)
+		CheckAndSetTank();
+		if (GetTank()->ShouldNPCFire())
 			NPC_Brake();
 		else
 			BaseClass::NPC_ThrottleReverse();
 	}
-	void NPC_ThrottleForward(void)
+
+	void NPC_ThrottleForward(void) override
 	{
-		if (!m_hTank)
-			m_hTank = dynamic_cast<CVehicleTank*>(GetVehicleEnt());
-		if (m_hTank->m_bIsGoodAimVector)
+		CheckAndSetTank();
+		if (GetTank()->ShouldNPCFire())
 			NPC_Brake();
 		else
 			BaseClass::NPC_ThrottleForward();
 	}
-	void NPC_TurnLeft(float flDegrees)
-	{
-		if (!m_hTank)
-			m_hTank = dynamic_cast<CVehicleTank*>(GetVehicleEnt());
-		if (m_hTank->m_bIsGoodAimVector)
+
+	void NPC_TurnLeft(float flDegrees) override
+	{	
+		CheckAndSetTank();
+		if (GetTank()->ShouldNPCFire())
 			NPC_TurnCenter();
 		else
 			BaseClass::NPC_TurnLeft(flDegrees);
 	}
-	void NPC_TurnRight(float flDegrees)
+
+	void NPC_TurnRight(float flDegrees) override
 	{
-		if (!m_hTank)
-			m_hTank = dynamic_cast<CVehicleTank*>(GetVehicleEnt());
-		if (m_hTank->m_bIsGoodAimVector)
+		CheckAndSetTank();
+		if (GetTank()->ShouldNPCFire())
 			NPC_TurnCenter();
 		else
 			BaseClass::NPC_TurnRight(flDegrees);
 	}
 
+private:
 	CHandle<CVehicleTank> m_hTank;
 	float m_flNextAimTime;
 };
@@ -202,34 +229,36 @@ public:
 
 void CVehicleTank::Precache()
 {
-	if(!GetModelName())
-	PrecacheModel("models/vehicles/merkava.mdl");
-	PrecacheSound("vehicles/tank_readyfire1.wav");
+	if (!GetModelName())
+		PrecacheModel("models/vehicles/merkava.mdl");
+	PrecacheScriptSound("vehicles/tank_readyfire1.wav");
 	PrecacheScriptSound("Weapon_Mortar.Single");
-	PrecacheSound("vehicles/tank_shellcasing1.wav");
+	PrecacheScriptSound("vehicles/tank_shellcasing1.wav");
 }
 void CVehicleTank::Spawn()
 {
 	Precache();
 
-if(!m_vehicleScript)
-	m_vehicleScript = MAKE_STRING("scripts/vehicles/jeep_test.txt");
-if(!GetModelName())
-	SetModel("models/vehicles/merkava.mdl");
+	if (!m_vehicleScript)
+		m_vehicleScript = MAKE_STRING("scripts/vehicles/jeep_test.txt");
+	if (!GetModelName())
+		SetModel("models/vehicles/merkava.mdl");
 
-	//SetBodygroup(1, true);
 	SetPoseParameter(JEEP_GUN_YAW, 0);
 	SetPoseParameter(JEEP_GUN_PITCH, 0);
 	SetVehicleType(VEHICLE_TYPE_AIRBOAT_RAYCAST);
+
 	RegisterThinkContext("ShootThink");
 	SetContextThink(&CVehicleTank::ShootThink, TICK_NEVER_THINK, "ShootThink");
 	SetContextThink(&CVehicleTank::NPCAimThink, TICK_NEVER_THINK, "NPCAimThink");
 	m_bHasGun = true;
+
 	BaseClass::Spawn();
 
 	delete m_pServerVehicle;
 	m_pServerVehicle = new CTankFourWheelServerVehicle();
 	m_pServerVehicle->SetVehicle(this);
+	m_bIsGoodAimVector = false;
 }
 
 void CVehicleTank::Think()
@@ -316,8 +345,6 @@ void CVehicleTank::Think()
 					pServerVehicle->SoundStartDisabled();
 				}
 			}
-
-
 		}
 
 		// Reset on exit anim
@@ -326,20 +353,15 @@ void CVehicleTank::Think()
 
 }
 
-
 void CVehicleTank::DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsDown, int iButtonsReleased)
 {
 	int iButtons = ucmd->buttons;
-
-
 	// If we're holding down an attack button, update our state
 
-	if (iButtons & IN_ATTACK && m_bIsGoodAimVector && gpGlobals->curtime > m_flNextAllowedShootTime)
+	if (iButtons & IN_ATTACK && gpGlobals->curtime > m_flNextAllowedShootTime)
 	{
 		FireCannon();
-
 	}
-
 	BaseClass::DriveVehicle(flFrameTime, ucmd, iButtonsDown, iButtonsReleased);
 }
 
@@ -366,8 +388,8 @@ void CVehicleTank::SetupMove(CBasePlayer* player, CUserCmd* ucmd, IMoveHelper* p
 void CVehicleTank::AimGunAt(Vector* endPos)
 {
 	Vector	aimPos = *endPos;
-	bool isNpc = GetDriver()->IsNPC();
-	//CAI_BaseNPC* pNPC = dynamic_cast<CAI_BaseNPC*>(GetDriver());
+	float dotPr = 1;
+	CNPC_VehicleDriver* pDriver = GetNPCDriver();
 
 	// See if the gun should be allowed to aim
 	if (IsOverturned() || m_bEngineLocked)
@@ -381,8 +403,6 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 		AngleVectors(GetLocalAngles(), NULL, &v_forward, &v_up);
 		aimPos = WorldSpaceCenter() + (v_forward * -32.0f) - Vector(0, 0, 128.0f);
 	}
-		
-
 
 	matrix3x4_t gunMatrix;
 	GetAttachment(LookupAttachment("gun_ref"), gunMatrix);
@@ -392,17 +412,16 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 	VectorITransform(aimPos, gunMatrix, localEnemyPosition);
 
 	//Lychy: compensate for gravity
-	if (isNpc)
+	if (pDriver)
 	{
 		//shit calculation
 		aimPos.z += Vector2D(aimPos.x, aimPos.y).Length() * 0.02f;//(aimPos.z - GetAbsOrigin().z);
 		//localEnemyPosition = VecCheckThrow(this, GetAbsOrigin(), localEnemyPosition, 3500.0f);
-		NDebugOverlay::Cross3D(localEnemyPosition, 5, 255, 0, 0, 0, 0.5f);
 	}
 
 	// do a look at in gun space (essentially a delta-lookat)
 	QAngle localEnemyAngles;
-	VectorAngles(localEnemyPosition, localEnemyAngles);	
+	VectorAngles(localEnemyPosition, localEnemyAngles);
 
 	// convert to +/- 180 degrees
 	localEnemyAngles.x = UTIL_AngleDiff(localEnemyAngles.x, 0);
@@ -427,8 +446,10 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 	GetAttachment("Muzzle", vecMuzzle, vecMuzzleAng);
 	AngleVectors(vecMuzzleAng, &vecMuzzleDir);
 
-	float dotPr = DotProduct(vecMuzzleDir, (m_vecNPCTarget - vecMuzzle).Normalized());
-
+	
+	if (pDriver)
+		dotPr = DotProduct(vecMuzzleDir, (m_vecNPCTarget - vecMuzzle).Normalized());
+	//NDebugOverlay::Line(vecMuzzle, m_vecNPCTarget, 255, 0, 0, 0, 0.05f);
 	targetYaw = newTargetYaw;
 	targetPitch = newTargetPitch;
 
@@ -437,14 +458,12 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 	float pitchSpeed = 1;
 
 	//Lychy: turning speed ramps down
-	if (isNpc)
+	if (pDriver)
 	{
 		yawSpeed = -1 * (dotPr * dotPr) + 1.5f;
 		pitchSpeed = -1 * (dotPr * dotPr) + 1.5f; // -x^2 + 1.5
 	}
 
-
-	Msg("DotPr: %f Speed:%f\n", dotPr, yawSpeed);
 	m_aimYaw = UTIL_Approach(targetYaw, m_aimYaw, yawSpeed);
 	m_aimPitch = UTIL_Approach(targetPitch, m_aimPitch, pitchSpeed);
 
@@ -454,11 +473,9 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 		m_aimYaw *= -(179 / abs(m_aimYaw));
 		//SetPoseParameter(JEEP_GUN_YAW, -targetYaw);
 	}
+
 	SetPoseParameter(JEEP_GUN_YAW, -m_aimYaw);
 	SetPoseParameter(JEEP_GUN_PITCH, -m_aimPitch);
-
-
-
 	InvalidateBoneCache();
 
 	// read back to avoid drift when hitting limits
@@ -466,17 +483,12 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 	m_aimPitch = -GetPoseParameter(JEEP_GUN_PITCH);
 	m_aimYaw = -GetPoseParameter(JEEP_GUN_YAW);
 
-
-	//Msg("DotPR:%f\n", dotPr);
-	if (dotPr > 0.99 && isNpc /* && pNPC->HasCondition(COND_SEE_ENEMY)*/)
-	{
-		m_bIsGoodAimVector = true;
-	}
-	else
-	{
-		m_bIsGoodAimVector = false;
-	}
-
+	if(pDriver)
+		if (dotPr > 0.99) /* && pNPC->HasCondition(COND_SEE_ENEMY)*/
+			m_bIsGoodAimVector = true;
+		else
+			m_bIsGoodAimVector = false;
+	
 	trace_t	tr;
 	UTIL_TraceLine(vecMuzzle, vecMuzzle + (vecMuzzleDir * MAX_TRACE_LENGTH), MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
 
@@ -485,9 +497,6 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 	{
 		m_vecGunCrosshair = vecMuzzle + (vecMuzzleDir * MAX_TRACE_LENGTH * tr.fraction);
 	}
-
-
-
 }
 
 void CVehicleTank::ShootThink()
@@ -504,8 +513,9 @@ void CVehicleTank::ShootThink()
 	pShell->SetOwnerEntity(this);
 	pShell->SetAbsOrigin(muzzleOrigin + aimVector * 10);
 	pShell->SetAbsAngles(muzzleAngles + QAngle(0, 90, 0));
-	pShell->SetAbsVelocity(aimVector * SHELL_SPEED);
+	pShell->SetAbsVelocity(aimVector * tank_shell_speed.GetFloat());
 	pShell->SetGravity(0.3f);
+
 	m_bIsFiring = false;
 	EmitSound("Weapon_Mortar.Single");
 	m_flNextAllowedShootTime = gpGlobals->curtime + 5.0f;
@@ -515,12 +525,12 @@ void CVehicleTank::ShootThink()
 
 	if (pObj != NULL)
 	{
-		Vector	shoveDir = aimVector * -(250 * 500.0f);
-
+		Vector	shoveDir = aimVector * -(250 * 250.0f);
 		pObj->ApplyForceOffset(shoveDir, muzzleOrigin);
 	}
 
 }
+
 void CVehicleTank::FireCannon()
 {
 	if (m_bUnableToFire)
@@ -545,15 +555,26 @@ void CVehicleTank::NPCAimThink()
 	SetNextThink(gpGlobals->curtime + 0.01f, "NPCAimThink");
 }
 
-void CVehicleTank::Restore()
+int CVehicleTank::DrawDebugTextOverlays()
 {
-	SetNextThink(TICK_NEVER_THINK, "NPCAimThink");
+	int text_offset = BaseClass::DrawDebugTextOverlays();
+	char buffer[32];
+	Q_snprintf(buffer, 32, "Good aim vector?: %i", m_bIsGoodAimVector);
+	EntityText(text_offset, buffer, 0);
+	return ++text_offset;
 }
-#pragma endregion
 
-class CNPC_TankDriver : public CNPC_VehicleDriver
+bool CVehicleTank::ShouldNPCFire()
 {
-	DECLARE_CLASS(CNPC_TankDriver, CNPC_VehicleDriver);
+	CNPC_VehicleDriver* pDriver = GetNPCDriver();
+	Assert(pDriver);
+	return m_bIsGoodAimVector && !pDriver->HasCondition(COND_ENEMY_OCCLUDED) && gpGlobals->curtime > m_flNextAllowedShootTime;
+}
+
+CNPC_VehicleDriver* CVehicleTank::GetNPCDriver()
+{
+	return dynamic_cast<CNPC_VehicleDriver*>(GetDriver());
+}
 
 
-};
+#pragma endregion

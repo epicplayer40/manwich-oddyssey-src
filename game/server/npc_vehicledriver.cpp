@@ -319,15 +319,17 @@ int	CNPC_VehicleDriver::RangeAttack1Conditions( float flDot, float flDist )
 	if ( flDist > flMaxRange )
 		return COND_TOO_FAR_TO_ATTACK;
 
-	// Don't shoot backwards
-	Vector vecForward;
-	Vector vecToTarget = (GetEnemy()->GetAbsOrigin() - GetAbsOrigin());
-	VectorNormalize(vecToTarget);
-	m_hVehicleEntity->GetVectors( &vecForward, NULL, NULL );
-	float flForwardDot = DotProduct( vecForward, vecToTarget );
-	if ( flForwardDot < 0 && fabs(flDot) < 0.5 )
-		return COND_NOT_FACING_ATTACK;
-
+	if (!m_pVehicleInterface->NPC_IsOmniDirectional()) //Don't try this dot product bs if the vehicle can aim in a circle like the tank.
+	{
+		// Don't shoot backwards
+		Vector vecForward;
+		Vector vecToTarget = (GetEnemy()->GetAbsOrigin() - GetAbsOrigin());
+		VectorNormalize(vecToTarget);
+		m_hVehicleEntity->GetVectors(&vecForward, NULL, NULL);
+		float flForwardDot = DotProduct(vecForward, vecToTarget);
+		if (flForwardDot < 0 && fabs(flDot) < 0.5)
+			return COND_NOT_FACING_ATTACK;
+	}
 	return COND_CAN_RANGE_ATTACK1;
 }
 

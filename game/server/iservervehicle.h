@@ -97,6 +97,8 @@ public:
 	virtual void			NPC_AimPrimaryWeapon( Vector vecTarget ) = 0;
 	virtual void			NPC_AimSecondaryWeapon( Vector vecTarget ) = 0;
 
+	virtual bool			NPC_IsOmniDirectional() = 0; //Lychy: Can the vehicle aim in any direction?
+
 	// Weapon handling
 	virtual void			Weapon_PrimaryRanges( float *flMinRange, float *flMaxRange ) = 0;	
 	virtual void			Weapon_SecondaryRanges( float *flMinRange, float *flMaxRange ) = 0;	
