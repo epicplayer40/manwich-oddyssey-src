@@ -951,7 +951,7 @@ int CNPC_Conscript::TranslateSchedule( int scheduleType )
 		}
 	case SCHED_RANGE_ATTACK1:
 		{
-			if( Weapon_OwnsThisType( "weapon_rpg" ) )
+			if( Weapon_OwnsThisType( "weapon_rpg" ) || Weapon_OwnsThisType("weapon_ml"))
 			{
 				return SCHED_CONSCRIPT_FIRE_RPG;
 			//	break;
@@ -961,7 +961,7 @@ int CNPC_Conscript::TranslateSchedule( int scheduleType )
 
 	case SCHED_ESTABLISH_LINE_OF_FIRE:
 		{
-			if( Weapon_OwnsThisType( "weapon_rpg" ) )
+			if( Weapon_OwnsThisType( "weapon_rpg" ) || Weapon_OwnsThisType("weapon_ml"))
 			{
 				return SCHED_CONSCRIPT_ESTABLISH_RPG_LINE_OF_FIRE;
 			}

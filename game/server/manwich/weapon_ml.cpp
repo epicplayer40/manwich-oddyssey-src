@@ -29,7 +29,6 @@
 #include "gamestats.h"
 #include "player_missile.h"
 #include "props.h"
-
 extern ConVar sk_plr_dmg_ml_grenade;
 extern ConVar sk_npc_dmg_ml_grenade;
 
@@ -175,8 +174,14 @@ void CWeaponMissileLauncher::Operator_HandleAnimEvent( animevent_t *pEvent, CBas
 
 			CAI_BaseNPC *npc = pOperator->MyNPCPointer();
 			ASSERT( npc != NULL );
+			Vector vecShootDir;
 
-			Vector vecShootDir = npc->GetActualShootTrajectory( muzzlePoint );
+	
+			if(npc->HasSpawnFlags(SF_NPC_LONG_RANGE)) //Conscripts
+				vecShootDir = npc->GetShootEnemyDir(muzzlePoint);
+			else
+				vecShootDir = npc->GetActualShootTrajectory(muzzlePoint);
+
 
 			// look for a better launch location
 			Vector altLaunchPoint;
@@ -201,6 +206,7 @@ void CWeaponMissileLauncher::Operator_HandleAnimEvent( animevent_t *pEvent, CBas
 
 			m_hNpcMissile->AimAtSpecificTarget(pTarget);
 			m_hNpcMissile->SetOwnerEntity(GetOwner());
+			
 			m_hNpcMissile->SetDamage(sk_npc_dmg_ml_grenade.GetFloat());
 
 			// NPCs always get a grace period

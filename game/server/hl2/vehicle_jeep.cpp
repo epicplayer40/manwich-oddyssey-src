@@ -362,7 +362,7 @@ Vector CPropJeep::BodyTarget( const Vector &posSrc, bool bNoisy )
 	int eyeAttachmentIndex = LookupAttachment("vehicle_driver_eyes");
 	GetAttachment( eyeAttachmentIndex, matrix );
 	MatrixGetColumn( matrix, 3, shotPos );
-
+	
 	if ( bNoisy )
 	{
 		shotPos[0] += random->RandomFloat( -8.0f, 8.0f );
@@ -774,7 +774,7 @@ void CPropJeep::Think( void )
 		{
 			m_VehiclePhysics.ReleaseHandbrake();
 			StartEngine();
-
+	
 			// HACKHACK: This forces the jeep to play a sound when it gets entered underwater
 			if ( m_VehiclePhysics.IsEngineDisabled() )
 			{

@@ -6,11 +6,17 @@
 #include "explode.h"
 #include "npc_vehicledriver.h"
 #include "smoke_trail.h"
+#include "saverestore_bitstring.h"
 
-ConVar tank_shell_speed("tank_shell_speed", "10000");
+
+ConVar sk_tank_shell_damage("sk_tank_shell_damage", "0");
+ConVar tank_shell_speed("sk_tank_shell_speed", "0");
+ConVar sk_tank_health("sk_tank_health", "0");
 
 #define JEEP_GUN_YAW				"vehicle_weapon_yaw"
 #define JEEP_GUN_PITCH				"vehicle_weapon_pitch"
+
+#define SMOKEPOINT_ATTACHMENT "smokepoint"
 
 #define CANNON_MAX_UP_PITCH			70
 #define CANNON_MAX_DOWN_PITCH		20
@@ -63,6 +69,7 @@ void CTankShell::Spawn()
 	m_hSmokeTrail->SetLifetime(120);
 	m_hSmokeTrail->FollowEntity(this);
 
+
 	SetThink(&CTankShell::Think);
 	SetNextThink(gpGlobals->curtime + 0.01f);
 }
@@ -91,27 +98,36 @@ class CVehicleTank : public CPropVehicleDriveable
 	DECLARE_CLASS(CVehicleTank, CPropVehicleDriveable);
 	DECLARE_DATADESC();
 public:
-	void Spawn();
-	void Precache();
-	void Think();
+	void Spawn() override;
+	void Precache() override;
+	void Think() override;
 	void FireCannon();
 	void DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsDown, int iButtonsReleased); // Driving Button handling
 	void SetupMove(CBasePlayer* player, CUserCmd* ucmd, IMoveHelper* pHelper, CMoveData* move);
 	void ShootThink();
 	void AimGunAt(Vector* endPos);
 	void AimPrimaryWeapon();
-	void Restore();
-	int DrawDebugTextOverlays();
+	int Restore(IRestore& restore) override;
 	void NPCAimThink();
+	void EnableSmokeAttachment(int iAttachment);
+	void ResetViewForward();
+	void EnableFire();
 	bool ShouldNPCFire();
+	int DrawDebugTextOverlays();
+	int RandomSmokeEnable();
+	int GetNumSmokePointAttachments();
+	int OnTakeDamage(const CTakeDamageInfo& info);
+
 	CNPC_VehicleDriver* GetNPCDriver();
-
-
+	
 	float			m_aimYaw;
 	float			m_aimPitch;
 	float			m_flNextAllowedShootTime;
 	bool			m_bIsFiring;
 	bool			m_bIsGoodAimVector;
+	bool			m_bIsOnFire;
+	int				m_bSmokingAttachments;
+	CBitVec<8>		m_bitsSmoking;
 
 	Vector			m_vecNPCTarget;
 
@@ -123,7 +139,9 @@ BEGIN_DATADESC(CVehicleTank)
 	DEFINE_FIELD(m_aimYaw, FIELD_FLOAT),
 	DEFINE_FIELD(m_aimPitch, FIELD_FLOAT),
 	DEFINE_FIELD(m_bIsGoodAimVector, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_bIsOnFire, FIELD_BOOLEAN),
 	DEFINE_FIELD(m_vecNPCTarget, FIELD_VECTOR),
+	DEFINE_BITSTRING(m_bitsSmoking),
 
 END_DATADESC()
 
@@ -240,7 +258,7 @@ void CVehicleTank::Spawn()
 	Precache();
 
 	if (!m_vehicleScript)
-		m_vehicleScript = MAKE_STRING("scripts/vehicles/jeep_test.txt");
+		m_vehicleScript = MAKE_STRING("scripts/vehicles/vehicle_tank.txt");
 	if (!GetModelName())
 		SetModel("models/vehicles/merkava.mdl");
 
@@ -253,12 +271,23 @@ void CVehicleTank::Spawn()
 	SetContextThink(&CVehicleTank::NPCAimThink, TICK_NEVER_THINK, "NPCAimThink");
 	m_bHasGun = true;
 
+	SetMaxHealth(sk_tank_health.GetInt());
+	SetHealth(sk_tank_health.GetInt());
 	BaseClass::Spawn();
 
+	m_takedamage = DAMAGE_YES;
 	delete m_pServerVehicle;
 	m_pServerVehicle = new CTankFourWheelServerVehicle();
 	m_pServerVehicle->SetVehicle(this);
 	m_bIsGoodAimVector = false;
+	for (int i = 0; i < m_bitsSmoking.GetNumBits(); i++)
+	{
+		if (m_bitsSmoking.IsBitSet(i))
+		{
+			int baseAttachment = LookupAttachment(SMOKEPOINT_ATTACHMENT"1");
+			EnableSmokeAttachment(baseAttachment + i - 1);
+		}
+	}
 }
 
 void CVehicleTank::Think()
@@ -391,6 +420,8 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 	float dotPr = 1;
 	CNPC_VehicleDriver* pDriver = GetNPCDriver();
 
+
+
 	// See if the gun should be allowed to aim
 	if (IsOverturned() || m_bEngineLocked)
 	{
@@ -449,6 +480,8 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 	
 	if (pDriver)
 		dotPr = DotProduct(vecMuzzleDir, (m_vecNPCTarget - vecMuzzle).Normalized());
+
+
 	//NDebugOverlay::Line(vecMuzzle, m_vecNPCTarget, 255, 0, 0, 0, 0.05f);
 	targetYaw = newTargetYaw;
 	targetPitch = newTargetPitch;
@@ -468,11 +501,7 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 	m_aimPitch = UTIL_Approach(targetPitch, m_aimPitch, pitchSpeed);
 
 	//Msg("AimYaw: %f, AimPitch: %f\n", m_aimYaw, m_aimPitch);
-	if (abs(m_aimYaw) > 180)
-	{
-		m_aimYaw *= -(179 / abs(m_aimYaw));
-		//SetPoseParameter(JEEP_GUN_YAW, -targetYaw);
-	}
+
 
 	SetPoseParameter(JEEP_GUN_YAW, -m_aimYaw);
 	SetPoseParameter(JEEP_GUN_PITCH, -m_aimPitch);
@@ -488,6 +517,14 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 			m_bIsGoodAimVector = true;
 		else
 			m_bIsGoodAimVector = false;
+
+	//Lychy: make it aim forward if no enemy
+	if (pDriver && pDriver->GetLastEnemyTime() + 5.0f < gpGlobals->curtime)
+	{
+		ResetViewForward();
+		if (m_bIsGoodAimVector)
+			SetNextThink(TICK_NEVER_THINK, "NPCAimThink");
+	}
 	
 	trace_t	tr;
 	UTIL_TraceLine(vecMuzzle, vecMuzzle + (vecMuzzleDir * MAX_TRACE_LENGTH), MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
@@ -528,7 +565,6 @@ void CVehicleTank::ShootThink()
 		Vector	shoveDir = aimVector * -(250 * 250.0f);
 		pObj->ApplyForceOffset(shoveDir, muzzleOrigin);
 	}
-
 }
 
 void CVehicleTank::FireCannon()
@@ -551,8 +587,9 @@ void CVehicleTank::AimPrimaryWeapon()
 
 void CVehicleTank::NPCAimThink()
 {
-	AimGunAt(&m_vecNPCTarget);
 	SetNextThink(gpGlobals->curtime + 0.01f, "NPCAimThink");
+	AimGunAt(&m_vecNPCTarget);
+	
 }
 
 int CVehicleTank::DrawDebugTextOverlays()
@@ -561,20 +598,131 @@ int CVehicleTank::DrawDebugTextOverlays()
 	char buffer[32];
 	Q_snprintf(buffer, 32, "Good aim vector?: %i", m_bIsGoodAimVector);
 	EntityText(text_offset, buffer, 0);
+	text_offset++;
+	Q_snprintf(buffer, 327, "Health: %i", GetHealth());
+	EntityText(text_offset, buffer, 0);
 	return ++text_offset;
+
 }
+
 
 bool CVehicleTank::ShouldNPCFire()
 {
 	CNPC_VehicleDriver* pDriver = GetNPCDriver();
 	Assert(pDriver);
-	return m_bIsGoodAimVector && !pDriver->HasCondition(COND_ENEMY_OCCLUDED) && gpGlobals->curtime > m_flNextAllowedShootTime;
+	return m_bIsGoodAimVector && !pDriver->HasCondition(COND_ENEMY_OCCLUDED) && pDriver->GetEnemy() && gpGlobals->curtime > m_flNextAllowedShootTime && pDriver;
 }
 
 CNPC_VehicleDriver* CVehicleTank::GetNPCDriver()
 {
 	return dynamic_cast<CNPC_VehicleDriver*>(GetDriver());
 }
-
-
 #pragma endregion
+
+void CVehicleTank::ResetViewForward()
+{
+	GetAttachment(LookupAttachment("muzzle_static"), m_vecNPCTarget);
+}
+
+//Enable a random smoke point on the tank
+int CVehicleTank::RandomSmokeEnable()
+{
+	int baseAttachment = LookupAttachment(SMOKEPOINT_ATTACHMENT"1");
+	int numAttachments = GetNumSmokePointAttachments();
+	int random =  RandomInt(1, numAttachments) ;
+
+
+	if (!m_bitsSmoking.IsBitSet(random))
+	{
+		m_bitsSmoking.Set(random);
+		EnableSmokeAttachment(baseAttachment + random - 1);
+	}
+	return random;
+
+}
+
+void CVehicleTank::EnableSmokeAttachment(int iAttachment)
+{
+	Vector smokePos;
+
+	SmokeTrail* pSmokeTrail;
+	pSmokeTrail = SmokeTrail::CreateSmokeTrail();
+
+	pSmokeTrail->SetParent(this, iAttachment);
+	pSmokeTrail->m_SpawnRate = 25;
+	pSmokeTrail->m_ParticleLifetime = 15;
+	pSmokeTrail->m_StartColor.Init(0.4, 0.4, 0.4);
+	pSmokeTrail->m_EndColor.Init(0.5, 0.5, 0.5);
+	pSmokeTrail->m_StartSize = 5;
+	pSmokeTrail->m_EndSize = 50;
+	pSmokeTrail->m_SpawnRadius = 20;
+	pSmokeTrail->m_MinDirectedSpeed = 10;
+	pSmokeTrail->m_MaxDirectedSpeed = 20;
+	pSmokeTrail->m_Opacity = 0.4;
+	pSmokeTrail->SetLifetime(-1);
+	pSmokeTrail->BaseClass::FollowEntity(this);
+	pSmokeTrail->m_nAttachment = iAttachment;
+}
+
+int CVehicleTank::GetNumSmokePointAttachments()
+{
+
+	//Count the attachments
+	int maxAttachment = 0;
+
+	int length = strlen(SMOKEPOINT_ATTACHMENT) + 4;
+	char* buffer;
+	do
+	{
+		maxAttachment++;
+		buffer = (char*)malloc(length);
+		Q_snprintf(buffer, length, SMOKEPOINT_ATTACHMENT"%u", maxAttachment);
+
+	} while (LookupAttachment(buffer));
+	maxAttachment--;
+
+	if (maxAttachment == 0)
+	{
+		AssertMsg(0, "Smokepoint attachments gone from Merkava tank model!");
+		return 0;
+	}
+	return maxAttachment;
+
+}
+
+int CVehicleTank::Restore(IRestore& restore)
+{
+
+	return BaseClass::Restore(restore);
+}
+
+void CVehicleTank::EnableFire()
+{
+	if (!m_bIsOnFire)
+	{
+		CFireTrail* pTrail = CFireTrail::CreateFireTrail();
+		pTrail->SetParent(this, LookupAttachment("firepoint"));
+		pTrail->SetLocalOrigin(vec3_origin);
+		DispatchSpawn(pTrail);
+	}
+}
+
+int CVehicleTank::OnTakeDamage(const CTakeDamageInfo& info)
+{
+	int prevQuarterDestroyed = 0;
+	if (info.GetDamageType() & DMG_BLAST)
+	{
+
+		int ret = BaseClass::OnTakeDamage(info);
+		int newQuart = (GetMaxHealth() - GetHealth()) / (GetMaxHealth() / 4);
+		if (prevQuarterDestroyed != newQuart)
+		{
+			if (newQuart >= 3)
+				EnableFire();
+			RandomSmokeEnable();
+		}
+		return ret;
+	}
+	
+	return 0;
+}

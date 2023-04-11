@@ -54,6 +54,7 @@
 #include "filters.h"
 #include "saverestore_utlvector.h"
 #include "eventqueue.h"
+#include "npc_conscript.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -3113,6 +3114,11 @@ int CNPC_Strider::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 					damage = GetMaxHealth() / sk_strider_num_missiles2.GetFloat();
 				}
 			}
+
+
+			CBaseEntity* pPtr = info.GetAttacker();
+			if(dynamic_cast<CNPC_Conscript*>(pPtr))
+				damage = GetMaxHealth();
 
 			m_iHealth -= damage;
 

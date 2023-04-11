@@ -1164,7 +1164,7 @@ void CAPCMissile::DoExplosion( void )
 	}
 	else
 	{
-#ifdef HL2_EPISODIC
+#ifdef HL2_FUCKEDUPAPCSHIT //Lychy
 		ExplosionCreate( GetAbsOrigin(), GetAbsAngles(), this, APC_MISSILE_DAMAGE, 100, true, 20000 );
 #else
 		ExplosionCreate( GetAbsOrigin(), GetAbsAngles(), GetOwnerEntity(), APC_MISSILE_DAMAGE, 100, true, 20000 );

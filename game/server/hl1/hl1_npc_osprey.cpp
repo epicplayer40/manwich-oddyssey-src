@@ -666,7 +666,7 @@ BEGIN_DATADESC( CHL1BaseHelicopter )
 	DEFINE_FIELD( m_vecTarget,			FIELD_VECTOR ),
 	DEFINE_FIELD( m_vecTargetPosition,	FIELD_POSITION_VECTOR ),
 
-	DEFINE_FIELD( m_angleVelocity, FIELD_VECTOR ),
+	DEFINE_FIELD( m_angleVelocity, FIELD_FLOAT ),
 	DEFINE_FIELD( m_flNextCrashExplosion, FIELD_TIME ),
 
 	DEFINE_FIELD( m_flMaxSpeed,		FIELD_FLOAT ),
