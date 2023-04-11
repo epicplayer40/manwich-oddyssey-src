@@ -107,16 +107,18 @@ public:
 	void ShootThink();
 	void AimGunAt(Vector* endPos);
 	void AimPrimaryWeapon();
-	int Restore(IRestore& restore) override;
 	void NPCAimThink();
 	void EnableSmokeAttachment(int iAttachment);
 	void ResetViewForward();
 	void EnableFire();
+	void Event_Killed(const CTakeDamageInfo& info);
 	bool ShouldNPCFire();
 	int DrawDebugTextOverlays();
 	int RandomSmokeEnable();
 	int GetNumSmokePointAttachments();
 	int OnTakeDamage(const CTakeDamageInfo& info);
+	int Restore(IRestore& restore) override;
+
 
 	CNPC_VehicleDriver* GetNPCDriver();
 	
@@ -650,14 +652,14 @@ void CVehicleTank::EnableSmokeAttachment(int iAttachment)
 
 	pSmokeTrail->SetParent(this, iAttachment);
 	pSmokeTrail->m_SpawnRate = 25;
-	pSmokeTrail->m_ParticleLifetime = 15;
+	pSmokeTrail->m_ParticleLifetime = 10;
 	pSmokeTrail->m_StartColor.Init(0.4, 0.4, 0.4);
-	pSmokeTrail->m_EndColor.Init(0.5, 0.5, 0.5);
+	pSmokeTrail->m_EndColor.Init(0.2, 0.2, 0.2);
 	pSmokeTrail->m_StartSize = 5;
 	pSmokeTrail->m_EndSize = 50;
 	pSmokeTrail->m_SpawnRadius = 20;
-	pSmokeTrail->m_MinDirectedSpeed = 10;
-	pSmokeTrail->m_MaxDirectedSpeed = 20;
+	pSmokeTrail->m_MinDirectedSpeed = 15;
+	pSmokeTrail->m_MaxDirectedSpeed = 30;
 	pSmokeTrail->m_Opacity = 0.4;
 	pSmokeTrail->SetLifetime(-1);
 	pSmokeTrail->BaseClass::FollowEntity(this);
@@ -725,4 +727,23 @@ int CVehicleTank::OnTakeDamage(const CTakeDamageInfo& info)
 	}
 	
 	return 0;
+}
+
+void CVehicleTank::Event_Killed(const CTakeDamageInfo& info)
+{
+	if (info.GetAttacker())
+	{
+		info.GetAttacker()->Event_KilledOther(this, info);
+	}
+	CBaseEntity* pDriver = GetDriver();
+	pDriver->TakeDamage(CTakeDamageInfo(this, this, pDriver->GetHealth(), DMG_BLAST));
+	m_bLocked = true;
+	ExitVehicle(VEHICLE_ROLE_DRIVER);
+	m_bEngineLocked = true;
+	StopEngine();
+	m_VehiclePhysics.SetDisableEngine(true);
+	SetBodygroup(FindBodygroupByName("weapon"), 1);
+
+	m_takedamage = DAMAGE_NO;
+	m_lifeState = LIFE_DEAD;
 }
