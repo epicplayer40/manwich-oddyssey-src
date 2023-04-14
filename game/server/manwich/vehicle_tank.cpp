@@ -7,6 +7,8 @@
 #include "npc_vehicledriver.h"
 #include "smoke_trail.h"
 #include "saverestore_bitstring.h"
+#include "IEffects.h"
+#include <fire.h>
 
 
 ConVar sk_tank_shell_damage("sk_tank_shell_damage", "0");
@@ -23,8 +25,15 @@ ConVar sk_tank_health("sk_tank_health", "0");
 #define CANNON_MAX_LEFT_YAW			180
 #define CANNON_MAX_RIGHT_YAW		180
 
+#define TANK_DEFAULTMODEL "models/vehicles/merkava.mdl"
+#define TANK_DEFAULTMODEL "models/vehicles/merkava.mdl"
+#define TANK_GAMESOUND_FIRE "Tank.Single"
+#define TANK_GAMESOUND_READYFIRE "Tank.ReadyFire"
+#define TANK_GAMESOUND_EJECTCASING "Tank.EjectCasing"
+
+
 #pragma region Tank Shell
-#define TANKSHELLMODEL "models/shell_casings/missilecasing01.mdl"
+#define TANKSHELL_MODEL "models/shell_casings/missilecasing01.mdl"
 
 class CTankShell : public CBaseAnimating
 {
@@ -46,13 +55,13 @@ END_DATADESC()
 
 void CTankShell::Precache()
 {
-	PrecacheModel(TANKSHELLMODEL);
+	PrecacheModel(TANKSHELL_MODEL);
 }
 
 void CTankShell::Spawn()
 {
 	Precache();
-	SetModel(TANKSHELLMODEL);
+	SetModel(TANKSHELL_MODEL);
 	SetMoveType(MOVETYPE_FLYGRAVITY);
 	SetSolid(SOLID_BBOX);
 	SetEFlags(FL_OBJECT);
@@ -250,19 +259,34 @@ private:
 void CVehicleTank::Precache()
 {
 	if (!GetModelName())
+	{
 		PrecacheModel("models/vehicles/merkava.mdl");
-	PrecacheScriptSound("vehicles/tank_readyfire1.wav");
-	PrecacheScriptSound("Weapon_Mortar.Single");
-	PrecacheScriptSound("vehicles/tank_shellcasing1.wav");
+	}
+
+	//PrecacheModel(TANKSHELL_MODEL);
+	PrecacheScriptSound(TANK_GAMESOUND_EJECTCASING);
+	PrecacheScriptSound(TANK_GAMESOUND_FIRE);
+	PrecacheScriptSound(TANK_GAMESOUND_READYFIRE);
+	PrecacheScriptSound("fire_large");
+	UTIL_PrecacheOther("env_fire");
+	UTIL_PrecacheOther("env_smoketrail");
+	UTIL_PrecacheOther("env_fire_trail");
+	UTIL_PrecacheOther("tank_shell");
+	
 }
 void CVehicleTank::Spawn()
 {
 	Precache();
 
 	if (!m_vehicleScript)
+	{
 		m_vehicleScript = MAKE_STRING("scripts/vehicles/vehicle_tank.txt");
+	}
+
 	if (!GetModelName())
+	{
 		SetModel("models/vehicles/merkava.mdl");
+	}
 
 	SetPoseParameter(JEEP_GUN_YAW, 0);
 	SetPoseParameter(JEEP_GUN_PITCH, 0);
@@ -541,31 +565,38 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 void CVehicleTank::ShootThink()
 {
 	//Find the direction the gun is pointing in
-	Vector	muzzleOrigin;
-	QAngle	muzzleAngles;
-	Vector aimVector;
-	GetAttachment(LookupAttachment("gun_ref"), muzzleOrigin, muzzleAngles);
-
-	AngleVectors(muzzleAngles, &aimVector);
-	CTankShell* pShell = (CTankShell*)CreateEntityByName("tank_shell");
-	DispatchSpawn(pShell);
-	pShell->SetOwnerEntity(this);
-	pShell->SetAbsOrigin(muzzleOrigin + aimVector * 10);
-	pShell->SetAbsAngles(muzzleAngles + QAngle(0, 90, 0));
-	pShell->SetAbsVelocity(aimVector * tank_shell_speed.GetFloat());
-	pShell->SetGravity(0.3f);
-
-	m_bIsFiring = false;
-	EmitSound("Weapon_Mortar.Single");
-	m_flNextAllowedShootTime = gpGlobals->curtime + 5.0f;
-
-	//Rock the car
-	IPhysicsObject* pObj = VPhysicsGetObject();
-
-	if (pObj != NULL)
+	if (GetHealth() > 0) //BETTER BE ALIVE 
 	{
-		Vector	shoveDir = aimVector * -(250 * 250.0f);
-		pObj->ApplyForceOffset(shoveDir, muzzleOrigin);
+		Vector	muzzleOrigin;
+		QAngle	muzzleAngles;
+		Vector aimVector;
+		GetAttachment(LookupAttachment("muzzle"), muzzleOrigin, muzzleAngles);
+		AngleVectors(muzzleAngles, &aimVector);
+
+		CTankShell* pShell = (CTankShell*)CreateEntityByName("tank_shell");
+		DispatchSpawn(pShell);
+		pShell->SetOwnerEntity(this);
+		pShell->SetAbsOrigin(muzzleOrigin + aimVector * 10);
+		pShell->SetAbsAngles(muzzleAngles + QAngle(0, 90, 0));
+		pShell->SetAbsVelocity(aimVector * tank_shell_speed.GetFloat());
+		pShell->SetGravity(0.3f);
+
+		m_bIsFiring = false;
+		m_flNextAllowedShootTime = gpGlobals->curtime + 5.0f;
+
+		EmitSound(TANK_GAMESOUND_FIRE);
+		EmitSound(TANK_GAMESOUND_EJECTCASING);
+
+		ExplosionCreate(muzzleOrigin, muzzleAngles, this, 5, 100, SF_ENVEXPLOSION_NODECAL | SF_ENVEXPLOSION_NOSOUND | SF_ENVEXPLOSION_NOFIREBALLSMOKE | SF_ENVEXPLOSION_NOPARTICLES);
+		g_pEffects->MuzzleFlash(muzzleOrigin, muzzleAngles, 25, MUZZLEFLASH_TYPE_DEFAULT);
+		//Rock the car
+		IPhysicsObject* pObj = VPhysicsGetObject();
+
+		if (pObj != NULL)
+		{
+			Vector	shoveDir = aimVector * -(250 * 250.0f);
+			pObj->ApplyForceOffset(shoveDir, muzzleOrigin);
+		}
 	}
 }
 
@@ -577,7 +608,7 @@ void CVehicleTank::FireCannon()
 	if (!m_bIsFiring)
 	{
 		m_bIsFiring = true;
-		EmitSound("vehicles/tank_readyfire1.wav");
+		EmitSound(TANK_GAMESOUND_READYFIRE);
 		SetNextThink(gpGlobals->curtime + 1.9f, "ShootThink");
 	}
 }
@@ -731,6 +762,9 @@ int CVehicleTank::OnTakeDamage(const CTakeDamageInfo& info)
 
 void CVehicleTank::Event_Killed(const CTakeDamageInfo& info)
 {
+
+	m_takedamage = DAMAGE_NO;
+	m_lifeState = LIFE_DEAD;
 	if (info.GetAttacker())
 	{
 		info.GetAttacker()->Event_KilledOther(this, info);
@@ -739,11 +773,18 @@ void CVehicleTank::Event_Killed(const CTakeDamageInfo& info)
 	pDriver->TakeDamage(CTakeDamageInfo(this, this, pDriver->GetHealth(), DMG_BLAST));
 	m_bLocked = true;
 	ExitVehicle(VEHICLE_ROLE_DRIVER);
+	UTIL_Remove(GetNPCDriver());
 	m_bEngineLocked = true;
 	StopEngine();
-	m_VehiclePhysics.SetDisableEngine(true);
 	SetBodygroup(FindBodygroupByName("weapon"), 1);
 
-	m_takedamage = DAMAGE_NO;
-	m_lifeState = LIFE_DEAD;
+	Vector mawPos;
+	int iMaw = LookupAttachment("maw");
+	GetAttachment(iMaw, mawPos);
+	ExplosionCreate(mawPos, GetAbsAngles(), this, 50, 200, true);
+	CBaseEntity* pFire = FireSystem_StartFire(mawPos, 50, 5, 120.0f, SF_FIRE_START_ON | SF_FIRE_DONT_DROP, this);
+	pFire->SetParent(this,iMaw);
+	pFire->EmitSound("fire_large",0.0f,&duration);
+
+
 }

@@ -387,7 +387,7 @@ bool FireSystem_CanAddFire( Vector *position, float separationRadius, fireType_e
 // Input  : &position - position to start the fire at
 //			flags - any special modifiers
 //-----------------------------------------------------------------------------
-bool FireSystem_StartFire( const Vector &position, float fireHeight, float attack, float fuel, int flags, CBaseEntity *owner, fireType_e type )
+CBaseEntity* FireSystem_StartFire( const Vector &position, float fireHeight, float attack, float fuel, int flags, CBaseEntity *owner, fireType_e type )
 {
 	VPROF_FIRE( "FireSystem_StartFire1" );
 
@@ -410,7 +410,7 @@ bool FireSystem_StartFire( const Vector &position, float fireHeight, float attac
 	CFire *fire = (CFire *) CreateEntityByName( "env_fire" );
 	
 	if ( fire == NULL )
-		return false;
+		return fire;
 
 	//Spawn the fire
 	// Fires not placed by a designer should be cleaned up automatically (not catch fire again)
@@ -420,7 +420,7 @@ bool FireSystem_StartFire( const Vector &position, float fireHeight, float attac
 	fire->Start();
 	fire->SetOwner( owner );
 
-	return true;
+	return fire;
 }
 
 

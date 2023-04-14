@@ -965,7 +965,7 @@ int CPropVehicleDriveable::VPhysicsGetObjectList( IPhysicsObject **pList, int li
 void CPropVehicleDriveable::TraceAttack( const CTakeDamageInfo &info, const Vector &vecDir, trace_t *ptr, CDmgAccumulator *pAccumulator )
 {
 	// If we've just been zapped by the physcannon, try and right ourselves
-	if ( info.GetDamageType() & DMG_PHYSGUN )
+	if ( info.GetDamageType() & DMG_PHYSGUN && m_VehiclePhysics.IsEngineDisabled() )
 	{
 		float flUprightStrength = GetUprightStrength();
 		if ( flUprightStrength )

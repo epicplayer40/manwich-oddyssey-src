@@ -43,7 +43,7 @@ enum fireType_e
 //==================================================
 // FireSystem
 //==================================================
-bool FireSystem_StartFire( const Vector &position, float fireHeight, float attack, float fuel, int flags, CBaseEntity *owner, fireType_e type = FIRE_NATURAL);
+CBaseEntity* FireSystem_StartFire( const Vector &position, float fireHeight, float attack, float fuel, int flags, CBaseEntity *owner, fireType_e type = FIRE_NATURAL);
 void FireSystem_ExtinguishInRadius( const Vector &origin, float radius, float rate );
 void FireSystem_AddHeatInRadius( const Vector &origin, float radius, float heat );
 
