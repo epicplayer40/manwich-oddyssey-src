@@ -18,6 +18,7 @@ class CPropVehicleDriveable;
 // Spawnflags
 //------------------------------------
 #define SF_VEHICLEDRIVER_INACTIVE		(1 << 16)
+#define SF_VEHICLEDRIVER_ALLIED_TO_PLAYER		(1 << 17)
 
 //=========================================================
 // Custom schedules
@@ -152,7 +153,7 @@ public:
 	int				BloodColor( void ) { return DONT_BLEED; }
 
 #ifdef HL2_DLL
-	Class_T			Classify( void ) { return CLASS_METROPOLICE; }
+	Class_T			Classify( void ) { return HasSpawnFlags(SF_VEHICLEDRIVER_ALLIED_TO_PLAYER) ?  CLASS_PLAYER_ALLY : CLASS_METROPOLICE; } //Lychy
 #else
 	Class_T			Classify( void ) { return CLASS_NONE; }
 #endif
