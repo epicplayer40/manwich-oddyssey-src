@@ -85,7 +85,7 @@ public:
 	CFire( void );
 	
 	virtual void UpdateOnRemove( void );
-
+	virtual void StopLoopingSounds(void); //lychy
 	void	Precache( void );
 	void	Init( const Vector &position, float scale, float attackTime, float fuel, int flags, int fireType );
 	bool	GoOut();
@@ -598,6 +598,8 @@ void CFire::UpdateOnRemove( void )
 	//Stop any looping sounds that might be playing
 	StopSound( "Fire.Plasma" );
 
+	StopLoopingSounds();
+
 	DestroyEffect();
 
 	// Chain at end to mimic destructor unwind order
@@ -637,6 +639,9 @@ void CFire::Precache( void )
 	}
 
 	PrecacheScriptSound( "Fire.Plasma" );
+	PrecacheScriptSound("fire_large");
+	PrecacheScriptSound("fire_medium");
+	PrecacheScriptSound("fire_medium");
 }
 
 //------------------------------------------------------------------------------
@@ -1462,4 +1467,12 @@ int CFire::DrawDebugTextOverlays( void )
 		text_offset++;
 	}
 	return text_offset;
+}
+
+//Lychy
+void CFire::StopLoopingSounds()
+{
+	StopSound("fire_large");
+	StopSound("fire_medium");
+	StopSound("fire_small");
 }

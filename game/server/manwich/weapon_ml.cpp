@@ -293,7 +293,8 @@ void CWeaponMissileLauncher::PrimaryAttack( void )
 	m_hMissile->m_flDamageRadius = 250;
 	m_hMissile->SetHealth(200);
 	DispatchSpawn(m_hMissile);
-	m_hMissile->InputActivate(inputdata_t{ this,this });
+	inputdata_t inputData = { this,this };
+	m_hMissile->InputActivate(inputData);
 
 
 	// If the shot is clear to the player, give the missile a grace period
