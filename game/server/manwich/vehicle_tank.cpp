@@ -712,7 +712,7 @@ bool CVehicleTank::ShouldNPCFire()
 {
 	CNPC_VehicleDriver* pDriver = GetNPCDriver();
 	Assert(pDriver);
-	return m_bIsGoodAimVector && !pDriver->HasCondition(COND_ENEMY_OCCLUDED) && pDriver->GetEnemy() && gpGlobals->curtime > m_flNextAllowedShootTime && pDriver;
+	return pDriver && m_bIsGoodAimVector && !pDriver->HasCondition(COND_ENEMY_OCCLUDED) && pDriver->GetEnemy() && gpGlobals->curtime > m_flNextAllowedShootTime;
 }
 
 CNPC_VehicleDriver* CVehicleTank::GetNPCDriver()
@@ -841,12 +841,16 @@ void CVehicleTank::Event_Killed(const CTakeDamageInfo& info)
 	CBaseEntity* pDriver = GetDriver();
 
 	pDriver->TakeDamage(CTakeDamageInfo(this, this, pDriver->GetHealth(), DMG_BLAST));
-	m_bLocked = true;
-	m_bEngineLocked = true;
+
 	ExitVehicle(VEHICLE_ROLE_DRIVER);
+	//GetNPCDriver()->ExitVehicle();
 	UTIL_Remove(GetNPCDriver());
+
 	StopEngine();
 	SetBodygroup( FindBodygroupByName("weapon"), 1);
+
+	m_bLocked = true;
+	m_bEngineLocked = true;
 
 	Vector mawPos;
 	int iMaw = LookupAttachment("maw");
