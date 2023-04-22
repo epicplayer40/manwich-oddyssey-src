@@ -34,6 +34,7 @@
 // 
 //------------------------------------
 ConVar g_debug_vehicledriver( "g_debug_vehicledriver", "0", FCVAR_CHEAT );
+extern ConVar tank_debug;
 
 BEGIN_DATADESC( CNPC_VehicleDriver )
 	DEFINE_KEYFIELD( m_iszVehicleName, FIELD_STRING, "vehicle" ),
@@ -876,7 +877,6 @@ void CNPC_VehicleDriver::DriveVehicle( void )
 		NDebugOverlay::Box(m_vecDesiredPosition, -Vector(20,20,20), Vector(20,20,20), 0,255,0, true, 0.1);
 		NDebugOverlay::Line(GetAbsOrigin(), GetAbsOrigin() + m_vecDesiredVelocity, 0,255,0, true, 0.1);
 	}
-
 	m_flGoalSpeed = VectorNormalize(m_vecDesiredVelocity);
 
 	// Is our target in front or behind us?
@@ -885,57 +885,106 @@ void CNPC_VehicleDriver::DriveVehicle( void )
 	float flDot = DotProduct( vecForward, m_vecDesiredVelocity );
 	bool bBehind = ( flDot < 0 );
 	float flVelDot = DotProduct( vecVelocity, m_vecDesiredVelocity );
+	float flDotRight = DotProduct(vecRight, m_vecDesiredVelocity);
 	bool bGoingWrongWay = ( flVelDot < 0 );
+	CPropVehicle* pPropVehicle = dynamic_cast<CPropVehicle*>(m_hVehicleEntity.Get());
 
-	// Figure out whether we should accelerate / decelerate
-	if ( bGoingWrongWay || (flSpeed < m_flGoalSpeed) )
+	Vector targetVector = (m_vecDesiredPosition - GetAbsOrigin()).Normalized();
+	Vector2D targetVector2D = targetVector.AsVector2D();
+	Vector2D vecForward2D = vecForward.AsVector2D();
+	Vector2D vecRight2D = vecRight.AsVector2D();
+
+	float flDot2D = DotProduct2D(vecForward2D, targetVector2D);
+	float flDotRight2D = DotProduct2D(vecRight2D, targetVector2D);
+
+
+	if (pPropVehicle->GetVehicleType() != VEHICLE_TYPE_AIRBOAT_RAYCAST) //Lychy
 	{
-		// If it's behind us, go backwards not forwards
-		if ( bBehind )
+		// Figure out whether we should accelerate / decelerate
+		if (bGoingWrongWay || (flSpeed < m_flGoalSpeed))
 		{
-			m_pVehicleInterface->NPC_ThrottleReverse();
+			// If it's behind us, go backwards not forwards
+
+				if (bBehind)
+				{
+					m_pVehicleInterface->NPC_ThrottleReverse();
+				}
+				else
+				{
+					m_pVehicleInterface->NPC_ThrottleForward();
+				}
+			}
+		else
+		{
+			// Brake if we're go significantly too fast
+			if ((flSpeed - 200) > m_flGoalSpeed)
+			{
+				m_pVehicleInterface->NPC_Brake();
+			}
+			else
+			{
+				m_pVehicleInterface->NPC_ThrottleCenter();
+			}
+		}
+
+		// Do we need to turn?
+
+		if (bBehind)
+		{
+			// If we're driving backwards, flip our turning
+			flDotRight *= -1;
+		}
+		// Map it to the vehicle's steering
+		flDotRight *= (m_flSteering / 90);
+		if (flDotRight < 0)
+		{
+			// Turn left
+			m_pVehicleInterface->NPC_TurnLeft(-flDotRight);
+		}
+		else if (flDotRight > 0)
+		{
+			// Turn right
+			m_pVehicleInterface->NPC_TurnRight(flDotRight);
 		}
 		else
 		{
-			m_pVehicleInterface->NPC_ThrottleForward();
+			m_pVehicleInterface->NPC_TurnCenter();
 		}
 	}
-	else
+	else //lychy: for the tank
 	{
-		// Brake if we're go significantly too fast
-		if ( (flSpeed - 200) > m_flGoalSpeed )
+		if (flDot2D < 0) // > 90 deg off from our destination , dont move, then turn
 		{
 			m_pVehicleInterface->NPC_Brake();
+		}
+		else if(flSpeed < m_flGoalSpeed)
+		{
+			m_pVehicleInterface->NPC_ThrottleForward();
 		}
 		else
 		{
 			m_pVehicleInterface->NPC_ThrottleCenter();
 		}
-	}
+		//float flDegrees = RAD2DEG(acos(flDot));
+		if (tank_debug.GetBool())
+		{
+			NDebugOverlay::Line(GetAbsOrigin(), GetAbsOrigin() + (targetVector * 100), 255, 0, 255, 0, 0.1f);
+			NDebugOverlay::Line(GetAbsOrigin(), GetAbsOrigin() + (vecForward * 100), 255, 0, 255, 0, 0.1f);
+		}
+		if (flDot2D > 0.98f) //20 deg, good...
+		{
+			m_pVehicleInterface->NPC_TurnCenter();
+		}
+		else if (flDotRight2D > 0)
+		{
+			m_pVehicleInterface->NPC_TurnRight(1);
+		}
+		else
+		{
+			//flDegrees *= -1;
+			m_pVehicleInterface->NPC_TurnLeft(1);
+		}
 
-	// Do we need to turn?
-	float flDotRight = DotProduct( vecRight, m_vecDesiredVelocity );
-	if ( bBehind )
-	{
-		// If we're driving backwards, flip our turning
-		flDotRight *= -1;
-	}
-	// Map it to the vehicle's steering
-	flDotRight *= (m_flSteering / 90);
-
-	if ( flDotRight < 0 )
-	{
-		// Turn left
-		m_pVehicleInterface->NPC_TurnLeft( -flDotRight );
-	}
-	else if ( flDotRight > 0 )
-	{
-		// Turn right
-		m_pVehicleInterface->NPC_TurnRight( flDotRight );
-	}
-	else
-	{
-		m_pVehicleInterface->NPC_TurnCenter();
 	}
 }
 

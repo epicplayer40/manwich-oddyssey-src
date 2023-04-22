@@ -6,15 +6,20 @@
 #include "explode.h"
 #include "npc_vehicledriver.h"
 #include "smoke_trail.h"
-#include "saverestore_bitstring.h"
+//#include "saverestore_bitstring.h"
 #include "IEffects.h"
 #include "fire.h"
 #include "gib.h"
 #include "func_break.h"
 #include "EntityFlame.h"
+#include "vphysics/friction.h"
+#include "particle_parse.h"
+
+CBaseEntity* BreakModelCreateSingle(CBaseEntity* pOwner, breakmodel_t* pModel, const Vector& position, const QAngle& angles, const Vector& velocity, const AngularImpulse& angVelocity, int nSkin, const breakablepropparams_t& params);
 
 ConVar sk_tank_shell_damage("sk_tank_shell_damage", "0");
-ConVar tank_shell_speed("sk_tank_shell_speed", "0");
+ConVar tank_shell_speed("sk_tank_shell_speed", "10000");
+ConVar tank_push_scalar("tank_push_scalar", "2000");
 ConVar sk_tank_health("sk_tank_health", "0");
 
 ConVar tank_debug("tank_debug", "0");
@@ -25,8 +30,7 @@ ConVar tank_debug("tank_debug", "0");
 #define SMOKEPOINT_ATTACHMENT "smokepoint"
 
 #define CANNON_MAX_UP_PITCH			70
-#define CANNON_MAX_DOWN_PITCH		20
-#define CANNON_MAX_LEFT_YAW			180
+#define CANNON_MAX_DOWN_PITCH		20#define CANNON_MAX_LEFT_YAW			180
 #define CANNON_MAX_RIGHT_YAW		180
 
 #define TANK_DEFAULTMODEL "models/vehicles/merkava.mdl"
@@ -38,8 +42,15 @@ ConVar tank_debug("tank_debug", "0");
 #define TANK_GAMESOUND_TURRET_MOVE_LOOP		"Tank.TurretMoveLoop"
 #define TANK_GAMESOUND_TURRET_MOVE_END		"Tank.TurretMoveEnd"
 
+#define TANK_GAMESOUND_TANKSHELL_FLYBY	"Tank.ShellFlyBy"
+
 #define TANK_GAMESOUND_TREADS		"Tank.Treads"
 #define TANK_GAMESOUND_DIE		"Tank.DieExplode"
+
+#define TANK_GIB_TURRET_MODEL	"models/vehicles/merkava_tank_turret_gib.mdl"
+
+#define TANK_CENTIPEDE_LEG_LENGTH 15.0f
+#define TANK_CENTIPEDE_LEG_GAP 5
 
 #define SF_INDESTRUCTIBLE 1 << 0
 
@@ -50,11 +61,12 @@ ConVar tank_debug("tank_debug", "0");
 class CTankShell : public CBaseAnimating
 {
 	DECLARE_DATADESC();
-	CHandle<SmokeTrail> m_hSmokeTrail;
 	void Spawn();
 	void Precache();
 	void Touch(CBaseEntity* pOther);
 	void Think();
+	
+	bool m_bHasSounded;
 
 };
 
@@ -62,12 +74,12 @@ LINK_ENTITY_TO_CLASS(tank_shell, CTankShell);
 
 BEGIN_DATADESC(CTankShell)
 	DEFINE_THINKFUNC(Think),
-	DEFINE_FIELD(m_hSmokeTrail, FIELD_EHANDLE),
 END_DATADESC()
 
 void CTankShell::Precache()
 {
 	PrecacheModel(TANKSHELL_MODEL);
+	PrecacheScriptSound(TANK_GAMESOUND_TANKSHELL_FLYBY);
 }
 
 void CTankShell::Spawn()
@@ -77,18 +89,21 @@ void CTankShell::Spawn()
 	SetMoveType(MOVETYPE_FLYGRAVITY);
 	SetSolid(SOLID_BBOX);
 	SetEFlags(FL_OBJECT);
-	m_hSmokeTrail = SmokeTrail::CreateSmokeTrail();
-	m_hSmokeTrail->m_SpawnRate = 90;
-	m_hSmokeTrail->m_ParticleLifetime = 3;
-	m_hSmokeTrail->m_StartColor.Init(0.1, 0.1, 0.1);
-	m_hSmokeTrail->m_EndColor.Init(0.5, 0.5, 0.5);
-	m_hSmokeTrail->m_StartSize = 10;
-	m_hSmokeTrail->m_EndSize = 50;
-	m_hSmokeTrail->m_SpawnRadius = 1;
-	m_hSmokeTrail->m_MinSpeed = 15;
-	m_hSmokeTrail->m_MaxSpeed = 25;
-	m_hSmokeTrail->SetLifetime(120);
-	m_hSmokeTrail->FollowEntity(this);
+	
+
+
+	SmokeTrail* pSmokeTrail = SmokeTrail::CreateSmokeTrail();
+	pSmokeTrail->m_SpawnRate = 130;
+	pSmokeTrail->m_ParticleLifetime = 2;
+	pSmokeTrail->m_StartColor.Init(0.1, 0.1, 0.1);
+	pSmokeTrail->m_EndColor.Init(0.5, 0.5, 0.5);
+	pSmokeTrail->m_StartSize = 10;
+	pSmokeTrail->m_EndSize = 50;
+	pSmokeTrail->m_SpawnRadius = 1;
+	//pSmokeTrail->m_MinSpeed = 15;
+	//pSmokeTrail->m_MaxSpeed = 25;
+	pSmokeTrail->SetLifetime(120);
+	pSmokeTrail->FollowEntity(this);
 
 
 	SetThink(&CTankShell::Think);
@@ -99,7 +114,7 @@ void CTankShell::Touch(CBaseEntity* pOther)
 {
 	if (!pOther->IsSolid())
 		return;
-	ExplosionCreate(WorldSpaceCenter(), vec3_angle, this, 500, 500, true);
+	ExplosionCreate(WorldSpaceCenter(), vec3_angle, GetOwnerEntity(), 500, 500, true);
 	UTIL_Remove(this);
 
 }
@@ -109,6 +124,19 @@ void CTankShell::Think()
 
 	VectorAngles(GetAbsVelocity(), angles);
 	SetAbsAngles(angles);
+	if (!m_bHasSounded )
+	{
+		CBasePlayer* pPlayer = UTIL_GetLocalPlayer();
+		vec_t distanceToPlayer = (pPlayer->GetAbsOrigin() - GetAbsOrigin()).Length();
+		//Msg("Distance: %f\n", distanceToPlayer);
+		if (distanceToPlayer <= 3000)
+		{
+			EmitSound(TANK_GAMESOUND_TANKSHELL_FLYBY);
+			m_bHasSounded = true;
+		}
+
+	}
+	SetNextThink(gpGlobals->curtime);
 }
 #pragma endregion
 
@@ -119,8 +147,13 @@ class CVehicleTank : public CPropVehicleDriveable
 	DECLARE_CLASS(CVehicleTank, CPropVehicleDriveable);
 	DECLARE_DATADESC();
 public:
+	CVehicleTank()
+	{
+		EnableFiring();
+	}
 	void Spawn() override;
 	void Precache() override;
+	void PrecacheBreakModels();
 	void Think() override;
 	void Event_Killed(const CTakeDamageInfo& info);
 
@@ -128,11 +161,16 @@ public:
 	void DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsDown, int iButtonsReleased) override; // Driving Button handling
 	void SetupMove(CBasePlayer* player, CUserCmd* ucmd, IMoveHelper* pHelper, CMoveData* move) override ;
 	void CreateServerVehicle() override;
+	void ExitVehicle(int nRole) override;
 
 	void ShootThink();
 	void AimGunAt(Vector* endPos);
-	void AimPrimaryWeapon();
 	void NPCAimThink();
+	void ReloadThink();
+	void FinishReloadThink();
+
+	void EnableFiring();
+	void DisableFiring();
 
 	void ResetViewForward();
 	void EnableFire();
@@ -146,6 +184,12 @@ public:
 	void SpawnFlamingGibsAtAttachment(int iAttachment);
 	void EnableSmokeAttachment(int iAttachment);
 	void SparkShowerAtAttachment(int iAttachment);
+	void SpawnMegaGibs();
+
+	bool CentipedeCheck(int iStartAttachment, int iEndAttachment);
+	bool TraceCentipedeLeg(const Vector& startTrace);
+	void InitialiseRaytraceAttachments();
+	void ApplyPush(bool backward);
 
 	void StopLoopingSounds() override;
 
@@ -153,13 +197,22 @@ public:
 	
 	float			m_aimYaw;
 	float			m_aimPitch;
+
 	float			m_flNextAllowedShootTime;
+	float			m_fPrevAimTime;
 	bool			m_bIsFiring;
 	bool			m_bIsGoodAimVector;
 	bool			m_bIsResettingAim;
 	bool			m_bIsOnFire;
 	bool			m_bIsSounding;
-	int				m_bSmokingAttachments;
+	bool			m_bHasNotYetReloaded;
+	
+
+	int				m_RaytraceAttachmentRL;
+	int				m_RaytraceAttachmentRR;
+	int				m_RaytraceAttachmentFL;
+	int				m_RaytraceAttachmentFR;
+
 	CBitVec<8>		m_bitsSmoking;
 
 	Vector			m_vecNPCTarget;
@@ -168,14 +221,17 @@ public:
 };
 
 BEGIN_DATADESC(CVehicleTank)
-	DEFINE_THINKFUNC(ShootThink),
+	DEFINE_THINKFUNC(FinishReloadThink),
+	DEFINE_THINKFUNC(ReloadThink),
 	DEFINE_THINKFUNC(NPCAimThink),
+	DEFINE_THINKFUNC(ShootThink),
 	DEFINE_FIELD(m_aimYaw, FIELD_FLOAT),
 	DEFINE_FIELD(m_aimPitch, FIELD_FLOAT),
 	DEFINE_FIELD(m_bIsGoodAimVector, FIELD_BOOLEAN),
 	DEFINE_FIELD(m_bIsOnFire, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_bHasNotYetReloaded, FIELD_BOOLEAN),
 	DEFINE_FIELD(m_vecNPCTarget, FIELD_VECTOR),
-	DEFINE_BITSTRING(m_bitsSmoking),
+	//DEFINE_BITSTRING(m_bitsSmoking),
 
 END_DATADESC()
 
@@ -199,8 +255,14 @@ public:
 		*flMinRange = 250.0f;
 		*flMaxRange = 9999.0f;
 	}
-	bool NPC_IsOmniDirectional() override { return true; }
-	CVehicleTank* GetTank() { return m_hTank;}
+	bool NPC_IsOmniDirectional() override 
+	{
+		return true; 
+	}
+	CVehicleTank* GetTank() 
+	{
+		return m_hTank;
+	}
 
 	void CheckAndSetTank()
 	{
@@ -233,7 +295,7 @@ public:
 			GetTank()->m_vecNPCTarget = vecTarget;
 			m_flNextAimTime = gpGlobals->curtime + 0.25f;
 		}
-		GetTank()->AimPrimaryWeapon();
+		GetTank()->NPCAimThink();
 	}
 
 	//Lychy: The tank should not move if the NPC driver has a good aiming vector
@@ -286,7 +348,6 @@ void CVehicleTank::Precache()
 		PrecacheModel("models/vehicles/merkava.mdl");
 	}
 
-	//PrecacheModel(TANKSHELL_MODEL);
 	PrecacheScriptSound(TANK_GAMESOUND_EJECTCASING);
 	PrecacheScriptSound(TANK_GAMESOUND_FIRE);
 	PrecacheScriptSound(TANK_GAMESOUND_READYFIRE);
@@ -297,6 +358,9 @@ void CVehicleTank::Precache()
 
 	PrecacheScriptSound(TANK_GAMESOUND_TREADS);
 	PrecacheScriptSound(TANK_GAMESOUND_DIE);
+
+	PrecacheParticleSystem("Explosion_2");
+	PrecacheBreakModels();
 
 	UTIL_PrecacheOther("env_fire");
 	UTIL_PrecacheOther("env_smoketrail");
@@ -322,20 +386,37 @@ void CVehicleTank::Spawn()
 	SetPoseParameter(JEEP_GUN_PITCH, 0);
 	SetVehicleType(VEHICLE_TYPE_AIRBOAT_RAYCAST);
 
+	RegisterThinkContext("FinishReloadThink");
+	RegisterThinkContext("ReloadThink");
 	RegisterThinkContext("ShootThink");
+	RegisterThinkContext("NPCAimThink");
+	SetContextThink(&CVehicleTank::FinishReloadThink, TICK_NEVER_THINK, "FinishReloadThink");
+	SetContextThink(&CVehicleTank::ReloadThink, TICK_NEVER_THINK, "ReloadThink");
 	SetContextThink(&CVehicleTank::ShootThink, TICK_NEVER_THINK, "ShootThink");
 	SetContextThink(&CVehicleTank::NPCAimThink, TICK_NEVER_THINK, "NPCAimThink");
+
+
 	m_bHasGun = true;
 
 	SetMaxHealth(sk_tank_health.GetInt());
 	SetHealth(sk_tank_health.GetInt());
 	BaseClass::Spawn();
+	PrecacheBreakModels();
 
 	m_takedamage = DAMAGE_YES;
 	delete m_pServerVehicle;
 	m_pServerVehicle = new CTankFourWheelServerVehicle();
 	m_pServerVehicle->SetVehicle(this);
 	m_bIsGoodAimVector = false;
+
+	//IPhysicsObject* physObj = VPhysicsGetObject();
+	//physObj->SetMass(GetModelPtr()->mass());
+
+	InitialiseRaytraceAttachments();
+
+	//for(int i = 0; i<4;i++)
+	//	m_VehiclePhysics.GetVehicleController()->SetWheelFriction(i, 1.0f);
+	/*
 	for (int i = 0; i < m_bitsSmoking.GetNumBits(); i++)
 	{
 		if (m_bitsSmoking.IsBitSet(i))
@@ -343,12 +424,13 @@ void CVehicleTank::Spawn()
 			int baseAttachment = LookupAttachment(SMOKEPOINT_ATTACHMENT"1");
 			EnableSmokeAttachment(baseAttachment + i - 1);
 		}
-	}
+	}*/
 }
 
 void CVehicleTank::Think()
 {
 	BaseClass::Think();
+
 
 	CBasePlayer* pPlayer = UTIL_GetLocalPlayer();
 
@@ -438,15 +520,28 @@ void CVehicleTank::Think()
 
 }
 
-void CVehicleTank::DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsDown, int iButtonsReleased)
+
+void CVehicleTank::DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsDown, int iButtonsReleased)	
 {
 	int iButtons = ucmd->buttons;
 	// If we're holding down an attack button, update our state
+	
 
 	if (iButtons & IN_ATTACK && gpGlobals->curtime > m_flNextAllowedShootTime)
 	{
 		FireCannon();
 	}
+	if (iButtons & IN_FORWARD && (CentipedeCheck(m_RaytraceAttachmentFL, m_RaytraceAttachmentRL) || CentipedeCheck(m_RaytraceAttachmentFR, m_RaytraceAttachmentRR)))
+	{
+		ApplyPush(false);
+	}
+	else if (iButtons & IN_BACK && (CentipedeCheck(m_RaytraceAttachmentFL, m_RaytraceAttachmentRL) || CentipedeCheck(m_RaytraceAttachmentFR, m_RaytraceAttachmentRR)))
+	{
+		ApplyPush(true);
+	}
+
+
+
 	BaseClass::DriveVehicle(flFrameTime, ucmd, iButtonsDown, iButtonsReleased);
 }
 
@@ -576,23 +671,24 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 	m_aimYaw = -GetPoseParameter(JEEP_GUN_YAW);
 
 
-	Vector2D currentVector(yawSpeed, pitchSpeed);
+	Vector2D currentVector(m_aimYaw, m_aimPitch);
 	if (m_vec2DPrevAimVector.IsValid())		//NaN check
 		lookSpeed = (currentVector - m_vec2DPrevAimVector).Length();
 
 	m_vec2DPrevAimVector = currentVector;
-	//Msg("lookspeed: %f\n", lookSpeed);
+	Msg("lookspeed: %f\n", lookSpeed);
 
-	if (lookSpeed > 0.005)
+	if (lookSpeed > 0.5)
 	{
 		if (!m_bIsSounding)
 		{
 			EmitSound(TANK_GAMESOUND_TURRET_MOVE_START);
 			EmitSound(TANK_GAMESOUND_TURRET_MOVE_LOOP);
+			m_fPrevAimTime = gpGlobals->curtime;
 			m_bIsSounding = true;
 		}
 	}
-	else if (m_bIsSounding)
+	else if (m_bIsSounding && (gpGlobals->curtime - m_fPrevAimTime) >= 0.35f)
 	{
 		StopLoopingSounds();
 		EmitSound(TANK_GAMESOUND_TURRET_MOVE_END);
@@ -605,8 +701,6 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 		else
 			m_bIsGoodAimVector = false;
 
-	if(tank_debug.GetBool())
-		Msg("Angle between target and aim:%f\n", dotPr);
 
 	//Lychy: make it aim forward if no enemy
 	if (pDriver && pDriver->GetLastEnemyTime() + 5.0f < gpGlobals->curtime)
@@ -618,6 +712,7 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 			SetNextThink(TICK_NEVER_THINK, "NPCAimThink");
 			StopLoopingSounds();
 			EmitSound(TANK_GAMESOUND_TURRET_MOVE_END);
+			m_bIsResettingAim = false;
 		}
 	}
 	trace_t	tr;
@@ -638,26 +733,34 @@ void CVehicleTank::ShootThink()
 		Vector	muzzleOrigin;
 		QAngle	muzzleAngles;
 		Vector aimVector;
-		GetAttachment(LookupAttachment("muzzle"), muzzleOrigin, muzzleAngles);
+		int muzzleAttachment = LookupAttachment("muzzle");
+		GetAttachment(muzzleAttachment, muzzleOrigin, muzzleAngles);
 		AngleVectors(muzzleAngles, &aimVector);
 
 		CTankShell* pShell = (CTankShell*)CreateEntityByName("tank_shell");
-		DispatchSpawn(pShell);
 		pShell->SetOwnerEntity(this);
 		pShell->SetAbsOrigin(muzzleOrigin + aimVector * 10);
-		pShell->SetAbsAngles(muzzleAngles + QAngle(0, 90, 0));
+		pShell->SetAbsAngles(muzzleAngles);
 		pShell->SetAbsVelocity(aimVector * tank_shell_speed.GetFloat());
 		pShell->SetGravity(0.3f);
+		DispatchSpawn(pShell);
 
-		m_bIsFiring = false;
-		m_flNextAllowedShootTime = gpGlobals->curtime + 5.0f;
+		
+		DisableFiring();
+		//m_flNextAllowedShootTime = gpGlobals->curtime + 5.0f;
+		SetNextThink(gpGlobals->curtime + 3.0f, "ReloadThink");
 
 		EmitSound(TANK_GAMESOUND_FIRE);
-		EmitSound(TANK_GAMESOUND_EJECTCASING);
+		//EmitSound(TANK_GAMESOUND_EJECTCASING);
+
+#if 1
+		DispatchParticleEffect("Explosion_2", PATTACH_POINT_FOLLOW, this, muzzleAttachment );
+#else
 
 		ExplosionCreate(muzzleOrigin, muzzleAngles, this, 5, 100, SF_ENVEXPLOSION_NODECAL | SF_ENVEXPLOSION_NOSOUND | SF_ENVEXPLOSION_NOFIREBALLSMOKE | SF_ENVEXPLOSION_NOPARTICLES);
 		g_pEffects->MuzzleFlash(muzzleOrigin, muzzleAngles, 25, MUZZLEFLASH_TYPE_DEFAULT);
 		UTIL_Smoke(muzzleOrigin, 500, 1);
+#endif
 		//Rock the car
 		IPhysicsObject* pObj = VPhysicsGetObject();
 
@@ -666,26 +769,20 @@ void CVehicleTank::ShootThink()
 			Vector	shoveDir = aimVector * -(250 * 250.0f);
 			pObj->ApplyForceOffset(shoveDir, muzzleOrigin);
 		}
+
+		m_bIsFiring = false;
 	}
 }
 
 void CVehicleTank::FireCannon()
 {
-	if (m_bUnableToFire)
-		return;
-
-	if (!m_bIsFiring)
+	if (!m_bUnableToFire && !m_bHasNotYetReloaded && !m_bIsFiring)
 	{
+		SetNextThink(gpGlobals->curtime + 1.0f, "ShootThink");
 		m_bIsFiring = true;
-		EmitSound(TANK_GAMESOUND_READYFIRE);
-		SetNextThink(gpGlobals->curtime + 1.9f, "ShootThink");
 	}
 }
 
-void CVehicleTank::AimPrimaryWeapon()
-{
-	SetContextThink(&CVehicleTank::NPCAimThink, gpGlobals->curtime + 0.01f, "NPCAimThink");
-}
 
 void CVehicleTank::NPCAimThink()
 {
@@ -755,16 +852,15 @@ void CVehicleTank::EnableSmokeAttachment(int iAttachment)
 	SmokeTrail* pSmokeTrail;
 	pSmokeTrail = SmokeTrail::CreateSmokeTrail();
 
-	pSmokeTrail->SetParent(this, iAttachment);
 	pSmokeTrail->m_SpawnRate = 25;
-	pSmokeTrail->m_ParticleLifetime = 10;
+	pSmokeTrail->m_ParticleLifetime = 5;
 	pSmokeTrail->m_StartColor.Init(0.4, 0.4, 0.4);
 	pSmokeTrail->m_EndColor.Init(0.2, 0.2, 0.2);
 	pSmokeTrail->m_StartSize = 5;
 	pSmokeTrail->m_EndSize = 50;
 	pSmokeTrail->m_SpawnRadius = 20;
-	pSmokeTrail->m_MinDirectedSpeed = 15;
-	pSmokeTrail->m_MaxDirectedSpeed = 30;
+	pSmokeTrail->m_MinDirectedSpeed = 25;
+	pSmokeTrail->m_MaxDirectedSpeed = 40;
 	pSmokeTrail->m_Opacity = 0.4;
 	pSmokeTrail->SetLifetime(-1);
 	pSmokeTrail->BaseClass::FollowEntity(this);
@@ -810,7 +906,7 @@ void CVehicleTank::EnableFire()
 
 int CVehicleTank::OnTakeDamage(const CTakeDamageInfo& info)
 {
-	if (!HasSpawnFlags(SF_INDESTRUCTIBLE))
+	if (!HasSpawnFlags(SF_INDESTRUCTIBLE) && info.GetAttacker() != this)
 	{
 		int prevQuarterDestroyed = (GetMaxHealth() - GetHealth()) / (GetMaxHealth() / 4);
 		if (info.GetDamageType() & DMG_BLAST)
@@ -831,7 +927,6 @@ int CVehicleTank::OnTakeDamage(const CTakeDamageInfo& info)
 
 void CVehicleTank::Event_Killed(const CTakeDamageInfo& info)
 {
-
 	m_takedamage = DAMAGE_NO;
 	m_lifeState = LIFE_DEAD;
 	if (info.GetAttacker())
@@ -839,12 +934,14 @@ void CVehicleTank::Event_Killed(const CTakeDamageInfo& info)
 		info.GetAttacker()->Event_KilledOther(this, info);
 	}
 	CBaseEntity* pDriver = GetDriver();
+	if (pDriver)
+	{
+		pDriver->TakeDamage(CTakeDamageInfo(this, this, pDriver->GetHealth(), DMG_BLAST));
 
-	pDriver->TakeDamage(CTakeDamageInfo(this, this, pDriver->GetHealth(), DMG_BLAST));
-
-	ExitVehicle(VEHICLE_ROLE_DRIVER);
-	//GetNPCDriver()->ExitVehicle();
-	UTIL_Remove(GetNPCDriver());
+		ExitVehicle(VEHICLE_ROLE_DRIVER);
+		//GetNPCDriver()->ExitVehicle();
+		UTIL_Remove(GetNPCDriver());
+	}
 
 	StopEngine();
 	SetBodygroup( FindBodygroupByName("weapon"), 1);
@@ -862,11 +959,14 @@ void CVehicleTank::Event_Killed(const CTakeDamageInfo& info)
 	pFire->SetParent(this,iMaw);
 	pFire->EmitSound("fire_large");
 
+	EmitSound(TANK_GAMESOUND_DIE);
+
+	SpawnMegaGibs();
 	EnableSmokeAttachment(iMaw);
+
 	SpawnFlamingGibsAtAttachment(iMaw);
 	SparkShowerAtAttachment(iMaw);
 	StopLoopingSounds();
-
 
 }
 
@@ -882,11 +982,11 @@ void CVehicleTank::CreateServerVehicle()
 
 void CVehicleTank::SpawnFlamingGibsAtAttachment(int iAttachment)
 {
-	for (int iGib = 0; iGib <= RandomInt(6,10); iGib++)
+	for (int iGib = 0; iGib <= RandomInt(10,15); iGib++)
 	{
 		CGib* pGib = CREATE_ENTITY(CGib, "gib");
 		pGib->m_material = matMetal;
-		pGib->m_lifeTime = gpGlobals->curtime + 10.0f;
+		pGib->m_lifeTime = gpGlobals->curtime + RandomInt(8,20);
 		pGib->SetBloodColor(DONT_BLEED);
 
 		const QAngle spitAngle(RandomFloat(-90, -45), RandomFloat(-180, 180), 0);
@@ -898,7 +998,14 @@ void CVehicleTank::SpawnFlamingGibsAtAttachment(int iAttachment)
 		pGib->SetAbsOrigin(attachmentPosition);
 
 		pGib->Spawn(g_PropDataSystem.GetRandomChunkModel("MetalChunks"));
-		pGib->SetBaseVelocity(spitVector * 400 );
+		pGib->SetCollisionGroup(COLLISION_GROUP_DEBRIS);
+
+		IPhysicsObject* pPhysicsObject = pGib->VPhysicsInitNormal(SOLID_VPHYSICS, pGib->GetSolidFlags(), false);
+		pGib->SetMoveType(MOVETYPE_VPHYSICS);
+
+		Vector vel = spitVector * RandomInt(250, 500);
+		//pGib->SetBaseVelocity(spitVector * 400 );
+		pPhysicsObject->ApplyForceCenter(vel);
 		//pGib->Ignite(10.0f);
 
 		CEntityFlame* pFlame = CEntityFlame::Create(pGib, false);
@@ -925,4 +1032,187 @@ void CVehicleTank::SparkShowerAtAttachment(int iAttachment)
 	GetAttachment(iAttachment, attachmentPosition);
 	pEntity->SetAbsOrigin(attachmentPosition);
 	DispatchSpawn(pEntity);
+}
+
+void CVehicleTank::ReloadThink()
+{
+	EmitSound(TANK_GAMESOUND_READYFIRE);
+	SetNextThink(gpGlobals->curtime + 1.9f, "FinishReloadThink");
+}
+
+void CVehicleTank::FinishReloadThink()
+{
+	EnableFiring();
+}
+
+void CVehicleTank::DisableFiring()
+{
+	m_bHasNotYetReloaded = true;
+}
+
+void CVehicleTank::EnableFiring()
+{
+	m_bHasNotYetReloaded = false;
+}
+
+
+//	Since a tank can only have 4 wheels due to source stuff, i will create many fake raytrace wheels that will push along the tank if any of them detect solid ground, this will prevent it from getting stuck, especially when going over trenches
+
+//Will trace multiple lines between these two
+//Output: Did one of our traces touch the floor
+bool CVehicleTank::CentipedeCheck(int iStartAttachment, int iEndAttachment)
+{
+
+	Vector startOriginWorld, endOriginWorld;
+	Vector startOriginLocal, endOriginLocal;
+	
+	GetAttachment(iStartAttachment, startOriginWorld);
+	GetAttachment(iEndAttachment, endOriginWorld);
+
+	WorldToEntitySpace(startOriginWorld, &startOriginLocal);
+	WorldToEntitySpace(endOriginWorld, &endOriginLocal);
+
+
+	if (/* !(GetAbsAngles().z > 10) &&*/ TraceCentipedeLeg(startOriginLocal) && TraceCentipedeLeg(endOriginLocal))
+		return false; //The 4 wheel vehicle physics is already working, so the tank is not beached, so dont push anymore,
+					 // The tank may actually not be strong enough to manage a ramp with only 1 pair of wheels, so give it a boost.
+#if 1
+	IPhysicsObject* physObj = VPhysicsGetObject();
+	IPhysicsFrictionSnapshot* snapshot = physObj->CreateFrictionSnapshot();
+
+
+	while (snapshot->IsValid())
+	{
+		Vector contactWorld, contactLocal;
+		Vector maxPointWorld, maxPointLocal;
+		Vector normal;
+
+		GetAttachment(m_RaytraceAttachmentFL, maxPointWorld);
+		WorldToEntitySpace(maxPointWorld, &maxPointLocal);
+
+		snapshot->GetContactPoint(contactWorld);
+		snapshot->GetSurfaceNormal(normal);
+
+		WorldToEntitySpace(contactWorld, &contactLocal);
+
+		if (contactLocal.z < maxPointLocal.z) //Contact point should be on the treads, anywhere above, it doesnt matter
+		{ 
+			snapshot->DeleteAllMarkedContacts(true);
+			physObj->DestroyFrictionSnapshot(snapshot);
+			return true;
+		}
+		snapshot->NextFrictionData();
+
+	}
+	snapshot->DeleteAllMarkedContacts(true);
+	physObj->DestroyFrictionSnapshot(snapshot);
+	return false;
+#else
+	Vector direction = endOriginLocal - startOriginLocal;
+	vec_t distance = direction.NormalizeInPlace();
+
+	for (vec_t scalar = TANK_CENTIPEDE_LEG_GAP; scalar < distance; scalar += TANK_CENTIPEDE_LEG_GAP) //Dont need to trace what we already have
+	{
+		Vector startTrace;
+		VectorMA(startOriginLocal, scalar, direction, startTrace);
+		if (TraceCentipedeLeg(startTrace) == true)
+			return true;
+	}
+	return false;
+#endif
+}
+
+
+//Input: starting vector, in local space
+//Output: Did we hit the floor?
+bool CVehicleTank::TraceCentipedeLeg( const Vector& startTrace)
+{
+
+	trace_t tr;
+	const Vector endTrace = startTrace + Vector(0, 0, -TANK_CENTIPEDE_LEG_LENGTH);
+
+	Vector startTraceWorld;
+	Vector endTraceWorld;
+
+	EntityToWorldSpace(startTrace,&startTraceWorld);
+	EntityToWorldSpace(endTrace,&endTraceWorld);
+
+	UTIL_TraceLine(startTraceWorld, endTraceWorld, MASK_SOLID_BRUSHONLY, this, COLLISION_GROUP_NONE, &tr);
+	if (tank_debug.GetBool())
+		NDebugOverlay::Line(startTraceWorld, endTraceWorld, 255, 0, 0, 0, 0.05f);
+	
+	return tr.DidHitWorld();
+}
+
+void CVehicleTank::InitialiseRaytraceAttachments()
+{
+	m_RaytraceAttachmentFL = LookupAttachment("raytrace_fl");
+	m_RaytraceAttachmentFR = LookupAttachment("raytrace_fr");
+	m_RaytraceAttachmentRL = LookupAttachment("raytrace_rl");
+	m_RaytraceAttachmentRR = LookupAttachment("raytrace_rr");
+
+	Assert(m_RaytraceAttachmentFL && m_RaytraceAttachmentFR && m_RaytraceAttachmentRR && m_RaytraceAttachmentRL);
+}
+
+void CVehicleTank::ApplyPush(bool backward)
+{
+	Vector vForward;
+	GetVectors(&vForward,NULL,NULL);
+
+	if(tank_debug.GetBool())
+		Msg("Pushing tank...\n");
+
+	IPhysicsObject* physObject = VPhysicsGetObject();
+
+	float scalar = tank_push_scalar.GetFloat();
+	Vector force = vForward * (scalar + (scalar * vForward.z));
+	if (backward)
+		force *= -1;
+
+	physObject->ApplyForceCenter(force);
+}
+
+void CVehicleTank::ExitVehicle(int nRole)
+{
+	StopLoopingSounds();
+	BaseClass::ExitVehicle(nRole);
+}
+
+void CVehicleTank::SpawnMegaGibs()
+{
+	CUtlVector<breakmodel_t> list;
+	BreakModelList(list, GetModelIndex(), 0, 0);
+
+	Vector attachmentOrigin;
+	QAngle attachmentAngles;
+	GetAttachment("turret_gib_spawn", attachmentOrigin, attachmentAngles);
+
+	for (int i = 0; i < list.Count(); i++)
+	{
+		CPhysicsProp* pGib = CREATE_ENTITY(CPhysicsProp, "prop_physics_override");
+		pGib->SetModel(list[i].modelName);
+
+		Vector velocity = (attachmentOrigin - GetAbsOrigin()).Normalized();
+		velocity *= 400;
+
+		pGib->SetAbsAngles(attachmentAngles);
+		pGib->SetAbsOrigin(attachmentOrigin);
+		
+		DispatchSpawn(pGib);	
+		IPhysicsObject* pPhys = pGib->VPhysicsGetObject();
+		pPhys->AddVelocity(&velocity, NULL);
+	}
+}	
+
+
+
+void CVehicleTank::PrecacheBreakModels()
+{
+	CUtlVector<breakmodel_t> list;
+	BreakModelList(list, GetModelIndex(), 0, 0);
+
+	for (int i = 0; i < list.Count(); i++)
+	{
+		PrecacheModel(list[i].modelName);
+	}
 }
