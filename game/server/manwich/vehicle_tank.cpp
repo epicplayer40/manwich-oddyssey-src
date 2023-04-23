@@ -6,7 +6,7 @@
 #include "explode.h"
 #include "npc_vehicledriver.h"
 #include "smoke_trail.h"
-//#include "saverestore_bitstring.h"
+#include "saverestore_bitstring.h"
 #include "IEffects.h"
 #include "fire.h"
 #include "gib.h"
@@ -14,14 +14,17 @@
 #include "EntityFlame.h"
 #include "vphysics/friction.h"
 #include "particle_parse.h"
+#include "soundent.h"
 
 CBaseEntity* BreakModelCreateSingle(CBaseEntity* pOwner, breakmodel_t* pModel, const Vector& position, const QAngle& angles, const Vector& velocity, const AngularImpulse& angVelocity, int nSkin, const breakablepropparams_t& params);
 
 ConVar sk_tank_shell_damage("sk_tank_shell_damage", "0");
+ConVar sk_tank_health("sk_tank_health", "0");
 ConVar tank_shell_speed("sk_tank_shell_speed", "10000");
 ConVar tank_push_scalar("tank_push_scalar", "2000");
 ConVar tank_passive_push_scalar("tank_passive_push_scalar", "1000");
-ConVar sk_tank_health("sk_tank_health", "0");
+ConVar tank_unstick_check_dist("tank_unstick_check_dist", "5");
+
 
 ConVar tank_debug("tank_debug", "0");
 
@@ -125,6 +128,9 @@ void CTankShell::Think()
 
 	VectorAngles(GetAbsVelocity(), angles);
 	SetAbsAngles(angles);
+
+	CSoundEnt::InsertSound(SOUND_DANGER | SOUND_MOVE_AWAY, GetAbsOrigin(), 1024, 1.0f, this, SOUNDENT_CHANNEL_REPEATED_DANGER);
+	
 	if (!m_bHasSounded )
 	{
 		CBasePlayer* pPlayer = UTIL_GetLocalPlayer();
@@ -193,6 +199,7 @@ public:
 	void InitialiseRaytraceAttachments();
 	void ApplyPush(bool backward);
 	void ApplyPassivePush(bool backward);
+	void UnStickCheckThink();
 
 	void StopLoopingSounds() override;
 
@@ -202,7 +209,9 @@ public:
 	float			m_aimPitch;
 
 	float			m_flNextAllowedShootTime;
-	float			m_fPrevAimTime;
+	float			m_flPrevAimTime;
+	float			m_flPrevUnStickTime;
+
 	bool			m_bIsFiring;
 	bool			m_bIsGoodAimVector;
 	bool			m_bIsResettingAim;
@@ -219,6 +228,7 @@ public:
 	CBitVec<8>		m_bitsSmoking;
 
 	Vector			m_vecNPCTarget;
+	Vector			m_vecPrevUnStickOrigin;
 	Vector2D		m_vec2DPrevAimVector;
 
 };
@@ -229,13 +239,14 @@ BEGIN_DATADESC(CVehicleTank)
 	DEFINE_THINKFUNC(NPCAimThink),
 	DEFINE_THINKFUNC(ShootThink),
 	DEFINE_THINKFUNC(EjectCasingThink),
+	DEFINE_THINKFUNC(UnStickCheckThink),
 	DEFINE_FIELD(m_aimYaw, FIELD_FLOAT),
 	DEFINE_FIELD(m_aimPitch, FIELD_FLOAT),
 	DEFINE_FIELD(m_bIsGoodAimVector, FIELD_BOOLEAN),
 	DEFINE_FIELD(m_bIsOnFire, FIELD_BOOLEAN),
 	DEFINE_FIELD(m_bHasNotYetReloaded, FIELD_BOOLEAN),
 	DEFINE_FIELD(m_vecNPCTarget, FIELD_VECTOR),
-	//DEFINE_BITSTRING(m_bitsSmoking),
+	DEFINE_BITSTRING(m_bitsSmoking),
 
 END_DATADESC()
 
@@ -395,11 +406,13 @@ void CVehicleTank::Spawn()
 	RegisterThinkContext("ShootThink");
 	RegisterThinkContext("NPCAimThink");
 	RegisterThinkContext("EjectCasingThink");
+	RegisterThinkContext("UnStickCheckThink");
 	SetContextThink(&CVehicleTank::FinishReloadThink, TICK_NEVER_THINK, "FinishReloadThink");
 	SetContextThink(&CVehicleTank::ReloadThink, TICK_NEVER_THINK, "ReloadThink");
 	SetContextThink(&CVehicleTank::ShootThink, TICK_NEVER_THINK, "ShootThink");
 	SetContextThink(&CVehicleTank::NPCAimThink, TICK_NEVER_THINK, "NPCAimThink");
 	SetContextThink(&CVehicleTank::EjectCasingThink, TICK_NEVER_THINK, "EjectCasingThink");
+	SetContextThink(&CVehicleTank::UnStickCheckThink, TICK_NEVER_THINK, "UnStickCheckThink");
 
 
 	m_bHasGun = true;
@@ -537,16 +550,19 @@ void CVehicleTank::DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsD
 	{
 		FireCannon();
 	}
-	if (iButtons & IN_FORWARD && (CentipedeCheck(m_RaytraceAttachmentFL, m_RaytraceAttachmentRL) || CentipedeCheck(m_RaytraceAttachmentFR, m_RaytraceAttachmentRR)))
+	if (iButtons & IN_FORWARD ) 
 	{
-		ApplyPush(false);
+		UnStickCheckThink();
+		CSoundEnt::InsertSound(SOUND_DANGER | SOUND_MOVE_AWAY, GetAbsOrigin(), 1024, 1.0f, this, SOUNDENT_CHANNEL_REPEATED_DANGER);
+		if (CentipedeCheck(m_RaytraceAttachmentFL, m_RaytraceAttachmentRL) || CentipedeCheck(m_RaytraceAttachmentFR, m_RaytraceAttachmentRR))
+		{
+			ApplyPush(false);
+		}
 	}
 	else if (iButtons & IN_BACK && (CentipedeCheck(m_RaytraceAttachmentFL, m_RaytraceAttachmentRL) || CentipedeCheck(m_RaytraceAttachmentFR, m_RaytraceAttachmentRR)))
 	{
 		ApplyPush(true);
 	}
-
-
 
 	BaseClass::DriveVehicle(flFrameTime, ucmd, iButtonsDown, iButtonsReleased);
 }
@@ -690,11 +706,11 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 		{
 			EmitSound(TANK_GAMESOUND_TURRET_MOVE_START);
 			EmitSound(TANK_GAMESOUND_TURRET_MOVE_LOOP);
-			m_fPrevAimTime = gpGlobals->curtime;
+			m_flPrevAimTime = gpGlobals->curtime;
 			m_bIsSounding = true;
 		}
 	}
-	else if (m_bIsSounding && (gpGlobals->curtime - m_fPrevAimTime) >= 0.35f)
+	else if (m_bIsSounding && (gpGlobals->curtime - m_flPrevAimTime) >= 0.35f)
 	{
 		StopLoopingSounds();
 		EmitSound(TANK_GAMESOUND_TURRET_MOVE_END);
@@ -744,7 +760,7 @@ void CVehicleTank::ShootThink()
 		AngleVectors(muzzleAngles, &aimVector);
 
 		CTankShell* pShell = (CTankShell*)CreateEntityByName("tank_shell");
-		pShell->SetOwnerEntity(this);
+		pShell->SetOwnerEntity(GetDriver());
 		pShell->SetAbsOrigin(muzzleOrigin + aimVector * 10);
 		pShell->SetAbsAngles(muzzleAngles);
 		pShell->SetAbsVelocity(aimVector * tank_shell_speed.GetFloat());
@@ -1080,7 +1096,7 @@ bool CVehicleTank::CentipedeCheck(int iStartAttachment, int iEndAttachment)
 	WorldToEntitySpace(endOriginWorld, &endOriginLocal);
 
 
-	if (/* !(GetAbsAngles().z > 10) &&*/ TraceCentipedeLeg(startOriginLocal) && TraceCentipedeLeg(endOriginLocal))
+	if ( TraceCentipedeLeg(startOriginLocal) && TraceCentipedeLeg(endOriginLocal))
 	{
 		ApplyPassivePush(false);
 		return false; //The 4 wheel vehicle physics is already working, so the tank is not beached, so dont push anymore,
@@ -1207,6 +1223,7 @@ void CVehicleTank::SpawnMegaGibs()
 
 		pGib->SetAbsAngles(attachmentAngles);
 		pGib->SetAbsOrigin(attachmentOrigin);
+		pGib->m_nSkin = m_nSkin;
 		
 		DispatchSpawn(pGib);	
 		IPhysicsObject* pPhys = pGib->VPhysicsGetObject();
@@ -1246,4 +1263,19 @@ void CVehicleTank::ApplyPassivePush(bool backward)
 void CVehicleTank::EjectCasingThink()
 {
 	EmitSound(TANK_GAMESOUND_EJECTCASING);
+}
+
+void CVehicleTank::UnStickCheckThink()
+{
+	if (GetNPCDriver() && m_flPrevUnStickTime < gpGlobals->curtime - 1)
+	{
+		if (m_vecPrevUnStickOrigin.IsValid() && (m_vecPrevUnStickOrigin - GetAbsOrigin()).Length() < tank_unstick_check_dist.GetFloat())
+		{
+			if (tank_debug.GetBool())
+				Msg("Unstuck the tank..\n");
+			ApplyPush(false);
+		}
+		m_vecPrevUnStickOrigin = GetAbsOrigin();
+	}
+	m_flPrevUnStickTime = gpGlobals->curtime;
 }
