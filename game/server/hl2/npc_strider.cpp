@@ -191,7 +191,8 @@ enum bodygroups
 enum
 {
 	SF_CAN_STOMP_PLAYER					= 0x10000,
-	SF_TAKE_MINIMAL_DAMAGE_FROM_NPCS	= 0x20000
+	SF_TAKE_MINIMAL_DAMAGE_FROM_NPCS	= 0x20000,
+	SF_TAKE_REAL_DAMAGE	= 0x40000
 };
 
 const float STRIDER_SPEED = 500;
@@ -3114,11 +3115,16 @@ int CNPC_Strider::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 					damage = GetMaxHealth() / sk_strider_num_missiles2.GetFloat();
 				}
 			}
-
+			if (HasSpawnFlags(SF_TAKE_REAL_DAMAGE))
+			{
+				damage = info.GetDamage();
+			}
 
 			CBaseEntity* pPtr = info.GetAttacker();
-			if(dynamic_cast<CNPC_Conscript*>(pPtr))
+			if (dynamic_cast<CNPC_Conscript*>(pPtr)) //Lychy: hacky, conscripts should 1-shot with a rocket launcher
+			{
 				damage = GetMaxHealth();
+			}
 
 			m_iHealth -= damage;
 

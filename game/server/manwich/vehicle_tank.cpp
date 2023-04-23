@@ -20,6 +20,7 @@ CBaseEntity* BreakModelCreateSingle(CBaseEntity* pOwner, breakmodel_t* pModel, c
 ConVar sk_tank_shell_damage("sk_tank_shell_damage", "0");
 ConVar tank_shell_speed("sk_tank_shell_speed", "10000");
 ConVar tank_push_scalar("tank_push_scalar", "2000");
+ConVar tank_passive_push_scalar("tank_passive_push_scalar", "1000");
 ConVar sk_tank_health("sk_tank_health", "0");
 
 ConVar tank_debug("tank_debug", "0");
@@ -168,6 +169,7 @@ public:
 	void NPCAimThink();
 	void ReloadThink();
 	void FinishReloadThink();
+	void EjectCasingThink();
 
 	void EnableFiring();
 	void DisableFiring();
@@ -190,6 +192,7 @@ public:
 	bool TraceCentipedeLeg(const Vector& startTrace);
 	void InitialiseRaytraceAttachments();
 	void ApplyPush(bool backward);
+	void ApplyPassivePush(bool backward);
 
 	void StopLoopingSounds() override;
 
@@ -225,6 +228,7 @@ BEGIN_DATADESC(CVehicleTank)
 	DEFINE_THINKFUNC(ReloadThink),
 	DEFINE_THINKFUNC(NPCAimThink),
 	DEFINE_THINKFUNC(ShootThink),
+	DEFINE_THINKFUNC(EjectCasingThink),
 	DEFINE_FIELD(m_aimYaw, FIELD_FLOAT),
 	DEFINE_FIELD(m_aimPitch, FIELD_FLOAT),
 	DEFINE_FIELD(m_bIsGoodAimVector, FIELD_BOOLEAN),
@@ -390,10 +394,12 @@ void CVehicleTank::Spawn()
 	RegisterThinkContext("ReloadThink");
 	RegisterThinkContext("ShootThink");
 	RegisterThinkContext("NPCAimThink");
+	RegisterThinkContext("EjectCasingThink");
 	SetContextThink(&CVehicleTank::FinishReloadThink, TICK_NEVER_THINK, "FinishReloadThink");
 	SetContextThink(&CVehicleTank::ReloadThink, TICK_NEVER_THINK, "ReloadThink");
 	SetContextThink(&CVehicleTank::ShootThink, TICK_NEVER_THINK, "ShootThink");
 	SetContextThink(&CVehicleTank::NPCAimThink, TICK_NEVER_THINK, "NPCAimThink");
+	SetContextThink(&CVehicleTank::EjectCasingThink, TICK_NEVER_THINK, "EjectCasingThink");
 
 
 	m_bHasGun = true;
@@ -676,7 +682,7 @@ void CVehicleTank::AimGunAt(Vector* endPos)
 		lookSpeed = (currentVector - m_vec2DPrevAimVector).Length();
 
 	m_vec2DPrevAimVector = currentVector;
-	Msg("lookspeed: %f\n", lookSpeed);
+	//Msg("lookspeed: %f\n", lookSpeed);
 
 	if (lookSpeed > 0.5)
 	{
@@ -749,9 +755,10 @@ void CVehicleTank::ShootThink()
 		DisableFiring();
 		//m_flNextAllowedShootTime = gpGlobals->curtime + 5.0f;
 		SetNextThink(gpGlobals->curtime + 3.0f, "ReloadThink");
+		SetNextThink(gpGlobals->curtime + 1.5f, "EjectCasingThink");
+
 
 		EmitSound(TANK_GAMESOUND_FIRE);
-		//EmitSound(TANK_GAMESOUND_EJECTCASING);
 
 #if 1
 		DispatchParticleEffect("Explosion_2", PATTACH_POINT_FOLLOW, this, muzzleAttachment );
@@ -1074,8 +1081,11 @@ bool CVehicleTank::CentipedeCheck(int iStartAttachment, int iEndAttachment)
 
 
 	if (/* !(GetAbsAngles().z > 10) &&*/ TraceCentipedeLeg(startOriginLocal) && TraceCentipedeLeg(endOriginLocal))
+	{
+		ApplyPassivePush(false);
 		return false; //The 4 wheel vehicle physics is already working, so the tank is not beached, so dont push anymore,
-					 // The tank may actually not be strong enough to manage a ramp with only 1 pair of wheels, so give it a boost.
+						// The tank may actually not be strong enough to manage a ramp with only 1 pair of wheels, so give it a boost.
+	}
 #if 1
 	IPhysicsObject* physObj = VPhysicsGetObject();
 	IPhysicsFrictionSnapshot* snapshot = physObj->CreateFrictionSnapshot();
@@ -1099,10 +1109,10 @@ bool CVehicleTank::CentipedeCheck(int iStartAttachment, int iEndAttachment)
 		{ 
 			snapshot->DeleteAllMarkedContacts(true);
 			physObj->DestroyFrictionSnapshot(snapshot);
+
 			return true;
 		}
 		snapshot->NextFrictionData();
-
 	}
 	snapshot->DeleteAllMarkedContacts(true);
 	physObj->DestroyFrictionSnapshot(snapshot);
@@ -1200,7 +1210,8 @@ void CVehicleTank::SpawnMegaGibs()
 		
 		DispatchSpawn(pGib);	
 		IPhysicsObject* pPhys = pGib->VPhysicsGetObject();
-		pPhys->AddVelocity(&velocity, NULL);
+		AngularImpulse angImpulse = RandomAngularImpulse(-5, 5);
+		pPhys->AddVelocity(&velocity, &angImpulse);
 	}
 }	
 
@@ -1215,4 +1226,24 @@ void CVehicleTank::PrecacheBreakModels()
 	{
 		PrecacheModel(list[i].modelName);
 	}
+}
+
+void CVehicleTank::ApplyPassivePush(bool backward)
+{
+	Vector vForward;
+	GetVectors(&vForward, NULL, NULL);
+
+	IPhysicsObject* physObject = VPhysicsGetObject();
+
+	float scalar = tank_passive_push_scalar.GetFloat();
+	Vector force = vForward * scalar;
+	if (backward)
+		force *= -1;
+
+	physObject->ApplyForceCenter(force);
+}
+
+void CVehicleTank::EjectCasingThink()
+{
+	EmitSound(TANK_GAMESOUND_EJECTCASING);
 }
