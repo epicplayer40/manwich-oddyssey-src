@@ -2684,7 +2684,15 @@ bool CHL2_Player::Weapon_CanUse( CBaseCombatWeapon *pWeapon )
 	}
 	if ( !sv_give_npconly_weapons.GetBool() && ( pWeapon->ClassMatches("weapon_mp5") || pWeapon->ClassMatches("weapon_p90") ) )
 	{
-//		UTIL_Remove( pWeapon );
+		if ( !Weapon_EquipAmmoOnly( pWeapon, true ) )
+			return false;
+		
+		// Only remove me if I have no ammo left
+		// Can't just check HasAnyAmmo because if I don't use clips, I want to be removed, 
+		if ( pWeapon->UsesClipsForAmmo1() && pWeapon->HasPrimaryAmmo() )
+			return false;
+		
+		UTIL_Remove( pWeapon );
 		return false;
 	}
 #endif

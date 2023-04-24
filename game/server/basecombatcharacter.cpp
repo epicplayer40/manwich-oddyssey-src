@@ -2179,12 +2179,12 @@ void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 // Purpose:	Leaves weapon, giving only ammo to the character
 // Input  : Weapon
 //-----------------------------------------------------------------------------
-bool CBaseCombatCharacter::Weapon_EquipAmmoOnly( CBaseCombatWeapon *pWeapon )
+bool CBaseCombatCharacter::Weapon_EquipAmmoOnly( CBaseCombatWeapon *pWeapon, bool bOnlyAmmo )
 {
 	// Check for duplicates
 	for (int i=0;i<MAX_WEAPONS;i++) 
 	{
-		if ( m_hMyWeapons[i].Get() && FClassnameIs(m_hMyWeapons[i], pWeapon->GetClassname()) )
+		if ( ( m_hMyWeapons[i].Get() && FClassnameIs(m_hMyWeapons[i], pWeapon->GetClassname()) ) || bOnlyAmmo )
 		{
 			// Just give the ammo from the clip
 			int	primaryGiven	= (pWeapon->UsesClipsForAmmo1()) ? pWeapon->m_iClip1 : pWeapon->GetPrimaryAmmoCount();
@@ -2217,6 +2217,8 @@ bool CBaseCombatCharacter::Weapon_EquipAmmoOnly( CBaseCombatWeapon *pWeapon )
 			
 			return false;
 		}
+		if ( bOnlyAmmo )
+			break;
 	}
 
 	return false;
