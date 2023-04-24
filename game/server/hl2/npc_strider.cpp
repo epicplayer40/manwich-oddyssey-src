@@ -3121,7 +3121,7 @@ int CNPC_Strider::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 			}
 
 			CBaseEntity* pPtr = info.GetAttacker();
-			if (dynamic_cast<CNPC_Conscript*>(pPtr)) //Lychy: hacky, conscripts should 1-shot with a rocket launcher
+			if ( FClassnameIs( pPtr, "npc_conscript" ) ) //Lychy: hacky, conscripts should 1-shot with a rocket launcher
 			{
 				damage = GetMaxHealth();
 			}
