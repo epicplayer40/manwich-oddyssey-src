@@ -283,22 +283,19 @@ void CNPC_FHGrunt::Spawn()
 		// pev->weapons = FHFGRUNT_SHOTGUN;
 		// pev->weapons = FHFGRUNT_9MMAR | FHFGRUNT_GRENADELAUNCHER;
 
-		int min = 1;
-		int max = 3;
-		double scaled = (double)rand()/RAND_MAX;
-		int r = (max - min +1)*scaled + min;
+		int iRand = random->RandomInt( 1, 3 );
 	
-		if (r == 1)
+		switch (iRand)
 		{
+		case 1:
 			m_iWeapons = FHFGRUNT_9MMAR | FHFGRUNT_HANDGRENADE;
-		}
-		else if (r == 2)
-		{
+			break;
+		case 2:
 			m_iWeapons = FHFGRUNT_SHOTGUN | FHFGRUNT_HANDGRENADE;
-		}
-		else if (r == 3)
-		{
+			break;
+		case 3:
 			m_iWeapons = FHFGRUNT_9MMAR | FHFGRUNT_GRENADELAUNCHER;
+			break;
 		}
 	}
 

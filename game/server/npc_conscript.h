@@ -136,6 +136,10 @@ public:
 public:
 	DECLARE_DATADESC();
 	DEFINE_CUSTOM_AI;
+
+protected:
+	static const char* pMaleModels[];
+	static const char* pFemaleModels[];
 };
 
 //#endif

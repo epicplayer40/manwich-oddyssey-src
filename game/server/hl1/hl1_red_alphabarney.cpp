@@ -178,28 +178,23 @@ void CNPC_HL1AlphaRarney::Spawn()
 		 //pev->weapons = TRESH_SHOTGUN;
 		// pev->weapons = TRESH_9MMAR | TRESH_GRENADELAUNCHER;
 
-	int min = 1;
-	int max = 4;
-	double scaled = (double)rand()/RAND_MAX;
-	int r = (max - min +1)*scaled + min;
-	
-	if (r == 1)
-	{
-		m_iWeapons = RARNEY_PISTOL;
-	}
-	else if (r == 2)
-	{
-		m_iWeapons = RARNEY_SMG;
-	}
-	else if (r == 3)
-	{
-		m_iWeapons = RARNEY_SHOTGUN;
-	}
-	else if (r == 4)
-	{
-		m_iWeapons = RARNEY_SNIPER;
-	}
-
+		int iRand = random->RandomInt( 1, 4 );
+		
+		switch( iRand )
+		{
+		case 1:
+			m_iWeapons = RARNEY_PISTOL;
+			break;
+		case 2:
+			m_iWeapons = RARNEY_SMG;
+			break;
+		case 3:
+			m_iWeapons = RARNEY_SHOTGUN;
+			break;
+		case 4:
+			m_iWeapons = RARNEY_SNIPER;
+			break;
+		}
 	}
 
 	if (FBitSet(m_iWeapons, RARNEY_PISTOL))

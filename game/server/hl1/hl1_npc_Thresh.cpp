@@ -307,32 +307,26 @@ void CNPC_HGang::Spawn()
 		 //pev->weapons = TRESH_SHOTGUN;
 		// pev->weapons = TRESH_9MMAR | TRESH_GRENADELAUNCHER;
 
-	int min = 1;
-	int max = 5;
-	double scaled = (double)rand()/RAND_MAX;
-	int r = (max - min +1)*scaled + min;
-	
-	if (r == 1)
-	{
-		m_iWeapons = TRESH_9MMAR | TRESH_HANDGRENADE;
-	}
-	else if (r == 2)
-	{
-		m_iWeapons = TRESH_SHOTGUN | TRESH_HANDGRENADE;
-	}
-	else if (r == 3)
-	{
-		m_iWeapons = TRESH_9MMAR;
-	}
-	else if (r == 4)
-	{
-		m_iWeapons = TRESH_SHOTGUN;
-	}
-	else if (r == 5)
-	{
-		m_iWeapons = TRESH_GRENADELAUNCHER;
-	}
-
+		int iRand = random->RandomInt(1, 5);
+		
+		switch (iRand)
+		{
+		case 1:
+			m_iWeapons = TRESH_9MMAR | TRESH_HANDGRENADE;
+			break;
+		case 2:
+			m_iWeapons = TRESH_SHOTGUN | TRESH_HANDGRENADE;
+			break;
+		case 3:
+			m_iWeapons = TRESH_9MMAR;
+			break;
+		case 4:
+			m_iWeapons = TRESH_SHOTGUN;
+			break;
+		case 5:
+			m_iWeapons = TRESH_GRENADELAUNCHER;
+			break;
+		}
 	}
 
 	if (FBitSet(m_iWeapons, TRESH_SHOTGUN))

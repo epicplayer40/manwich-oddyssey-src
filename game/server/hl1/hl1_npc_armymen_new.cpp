@@ -249,22 +249,20 @@ void CNPC_ArmyMen::Spawn()
 	Precache();
 
 
-	int mmin = 1;
-	int mmax = 3;
-	double scaled = (double)rand()/RAND_MAX;
-	int mr = (mmax - mmin +1)*scaled + mmin;
+	int iRand = random->RandomInt( 1, 3 );
 	
-	if (mr == 1)
+	// himdeez: it won't matter adding table of models in this class anyway
+	switch (iRand)
 	{
-		SetModel("models/plastic_soldier.mdl");  
-	}
-	else if (mr == 2)
-	{
-		SetModel("models/plastic_soldier2.mdl");  
-	}
-	else if (mr == 3)
-	{
-		SetModel("models/plastic_soldier3.mdl");  
+	case 1:
+		SetModel("models/plastic_soldier.mdl");
+		break;
+	case 2:
+		SetModel("models/plastic_soldier2.mdl");
+		break;
+	case 3:
+		SetModel("models/plastic_soldier3.mdl");
+		break;
 	}
 
 

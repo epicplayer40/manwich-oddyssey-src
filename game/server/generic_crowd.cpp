@@ -50,6 +50,10 @@ public:
 	string_t			m_strHullName;
 
 	DECLARE_DATADESC();
+
+protected:
+	
+	static char *pModels[];
 };
 LINK_ENTITY_TO_CLASS( generic_crowd, CGenericCrowd );
 
@@ -59,6 +63,23 @@ BEGIN_DATADESC( CGenericCrowd )
 
 END_DATADESC()
 
+//=========================================================
+// Models array
+//=========================================================
+
+char *CGenericCrowd::pModels[] = 
+{
+	"models/bahl101.mdl",
+	"models/combine_soldier.mdl",
+	"models/police.mdl",
+	"models/childsoldier.mdl",
+	"models/cremator_npc.mdl",
+	"models/hgang01.mdl",
+	"models/monster_metropolice.mdl",
+	"models/Tank_Escorter.mdl",
+	"models/barngreen.mdl",
+	"models/barnyellow.mdl"
+};
 
 //=========================================================
 // Classify - indicates this NPC's place in the 
@@ -105,50 +126,8 @@ void CGenericCrowd::Spawn()
 	char *szModel = (char *)STRING( GetModelName() );
 	if (!szModel || !*szModel)
 	{
-		int min = 1;
-		int max = 10;
-		double scaled = (double)rand()/RAND_MAX;
-		int r = (max - min +1)*scaled + min;
-		if (r == 1)
-		{
-			szModel = "models/bahl101.mdl";
-		}
-		else if (r == 2)
-		{
-			szModel = "models/combine_soldier.mdl";
-		}
-		else if (r == 3)
-		{
-			szModel = "models/police.mdl";
-		}
-		else if (r == 4)
-		{
-			szModel = "models/childsoldier.mdl";
-		}
-		else if (r == 5)
-		{
-			szModel = "models/cremator_npc.mdl";
-		}
-		else if (r == 6)
-		{
-			szModel = "models/hgang01.mdl";
-		}
-		else if (r == 7)
-		{
-			szModel = "models/monster_metropolice.mdl";
-		}
-		else if (r == 8)
-		{
-			szModel = "models/Tank_Escorter.mdl";
-		}
-		else if (r == 9)
-		{
-			szModel = "models/barngreen.mdl";
-		}
-		else if (r == 10)
-		{
-			szModel = "models/barnyellow.mdl";
-		}
+		// himdeez: even if this is unused i'll improve this anyway
+		szModel = pModels[ random->RandomInt( 0, ARRAYSIZE( pModels ) - 1 ) ];
 		SetModelName( AllocPooledString(szModel) );
 	}
 

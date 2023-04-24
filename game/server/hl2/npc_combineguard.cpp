@@ -330,21 +330,15 @@ int CNPC_CombineGuard::SelectSchedule ( void )
 							 // dead enemy
 		if (HasCondition(COND_ENEMY_DEAD))
 		{
-
-		int min = 1;
-		int max = 4;
-		double scaled = (double)rand()/RAND_MAX;
-		int r = (max - min +1)*scaled + min;
-		if (r == 1) //1 in 4 chance to taunt enemies
-		{
-			EmitSound( "CGuard.Evil" );
-		}
-
-		if (r > 1)
-		{
-			EmitSound( "Common.Null" );
-		}
-
+			int iRand = random->RandomInt( 1, 4 );
+			if ( iRand == 1 ) //1 in 4 chance to taunt enemies
+			{
+				EmitSound( "CGuard.Evil" );
+			}
+			else
+			{
+				EmitSound( "Common.Null" );
+			}
 		}
 		return BaseClass::SelectSchedule(); // call base class, all code to handle dead enemies is centralized there.
 

@@ -276,18 +276,16 @@ void CNPC_HGrunt::Spawn()
 		// pev->weapons = HGRUNT_SHOTGUN;
 		// pev->weapons = HGRUNT_9MMAR | HGRUNT_GRENADELAUNCHER;
 
-		int min = 1;
-		int max = 2;
-		double scaled = (double)rand()/RAND_MAX;
-		int r = (max - min +1)*scaled + min;
+		int iRand = random->RandomInt( 1, 2 );
 	
-		if (r == 1)
+		switch( iRand )
 		{
+		case 1:
 			m_iWeapons = HGRUNT_9MMAR | HGRUNT_HANDGRENADE;
-		}
-		else if (r == 2)
-		{
+			break;
+		case 2:
 			m_iWeapons = HGRUNT_SHOTGUN | HGRUNT_HANDGRENADE;
+			break;
 		}
 	}
 

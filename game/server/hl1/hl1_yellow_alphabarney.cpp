@@ -167,29 +167,23 @@ void CNPC_HL1AlphaYarney::Spawn()
 
 	if (m_iWeapons == 0)
 	{
-
-	int min = 1;
-	int max = 4;
-	double scaled = (double)rand()/RAND_MAX;
-	int r = (max - min +1)*scaled + min;
-	
-	if (r == 1)
-	{
-		m_iWeapons = YARNEY_PISTOL;
-	}
-	else if (r == 2)
-	{
-		m_iWeapons = YARNEY_SMG;
-	}
-	else if (r == 3)
-	{
-		m_iWeapons = YARNEY_SHOTGUN;
-	}
-	else if (r == 4)
-	{
-		m_iWeapons = YARNEY_SNIPER;
-	}
-
+		int iRand = random->RandomInt(1, 4);
+		
+		switch (iRand)
+		{
+		case 1:
+			m_iWeapons = YARNEY_PISTOL;
+			break;
+		case 2:
+			m_iWeapons = YARNEY_SMG;
+			break;
+		case 3:
+			m_iWeapons = YARNEY_SHOTGUN;
+			break;
+		case 4:
+			m_iWeapons = YARNEY_SNIPER;
+			break;
+		}
 	}
 
 	if (FBitSet(m_iWeapons, YARNEY_PISTOL))
@@ -438,45 +432,17 @@ int CNPC_HL1AlphaYarney::GetGrenadeConditions(float flDot, float flDist)
 			// don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->curtime + 10; // 10 seconds.
 
-		int min = 1;
-		int max = 8;
-		double scaled = (double)rand()/RAND_MAX;
-		int r = (max - min +1)*scaled + min;
-	
-		if (r == 1)
+			int iRand = random->RandomInt(1, 8);
+			if (iRand == 1)
 			{
 				return COND_CAN_RANGE_ATTACK2;
 			}
-		else if (r == 2)
-			{
-				return COND_NONE;
-			}
-		else if (r == 3)
-			{
-				return COND_NONE;
-			}
-		else if (r == 4)
-			{
-				return COND_NONE;
-			}
-		else if (r == 5)
-			{
-				return COND_NONE;
-			}
-		else if (r == 6)
-			{
-				return COND_NONE;
-			}
-		else if (r == 7)
-			{
-				return COND_NONE;
-			}
-		else if (r == 8)
+			else
 			{
 				return COND_NONE;
 			}
 		}
-
+		// himdeez: no idea what this is maybe you forgot to add else here?
 		{
 			// don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->curtime + 20; // 20 seconds.

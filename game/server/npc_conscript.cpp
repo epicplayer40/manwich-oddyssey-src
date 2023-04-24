@@ -204,6 +204,30 @@ BEGIN_DATADESC( CNPC_Conscript )
 
 END_DATADESC()
 
+const char *CNPC_Conscript::pMaleModels[] = 
+{
+	"models/conscripts/male_01.mdl",
+	"models/conscripts/male_02.mdl",
+	"models/conscripts/male_03.mdl",
+	"models/conscripts/male_04.mdl",
+	"models/conscripts/male_05.mdl",
+	"models/conscripts/male_06.mdl",
+	"models/conscripts/male_07.mdl",
+	"models/conscripts/male_08.mdl",
+	"models/conscripts/male_09.mdl"
+};
+
+const char *CNPC_Conscript::pFemaleModels[] = 
+{
+	"models/conscripts/female_01.mdl",
+	"models/conscripts/female_02.mdl",
+	"models/conscripts/female_03.mdl",
+	"models/conscripts/female_04.mdl",
+//	"models/conscripts/female_05.mdl", there was no female_05
+	"models/conscripts/female_06.mdl",
+	"models/conscripts/female_07.mdl"
+};
+
 //-----------------------------------------------------------------------------
 // Purpose:
 // Input  :
@@ -295,87 +319,155 @@ void CNPC_Conscript::StartTask( const Task_t *pTask )
 // Output :
 //-----------------------------------------------------------------------------
 Activity CNPC_Conscript::NPC_TranslateActivity( Activity eNewActivity )  //MESSY, MESSY, MESSY! LOOK AWAY IF YOU KNOW WHAT'S GOOD FOR YOU!!!! -Stacker
+                                                                         //update: fixed to look a bit cleaner -himdeez
 {
+	if ( m_NPCState == NPC_STATE_COMBAT && eNewActivity == ACT_IDLE )
+	{
+		return ACT_IDLE_ANGRY;
+	}
 
-		if ( m_NPCState == NPC_STATE_COMBAT && eNewActivity == ACT_IDLE )
+	//Override anims for new ones
+	if ( Weapon_OwnsThisType( "weapon_smg1" ) || 
+		 Weapon_OwnsThisType( "weapon_smg2" ) ||
+		 Weapon_OwnsThisType( "weapon_tommygun" ) )
+	{
+		switch ( eNewActivity )
 		{
-			return ACT_IDLE_ANGRY;
+		case ACT_IDLE:
+			return (Activity)ACT_CONSCRIPT_IDLE_SMG1;
+			break;
+		case ACT_RUN:
+			return (Activity)ACT_CONSCRIPT_RUN_SMG1;
+			break;
+		case ACT_WALK:
+			return (Activity)ACT_CONSCRIPT_WALK_SMG1;
+			break;
+		case ACT_RANGE_ATTACK_SMG1:
+			return (Activity)ACT_CONSCRIPT_SHOOT_SMG1;
+			break;
+		case ACT_RELOAD:
+			return (Activity)ACT_CONSCRIPT_RELOAD_SMG1;
+			break;
+		case ACT_RELOAD_SMG1:
+			return (Activity)ACT_CONSCRIPT_RELOAD_SMG1;
+			break;
+		case ACT_IDLE_ANGRY:
+			return (Activity)ACT_CONSCRIPT_IDLE_ANGRY_SMG1;
+			break;
+		case ACT_IDLE_ANGRY_SMG1:
+			return (Activity)ACT_CONSCRIPT_IDLE_ANGRY_SMG1;
+			break;
 		}
+	}
 
-		//Override anims for new ones
-		if( Weapon_OwnsThisType( "weapon_smg1" ) && eNewActivity == ACT_IDLE ) { return (Activity)ACT_CONSCRIPT_IDLE_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg1" ) && eNewActivity == ACT_IDLE_ANGRY ) { return (Activity)ACT_CONSCRIPT_IDLE_ANGRY_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg1" ) && eNewActivity == ACT_RUN ) { return (Activity)ACT_CONSCRIPT_RUN_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg1" ) && eNewActivity == ACT_WALK ) { return (Activity)ACT_CONSCRIPT_WALK_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg1" ) && eNewActivity == ACT_RANGE_ATTACK_SMG1 ) { return (Activity)ACT_CONSCRIPT_SHOOT_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg1" ) && eNewActivity == ACT_RELOAD ) { return (Activity)ACT_CONSCRIPT_RELOAD_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg1" ) && eNewActivity == ACT_RELOAD_SMG1 ) { return (Activity)ACT_CONSCRIPT_RELOAD_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg1" ) && eNewActivity == ACT_IDLE_ANGRY_SMG1 ) { return (Activity)ACT_CONSCRIPT_IDLE_ANGRY_SMG1; }
+	if ( Weapon_OwnsThisType( "weapon_ar2" ) || Weapon_OwnsThisType( "weapon_oicw" ) )
+	{
+		if ( eNewActivity == ACT_IDLE )
+		{
+			return (Activity)ACT_IDLE_AR2;
+		}
+	}
+	
+	if ( Weapon_OwnsThisType( "weapon_shotgun" ) || Weapon_OwnsThisType( "weapon_dbarrel" ) )
+	{
+		switch (eNewActivity)
+		{
+		case ACT_IDLE:
+			return (Activity)ACT_CONSCRIPT_IDLE_SHOTGUN;
+			break;
+		case ACT_WALK:
+			return (Activity)ACT_CONSCRIPT_WALK_SHOTGUN;
+			break;
+		case ACT_RUN:
+			return (Activity)ACT_CONSCRIPT_RUN_SHOTGUN;
+			break;
+		case ACT_RELOAD_SHOTGUN:
+			if ( Weapon_OwnsThisType( "weapon_dbarrel" ) )
+			{
+				return (Activity)ACT_CONSCRIPT_RELOAD_SMG1;
+				break;
+			}
+		}
+	}
+	
+	if ( Weapon_OwnsThisType( "weapon_ar1" ) || Weapon_OwnsThisType( "weapon_hmg1" ) )
+	{
+		switch ( eNewActivity )
+		{
+		case ACT_IDLE:
+			return (Activity)ACT_IDLE_AR1;
+			break;
+		case ACT_RUN:
+			return (Activity)ACT_RUN_AR1;
+			break;
+		case ACT_RANGE_ATTACK1:
+			return (Activity)ACT_CONSCRIPT_SHOOT_AR1;
+			break;
+		case ACT_RANGE_ATTACK_AR2:
+			return (Activity)ACT_CONSCRIPT_SHOOT_AR1;
+			break;
+		case ACT_IDLE_ANGRY:
+			return (Activity)ACT_IDLE_ANGRY_AR1;
+			break;
+		case ACT_IDLE_ANGRY_SMG1:
+			return (Activity)ACT_IDLE_ANGRY_AR1;
+			break;
+		case ACT_WALK:
+			return (Activity)ACT_CONSCRIPT_WALK_AR1;
+			break;
+		case ACT_RELOAD_SMG1:
+			if ( Weapon_OwnsThisType( "weapon_ar1" ) )
+			{
+				return (Activity)ACT_RELOAD;
+				break;
+			}
+		}
+	}
 
-		if( Weapon_OwnsThisType( "weapon_smg2" ) && eNewActivity == ACT_IDLE ) { return (Activity)ACT_CONSCRIPT_IDLE_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg2" ) && eNewActivity == ACT_RUN ) { return (Activity)ACT_CONSCRIPT_RUN_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg2" ) && eNewActivity == ACT_WALK ) { return (Activity)ACT_CONSCRIPT_WALK_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg2" ) && eNewActivity == ACT_RANGE_ATTACK_SMG1 ) { return (Activity)ACT_CONSCRIPT_SHOOT_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg2" ) && eNewActivity == ACT_RELOAD ) { return (Activity)ACT_CONSCRIPT_RELOAD_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg2" ) && eNewActivity == ACT_RELOAD_SMG1 ) { return (Activity)ACT_CONSCRIPT_RELOAD_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg2" ) && eNewActivity == ACT_IDLE_ANGRY ) { return (Activity)ACT_CONSCRIPT_IDLE_ANGRY_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_smg2" ) && eNewActivity == ACT_IDLE_ANGRY_SMG1 ) { return (Activity)ACT_CONSCRIPT_IDLE_ANGRY_SMG1; }
-		
-		if( Weapon_OwnsThisType( "weapon_tommygun" ) && eNewActivity == ACT_IDLE ) { return (Activity)ACT_CONSCRIPT_IDLE_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_tommygun" ) && eNewActivity == ACT_RUN ) { return (Activity)ACT_CONSCRIPT_RUN_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_tommygun" ) && eNewActivity == ACT_WALK ) { return (Activity)ACT_CONSCRIPT_WALK_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_tommygun" ) && eNewActivity == ACT_RANGE_ATTACK_SMG1 ) { return (Activity)ACT_CONSCRIPT_SHOOT_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_tommygun" ) && eNewActivity == ACT_RELOAD ) { return (Activity)ACT_CONSCRIPT_RELOAD_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_tommygun" ) && eNewActivity == ACT_RELOAD_SMG1 ) { return (Activity)ACT_CONSCRIPT_RELOAD_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_tommygun" ) && eNewActivity == ACT_IDLE_ANGRY ) { return (Activity)ACT_CONSCRIPT_IDLE_ANGRY_SMG1; }
-		if( Weapon_OwnsThisType( "weapon_tommygun" ) && eNewActivity == ACT_IDLE_ANGRY_SMG1 ) { return (Activity)ACT_CONSCRIPT_IDLE_ANGRY_SMG1; }
+	if ( Weapon_OwnsThisType( "weapon_sniperrifle" ) )
+	{
+		switch (eNewActivity)
+		{
+		case ACT_IDLE:
+			return (Activity)ACT_IDLE_AR1;
+			break;
+		case ACT_WALK:
+			return (Activity)ACT_CONSCRIPT_WALK_AR1;
+			break;
+		case ACT_RANGE_ATTACK_AR2:
+			return (Activity)ACT_CONSCRIPT_SHOOT_SNIPER_RIFLE;
+			break;
+		}
+	}
 
-		if( Weapon_OwnsThisType( "weapon_ar2" ) && eNewActivity == ACT_IDLE ) { return (Activity)ACT_IDLE_AR2; }
+	if ( Weapon_OwnsThisType( "weapon_garand" ) )
+	{
+		switch (eNewActivity)
+		{
+		case ACT_RUN:
+			return (Activity)ACT_RUN_AR1;
+			break;
+		case ACT_RANGE_ATTACK_SHOTGUN:
+			return (Activity)ACT_CONSCRIPT_SHOOT_SNIPER_RIFLE;
+			break;
+		}
+	}
+	
+	// it's good
+	if (Weapon_OwnsThisType("weapon_uzi") && eNewActivity == ACT_RANGE_ATTACK_PISTOL)
+	{
+		return (Activity)ACT_CONSCRIPT_SHOOT_AR1;
+	}
 
-		if( Weapon_OwnsThisType( "weapon_oicw" ) && eNewActivity == ACT_IDLE ) { return (Activity)ACT_IDLE_AR2; }
-
-		if( Weapon_OwnsThisType( "weapon_shotgun" ) && eNewActivity == ACT_IDLE ) { return (Activity)ACT_CONSCRIPT_IDLE_SHOTGUN; }
-		if( Weapon_OwnsThisType( "weapon_shotgun" ) && eNewActivity == ACT_WALK ) { return (Activity)ACT_CONSCRIPT_WALK_SHOTGUN; }
-		if( Weapon_OwnsThisType( "weapon_shotgun" ) && eNewActivity == ACT_RUN ) { return (Activity)ACT_CONSCRIPT_RUN_SHOTGUN; }
-
-		if( Weapon_OwnsThisType( "weapon_dbarrel" ) && eNewActivity == ACT_IDLE ) { return (Activity)ACT_CONSCRIPT_IDLE_SHOTGUN; }
-		if( Weapon_OwnsThisType( "weapon_dbarrel" ) && eNewActivity == ACT_WALK ) { return (Activity)ACT_CONSCRIPT_WALK_SHOTGUN; }
-		if( Weapon_OwnsThisType( "weapon_dbarrel" ) && eNewActivity == ACT_RUN ) { return (Activity)ACT_CONSCRIPT_RUN_SHOTGUN; }
-		if( Weapon_OwnsThisType( "weapon_dbarrel" ) && eNewActivity == ACT_RELOAD_SHOTGUN ) { return (Activity)ACT_CONSCRIPT_RELOAD_SMG1; }
-
-		if( Weapon_OwnsThisType( "weapon_ar1" ) && eNewActivity == ACT_IDLE ) { return (Activity)ACT_IDLE_AR1; }
-		if( Weapon_OwnsThisType( "weapon_ar1" ) && eNewActivity == ACT_RUN ) { return (Activity)ACT_RUN_AR1; }
-		if( Weapon_OwnsThisType( "weapon_ar1" ) && eNewActivity == ACT_RANGE_ATTACK_AR2 ) { return (Activity)ACT_CONSCRIPT_SHOOT_AR1; }
-		if( Weapon_OwnsThisType( "weapon_ar1" ) && eNewActivity == ACT_RANGE_ATTACK1 ) { return (Activity)ACT_CONSCRIPT_SHOOT_AR1; }
-		if( Weapon_OwnsThisType( "weapon_ar1" ) && eNewActivity == ACT_IDLE_ANGRY ) { return (Activity)ACT_IDLE_ANGRY_AR1; }
-		if( Weapon_OwnsThisType( "weapon_ar1" ) && eNewActivity == ACT_IDLE_ANGRY_SMG1 ) { return (Activity)ACT_IDLE_ANGRY_AR1; }
-		if( Weapon_OwnsThisType( "weapon_ar1" ) && eNewActivity == ACT_WALK ) { return (Activity)ACT_CONSCRIPT_WALK_AR1; }
-		if( Weapon_OwnsThisType( "weapon_ar1" ) && eNewActivity == ACT_RELOAD_SMG1 ) { return (Activity)ACT_RELOAD; }
-
-		if( Weapon_OwnsThisType( "weapon_sniperrifle" ) && eNewActivity == ACT_IDLE ) { return (Activity)ACT_IDLE_AR1; }
-		if( Weapon_OwnsThisType( "weapon_sniperrifle" ) && eNewActivity == ACT_WALK ) { return (Activity)ACT_CONSCRIPT_WALK_AR1; }
-		if( Weapon_OwnsThisType( "weapon_sniperrifle" ) && eNewActivity == ACT_RANGE_ATTACK_AR2 ) { return (Activity)ACT_CONSCRIPT_SHOOT_SNIPER_RIFLE; }
-
-		if( Weapon_OwnsThisType( "weapon_hmg1" ) && eNewActivity == ACT_RANGE_ATTACK1 ) { return (Activity)ACT_CONSCRIPT_SHOOT_AR1; }
-		if( Weapon_OwnsThisType( "weapon_hmg1" ) && eNewActivity == ACT_RANGE_ATTACK_AR2 ) { return (Activity)ACT_CONSCRIPT_SHOOT_AR1; }
-		if( Weapon_OwnsThisType( "weapon_hmg1" ) && eNewActivity == ACT_IDLE_ANGRY ) { return (Activity)ACT_IDLE_ANGRY_AR1; }
-		if( Weapon_OwnsThisType( "weapon_hmg1" ) && eNewActivity == ACT_IDLE_ANGRY_SMG1 ) { return (Activity)ACT_IDLE_ANGRY_AR1; }
-		if( Weapon_OwnsThisType( "weapon_hmg1" ) && eNewActivity == ACT_IDLE ) { return (Activity)ACT_IDLE_AR1; }
-		if( Weapon_OwnsThisType( "weapon_hmg1" ) && eNewActivity == ACT_RUN ) { return (Activity)ACT_RUN_AR1; }
-		if( Weapon_OwnsThisType( "weapon_hmg1" ) && eNewActivity == ACT_WALK ) { return (Activity)ACT_CONSCRIPT_WALK_AR1; }
-
-
-		if (Weapon_OwnsThisType("weapon_uzi") && eNewActivity == ACT_RANGE_ATTACK_PISTOL) { return (Activity)ACT_CONSCRIPT_SHOOT_AR1; }
-
-
-		if( Weapon_OwnsThisType( "weapon_annabelle" ) && eNewActivity == ACT_RANGE_ATTACK_SHOTGUN ) { return (Activity)ACT_CONSCRIPT_SHOOT_SNIPER_RIFLE; }
-
-		if( Weapon_OwnsThisType( "weapon_garand" ) && eNewActivity == ACT_RANGE_ATTACK_SHOTGUN ) { return (Activity)ACT_CONSCRIPT_SHOOT_SNIPER_RIFLE; }
-		if( Weapon_OwnsThisType( "weapon_garand" ) && eNewActivity == ACT_RUN ) { return (Activity)ACT_RUN_AR1; }
+	if( Weapon_OwnsThisType( "weapon_annabelle" ) && eNewActivity == ACT_RANGE_ATTACK_SHOTGUN )
+	{
+		return (Activity)ACT_CONSCRIPT_SHOOT_SNIPER_RIFLE;
+	}
 
 	return eNewActivity;
 
-	return BaseClass::NPC_TranslateActivity( eNewActivity );
+//	return BaseClass::NPC_TranslateActivity( eNewActivity );
+//  no need this since we already returned eNewActivity -himdeez
 }
 
 
@@ -560,22 +652,13 @@ void CNPC_Conscript::Spawn()
 	SetUse( &CNPCSimpleTalker::FollowerUse );
 
 	//Had to do this awful hack because a model's eyes don't scale with it if scaled via .qc. Thanks a lot, Failve!
-	const char *pModelName = STRING( GetModelName() ); 	
-	if( !Q_stricmp( pModelName, "models/conscripts/female_01.mdl" ) ) { SetModelScale (0.97); }
-	if( !Q_stricmp( pModelName, "models/conscripts/female_02.mdl" ) ) { SetModelScale (0.97); }
-	if( !Q_stricmp( pModelName, "models/conscripts/female_03.mdl" ) ) { SetModelScale (0.97); }
-	if( !Q_stricmp( pModelName, "models/conscripts/female_04.mdl" ) ) { SetModelScale (0.97); }
-	if( !Q_stricmp( pModelName, "models/conscripts/female_06.mdl" ) ) { SetModelScale (0.97); }
-	if( !Q_stricmp( pModelName, "models/conscripts/female_07.mdl" ) ) { SetModelScale (0.97); }
-
-
-
 
 	string_t iszModelName = BaseClass::GetModelName();
 
 	if (!Q_strnicmp(STRING(iszModelName), "models/conscripts/female", 13))
 	{
 		m_bIsFemale = true; //Use female voice lines if set to true (Not yet implemented)
+		SetModelScale(0.97);
 	}
 	else
 	{
@@ -597,14 +680,20 @@ void CNPC_Conscript::Spawn()
 
 	if (m_iPersonality == 0)
 	{
-		int pmin = 1;
-		int pmax = 3;
-		double scaled = (double)rand()/RAND_MAX;
-		int r = (pmax - pmin +1)*scaled + pmin;
-
-		if (r == 1)	{ m_iPersonality = CONSCRIPT_PERSONALITY_BALANCED; }
-		if (r == 2)	{ m_iPersonality = CONSCRIPT_PERSONALITY_CAUTIOUS; }
-		if (r == 3)	{ m_iPersonality = CONSCRIPT_PERSONALITY_AGGRESSIVE; }
+		int iRand = random->RandomInt(1, 3);
+		
+		switch (iRand)
+		{
+		case 1:
+			m_iPersonality = CONSCRIPT_PERSONALITY_BALANCED;
+			break;
+		case 2:
+			m_iPersonality = CONSCRIPT_PERSONALITY_CAUTIOUS;
+			break;
+		case 3:
+			m_iPersonality = CONSCRIPT_PERSONALITY_AGGRESSIVE;
+			break;
+		}
 	}
 
 	if ( sk_conscript_personality_colors.GetInt() != 0 )
@@ -662,26 +751,16 @@ void CNPC_Conscript::Precache()
 	const char *pModelName = STRING( GetModelName() ); 	
 	if( !Q_stricmp( pModelName, "random" ) )
 	{
-			int min = 1;
-			int max = 15;
-			double scaled = (double)rand()/RAND_MAX;
-			int r = (max - min +1)*scaled + min;
-	
-			if		(r == 1)	{ SetModel( "models/conscripts/male_01.mdl"); }
-			else if (r == 2)	{ SetModel( "models/conscripts/female_01.mdl"); }
-			else if (r == 3)	{ SetModel( "models/conscripts/male_02.mdl"); }
-			else if (r == 4)	{ SetModel( "models/conscripts/female_02.mdl"); }
-			else if (r == 5)	{ SetModel( "models/conscripts/male_03.mdl"); }
-			else if (r == 6)	{ SetModel( "models/conscripts/female_03.mdl"); }
-			else if (r == 7)	{ SetModel( "models/conscripts/male_04.mdl"); }
-			else if (r == 8)	{ SetModel( "models/conscripts/female_04.mdl"); }
-			else if (r == 9)	{ SetModel( "models/conscripts/male_05.mdl"); }
-			else if (r == 10)	{ SetModel( "models/conscripts/female_06.mdl"); }
-			else if (r == 11)	{ SetModel( "models/conscripts/male_06.mdl"); }
-			else if (r == 12)	{ SetModel( "models/conscripts/female_07.mdl"); }
-			else if (r == 13)	{ SetModel( "models/conscripts/male_07.mdl"); }
-			else if (r == 14)	{ SetModel( "models/conscripts/male_08.mdl"); }
-			else if (r == 15)	{ SetModel( "models/conscripts/male_09.mdl"); }
+		bool IsFemale = random->RandomInt( 1, 15 ) <= 6; // himdeez: added this so it will not impact the chance of female soldiers appearing like the previous code
+		
+		if ( IsFemale )
+		{
+			SetModel( pFemaleModels[random->RandomInt(1, ARRAYSIZE(pFemaleModels) - 1)] );
+		}
+		else
+		{
+			SetModel( pMaleModels[random->RandomInt(1, ARRAYSIZE(pMaleModels) - 1)] );
+		}
 	}
 
 	if( !GetModelName() ) //revert to user-defined model (or the new models if set to "random") if no model is given
