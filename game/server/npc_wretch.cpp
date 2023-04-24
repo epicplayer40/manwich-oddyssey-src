@@ -786,16 +786,13 @@ int CWretch::GetGrenadeConditions(float flDot, float flDist)
 			// don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->curtime + 0.3; // 1/3 second.
 
-		int min = 1;
-		int max = 5;
-		double scaled = (double)rand()/RAND_MAX;
-		int r = (max - min +1)*scaled + min;
-	
-		if (r == 1)
+			int iRand = random->RandomInt( 1, 5 );
+
+			if (iRand == 1)
 			{
 				return COND_CAN_RANGE_ATTACK2;
 			}
-		else if (r > 1)
+			else if (iRand > 1)
 			{
 				return COND_NONE;
 			}

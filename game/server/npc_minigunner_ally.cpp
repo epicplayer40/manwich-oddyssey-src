@@ -353,31 +353,25 @@ void CNPC_Militiagunner::Spawn( void )
 	char *szModel = (char *)STRING( GetModelName() );
 	if (!szModel || !*szModel)
 	{
-	int min = 1;
-	int max = 5;
-	double scaled = (double)rand()/RAND_MAX;
-	int r = (max - min +1)*scaled + min;
-	
-	if (r == 1)
-	{
-		szModel = "models/hassault01.mdl";
-	}
-	else if (r == 2)
-	{
-		szModel = "models/hassault02.mdl";
-	}
-	else if (r == 3)
-	{
-		szModel = "models/hassault03.mdl";
-	}
-	else if (r == 4)
-	{
-		szModel = "models/hassault04.mdl";
-	}
-	else if (r == 5)
-	{
-		szModel = "models/hassault05.mdl";
-	}
+		int iRand = random->RandomInt( 1, 5 );
+		switch (iRand)
+		{
+		case 1:
+			szModel = "models/hassault01.mdl";
+			break;
+		case 2:
+			szModel = "models/hassault02.mdl";
+			break;
+		case 3:
+			szModel = "models/hassault03.mdl";
+			break;
+		case 4:
+			szModel = "models/hassault04.mdl";
+			break;
+		case 5:
+			szModel = "models/hassault05.mdl";
+			break;
+		}
 	}
 
 	SetModel( szModel );   
