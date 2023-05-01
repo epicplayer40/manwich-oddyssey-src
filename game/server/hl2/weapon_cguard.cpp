@@ -11,7 +11,7 @@
 #include "player.h"
 #include "grenade_ar2.h"
 #include "ai_basenpc.h"
-#include "NPCEvent.h"
+#include "npcevent.h"
 #include "soundent.h"
 #include "explode.h"
 #include "shake.h"

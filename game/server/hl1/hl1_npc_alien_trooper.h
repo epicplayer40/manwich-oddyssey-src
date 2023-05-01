@@ -65,7 +65,7 @@ public:
 	void	SUB_StartLVFadeOut( float delay = 10.0f, bool bNotSolid = true );
 	void	SUB_LVFadeOut( void  );
 
-	NPC_STATE CNPC_HL1Alien_Trooper::SelectIdealState ( void );
+	NPC_STATE SelectIdealState ( void );
 
 	bool	m_fGunDrawn;
 	float	m_flPainTime;

@@ -21,7 +21,7 @@
 #include "hl2_gamerules.h"
 #include "ai_hull.h"
 #include "npc_talker.h"
-#include "npc_CombineE.h"
+#include "npc_combinee.h"
 #include "ammodef.h"
 
 ConVar	sk_combine_elite_health( "sk_combine_elite_health","120");

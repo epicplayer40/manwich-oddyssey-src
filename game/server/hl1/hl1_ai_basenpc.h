@@ -10,9 +10,11 @@
 #ifndef HL1_AI_BASENPC_H
 #define HL1_AI_BASENPC_H
 
+#if 0 //Lychy: why?
 #pragma warning(push)
 #include <set>
 #pragma warning(pop)
+#endif
 
 #ifdef _WIN32
 #pragma once
@@ -20,7 +22,7 @@
 
 
 #include "ai_basenpc.h"
-#include "AI_Motor.h"
+#include "ai_motor.h"
 //=============================================================================
 // >> CHL1NPCTalker
 //=============================================================================

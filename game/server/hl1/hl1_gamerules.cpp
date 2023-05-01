@@ -147,7 +147,7 @@ int	CHalfLife1::Damage_GetShowOnHud( void )
 	}
 
 	//-----------------------------------------------------------------------------
-	// Purpose: Player has just spawned. Equip them.
+	// Purpose: player.has just spawned. Equip them.
 	//-----------------------------------------------------------------------------
 	void CHalfLife1::PlayerSpawn( CBasePlayer *pPlayer )
 	{
@@ -502,7 +502,7 @@ int	CHalfLife1::Damage_GetShowOnHud( void )
 	}
 
 
-	void CHalfLife1::PlayerThink( CBasePlayer *pPlayer )
+	void CHalfLife1::player.hink( CBasePlayer *pPlayer )
 	{
 	}
 

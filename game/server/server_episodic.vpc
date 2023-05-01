@@ -220,7 +220,7 @@ $Project "Server (Mambridge)"
 			$File	"hl2/npc_vance.cpp"
 //			$File	"hl2/weapon_custom_flaregun.cpp"
 			$File	"generic_crowd.cpp"
-			$File	"npc_alien_suppressor.cpp"
+//			$File	"npc_alien_suppressor.cpp" //Lychy: WHY TF DID U INCLUDE IT TWICE!!!
 			$File	"npc_cremator.cpp"
 			$File	"npc_cremator.h"	
 			$File	"hl2/npc_crematoa.h"

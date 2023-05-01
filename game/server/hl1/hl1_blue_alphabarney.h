@@ -67,7 +67,7 @@ public:
 
 	int		m_iWeapons;
 
-	NPC_STATE CNPC_HL1AlphaBlarney::SelectIdealState ( void );
+	NPC_STATE SelectIdealState ( void );
 
 	bool	m_fGunDrawn;
 	float	m_flPainTime;

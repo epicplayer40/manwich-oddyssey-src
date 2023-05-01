@@ -19,6 +19,7 @@
 #include "view_scene.h"
 #include "c_tracer.h"
 #include "view.h"
+#include "override.h"
 
 #define CGUARD_MSG_SHOT			1
 #define CGUARD_MSG_SHOT_START	2
@@ -279,7 +280,8 @@ void CSphereTrails::RenderParticles(CParticleRenderIterator* pIterator)
 	color[3] = pParticle->m_flColor[3] * ramp;
 
 	//See if we should fade
-	Tracer_Draw(pIterator->GetParticleDraw(), start, (delta * scale), pParticle->m_flWidth, color);
+	Vector newDelta = delta * scale;
+	Tracer_Draw(pIterator->GetParticleDraw(), start, newDelta, pParticle->m_flWidth, color);
 
 	Vector orgDir = m_boneOrigin - pParticle->m_Pos;
 	VectorNormalize(orgDir);

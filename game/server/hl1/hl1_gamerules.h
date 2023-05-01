@@ -51,7 +51,7 @@ public:
 	virtual float			FlPlayerFallDamage( CBasePlayer *pPlayer );
 
 	// Ammo
-	virtual void			PlayerThink( CBasePlayer *pPlayer );
+	virtual void			player.hink( CBasePlayer *pPlayer );
 	bool					CanHavePlayerItem( CBasePlayer *pPlayer, CBaseCombatWeapon *pWeapon );
 
 	void					RadiusDamage( const CTakeDamageInfo &info, const Vector &vecSrc, float flRadius, int iClassIgnore );

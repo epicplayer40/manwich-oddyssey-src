@@ -141,7 +141,7 @@ void CHL1_Player::PreThink(void)
 
 	UpdatePullingObject();
 
-	g_pGameRules->PlayerThink( this );
+	g_pGameRules->player.hink( this );
 
 	if ( g_fGameOver || IsPlayerLockedInPlace() )
 		return;         // intermission or finale

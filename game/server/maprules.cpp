@@ -442,16 +442,10 @@ void CGameText::InputSetTextInt( inputdata_t &inputdata )
 void CGameText::SetTextInt( int pszStr )
 {
 	//I'm gonna pull a child's organs out of I have to make this work again - epicplayer
-	char stringsize[256];
-//	string_t balls = MAKE_STRING(itoa(pszStr, stringsize, 10));
-	itoa(pszStr, stringsize, 10);
-//	string_t balls = MAKE_STRING(stringsize);
-//	m_iszMessage.ToCStr();
-//	strcpy(m_iszMessage.ToCStr(), stringsize);
-	strcpy(const_cast<char*>(m_iszMessage.ToCStr()), stringsize);
+	char stringsize[15];
+	Q_snprintf(stringsize, sizeof(stringsize)/sizeof(char), "%i", pszStr);
+	m_iszMessage = AllocPooledString(stringsize);
 
-//	Q_strncpy(szMapName, STRING(pszStr), sizeof(szMapName));
-//	m_iszMessage = balls;
 }
 
 //

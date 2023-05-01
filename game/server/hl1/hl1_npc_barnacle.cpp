@@ -8,10 +8,10 @@
 //=============================================================================//
 
 #include "cbase.h"
-#include "hl1_NPC_Barnacle.h"
-#include "NPCEvent.h"
+#include "hl1_npc_barnacle.h"
+#include "npcevent.h"
 #include "gib.h"
-#include "AI_Default.h"
+#include "ai_default.h"
 #include "activitylist.h"
 #include "hl2_player.h"
 #include "vstdlib/random.h"

@@ -7,14 +7,14 @@
 
 #include "cbase.h"
 #include "game.h"
-#include "AI_Default.h"
-#include "AI_Schedule.h"
-#include "AI_Hull.h"
-#include "AI_Navigator.h"
-#include "AI_Motor.h"
-#include "AI_Squad.h"
+#include "ai_default.h"
+#include "ai_schedule.h"
+#include "ai_hull.h"
+#include "ai_navigator.h"
+#include "ai_motor.h"
+#include "ai_squad.h"
 #include "npc_bullsquid.h"
-#include "NPCEvent.h"
+#include "npcevent.h"
 #include "soundent.h"
 #include "activitylist.h"
 #include "weapon_brickbat.h"
@@ -31,8 +31,8 @@
 #include "engine/IEngineSound.h"
 #include "movevars_shared.h"
 
-#include "AI_Hint.h"
-#include "AI_Senses.h"
+#include "ai_hint.h"
+#include "ai_senses.h"
 
 
 #define		SQUID_SPRINT_DIST	256 // how close the squid has to get before starting to sprint and refusing to swerve

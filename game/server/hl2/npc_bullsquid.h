@@ -19,7 +19,7 @@
 #ifndef NPC_HL2BULLSQUID_H
 #define NPC_HL2BULLSQUID_H
 
-#include "AI_BaseNPC.h"
+#include "ai_basenpc.h"
 
 
 class CNPC_HL2Bullsquid : public CAI_BaseNPC

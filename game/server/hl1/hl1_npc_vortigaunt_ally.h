@@ -41,7 +41,7 @@ public:
 	int  OnTakeDamage_Alive( const CTakeDamageInfo &inputInfo );
 	void TraceAttack( const CTakeDamageInfo &info, const Vector &vecDir, trace_t *ptr );
 
-	NPC_STATE CNPC_HL1Allygaunt::SelectIdealState ( void );
+	NPC_STATE SelectIdealState ( void );
 	
 	void StartTask( const Task_t *pTask );
 

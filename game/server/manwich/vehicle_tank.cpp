@@ -15,6 +15,7 @@
 #include "vphysics/friction.h"
 #include "particle_parse.h"
 #include "soundent.h"
+#include "override.h"
 
 CBaseEntity* BreakModelCreateSingle(CBaseEntity* pOwner, breakmodel_t* pModel, const Vector& position, const QAngle& angles, const Vector& velocity, const AngularImpulse& angVelocity, int nSkin, const breakablepropparams_t& params);
 

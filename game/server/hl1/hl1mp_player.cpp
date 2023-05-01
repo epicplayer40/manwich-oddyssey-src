@@ -77,7 +77,7 @@ IMPLEMENT_SERVERCLASS_ST( CHL1MP_Player, DT_HL1MP_PLAYER )
 	SendPropInt( SENDINFO( m_iRealSequence ), 9 ),
 
 
-//	SendPropDataTable( SENDINFO_DT( m_Shared ), &REFERENCE_SEND_TABLE( DT_TFCPlayerShared ) )
+//	SendPropDataTable( SENDINFO_DT( m_Shared ), &REFERENCE_SEND_TABLE( DT_TFCplayer.hared ) )
 END_SEND_TABLE()
 
 void cc_CreatePredictionError_f()
@@ -106,7 +106,7 @@ CHL1MP_Player::CHL1MP_Player()
 
 //	SetViewOffset( TFC_PLAYER_VIEW_OFFSET );
 
-//	SetContextThink( &CTFCPlayer::TFCPlayerThink, gpGlobals->curtime, "TFCPlayerThink" );
+//	SetContextThink( &CTFCPlayer::TFCplayer.hink, gpGlobals->curtime, "TFCplayer.hink" );
 }
 
 CHL1MP_Player::~CHL1MP_Player()

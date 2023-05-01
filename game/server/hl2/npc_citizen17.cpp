@@ -34,7 +34,7 @@
 #include "sceneentity.h"
 #include "tier0/icommandline.h"
 
-#include "NPC_Cremator.h"
+#include "npc_cremator.h"
 
 
 // memdbgon must be the last include file in a .cpp file!!!

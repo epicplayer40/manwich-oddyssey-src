@@ -6,8 +6,8 @@
 
 #include "cbase.h"
 #include "ammodef.h"
-#include "AI_Hint.h"
-#include "AI_Navigator.h"
+#include "ai_hint.h"
+#include "ai_navigator.h"
 #include "npc_Assassin.h"
 #include "game.h"
 #include "npcevent.h"

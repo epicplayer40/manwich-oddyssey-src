@@ -686,7 +686,7 @@ void CWeaponRPG::ItemPostFrame( void )
 		}
 	}
 
-	//Player has toggled guidance state
+	//player.has toggled guidance state
 	if ( pPlayer->m_afButtonPressed & IN_ATTACK2 )
 	{
 		if ( IsGuiding() )

@@ -17,7 +17,7 @@ extern void CopyToBodyQue( CBaseAnimating *pCorpse );
 
 enum HL1PlayerPhysFlag_e
 {
-	// 1 -- 5 are used by enum PlayerPhysFlag_e in player.h
+	// 1 -- 5 are used by enum playerPhysFlag_e in player.h
 
 	PFLAG_ONBARNACLE	= ( 1<<6 )		// player is hangning from the barnalce
 };

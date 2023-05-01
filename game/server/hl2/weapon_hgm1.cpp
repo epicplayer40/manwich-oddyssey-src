@@ -6,9 +6,9 @@
 
 #include "cbase.h"
 #include "basehlcombatweapon.h"
-#include "NPCevent.h"
+#include "npcevent.h"
 #include "basecombatcharacter.h"
-#include "AI_BaseNPC.h"
+#include "ai_basenpc.h"
 
 ConVar	sk_hmg1_firerate ("sk_hmg1_firerate", "0.12" );
 

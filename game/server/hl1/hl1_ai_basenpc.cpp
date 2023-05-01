@@ -5,19 +5,20 @@
 // $NoKeywords: $
 //
 //=============================================================================//
+
 #include "cbase.h"
 #include "gib.h"
 #include "hl1_ai_basenpc.h"
 #include "scripted.h"
 #include "soundent.h"
 #include "animation.h"
-#include "EntityList.h"
-#include "AI_Navigator.h"
-#include "AI_Motor.h"
+#include "entitylist.h"
+#include "ai_navigator.h"
+#include "ai_motor.h"
 #include "player.h"
 #include "vstdlib/random.h"
 #include "engine/IEngineSound.h"
-#include "NPCevent.h"
+#include "npcevent.h"
 #include "hl2_gamerules.h"
 
 #include "effect_dispatch_data.h"
