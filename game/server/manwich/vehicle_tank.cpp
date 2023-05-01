@@ -930,7 +930,7 @@ void CVehicleTank::EnableFire()
 
 int CVehicleTank::OnTakeDamage(const CTakeDamageInfo& info)
 {
-	if (!HasSpawnFlags(SF_INDESTRUCTIBLE) && info.GetAttacker() != this)
+	if (!HasSpawnFlags(SF_INDESTRUCTIBLE) && info.GetAttacker() != GetDriver())
 	{
 		int prevQuarterDestroyed = (GetMaxHealth() - GetHealth()) / (GetMaxHealth() / 4);
 		if (info.GetDamageType() & DMG_BLAST)
