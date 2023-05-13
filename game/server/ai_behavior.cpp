@@ -413,6 +413,16 @@ void CAI_BehaviorBase::HandleAnimEvent( animevent_t *pEvent )
 
 //-------------------------------------
 
+void CAI_BehaviorBase::SignalSequenceFinished()
+{
+	Assert(m_pBackBridge != NULL);
+
+	m_pBackBridge->BackBridge_SignalSequenceFinished();
+}
+
+
+//-------------------------------------
+
 bool CAI_BehaviorBase::NotifyChangeBehaviorStatus( bool fCanFinishSchedule )
 {
 	bool fInterrupt = GetOuter()->OnBehaviorChangeStatus( this, fCanFinishSchedule );

@@ -176,6 +176,7 @@ bool CActBusyAnimData::ParseActBusyFromKV( busyanim_t *pAnim, KeyValues *pSectio
 	pAnim->flMaxTime = pSection->GetFloat( "max_time", 20.0 );
 
 	pAnim->bUseAutomovement = pSection->GetInt( "use_automovement", 0 ) != 0;
+	pAnim->bRepeatAndRandomise = pSection->GetInt( "use_randomization", 0 ) != 0;
 
 	const char *sInterrupt = pSection->GetString( "interrupts", "BA_INT_DANGER" );
 	if ( !strcmp( sInterrupt, "BA_INT_PLAYER" ) )
@@ -2197,6 +2198,15 @@ void CAI_ActBusyBehavior::NotifyBusyEnding( void )
 	else
 	{
 		m_flNextBusySearchTime = gpGlobals->curtime + (RandomFloat(ai_actbusy_search_time.GetFloat(), ai_actbusy_search_time.GetFloat()*2));
+	}
+}
+
+void CAI_ActBusyBehavior::SignalSequenceFinished(void)
+{
+	busyanim_t* pBusyAnim = g_ActBusyAnimDataSystem.GetBusyAnim(m_iCurrentBusyAnim);
+	if (m_bBusy && pBusyAnim->bRepeatAndRandomise)
+	{
+		GetOuter()->ResetActivity();
 	}
 }
 

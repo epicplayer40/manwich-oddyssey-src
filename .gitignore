@@ -68,3 +68,5 @@ config.cfg
 *.txt
 *.enc
 enc_temp_folder/
+
+*.lib //Lychy STOP PUSHING UR LIB FILES, THEY ARE DIFFERENT FOR EVERYONE

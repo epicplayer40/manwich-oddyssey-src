@@ -4778,6 +4778,12 @@ void CAI_BaseNPC::PrescheduleThink( void )
 			m_iDesiredWeaponState = DESIREDWEAPONSTATE_IGNORE;
 		}
 	}
+
+	//Lychy
+	if (IsSequenceFinished())
+	{
+		SignalSequenceFinished();
+	}
 }
 
 //-----------------------------------------------------------------------------

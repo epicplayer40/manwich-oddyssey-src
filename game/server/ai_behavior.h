@@ -130,6 +130,7 @@ public:
 	void BridgeModifyOrAppendCriteria( AI_CriteriaSet& criteriaSet );
 	void BridgeTeleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity );
 	void BridgeHandleAnimEvent( animevent_t *pEvent );
+	void BridgeSignalSequenceFinished(void);
 
 	virtual void GatherConditions();
 	virtual void GatherConditionsNotActive() { return; } // Override this and your behavior will call this in place of GatherConditions() when your behavior is NOT the active one.
@@ -215,6 +216,7 @@ protected:
 	virtual void ModifyOrAppendCriteria( AI_CriteriaSet& criteriaSet );
 	virtual void Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity );
 	virtual void HandleAnimEvent( animevent_t *pEvent );
+	virtual void SignalSequenceFinished( void);
 
 	virtual bool ShouldAlwaysThink();
 
@@ -360,6 +362,7 @@ public:
 	virtual void		 BackBridge_Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity ) = 0;
 
 	virtual void		 BackBridge_HandleAnimEvent( animevent_t *pEvent ) = 0;
+	virtual void		 BackBridge_SignalSequenceFinished() = 0;
 
 //-------------------------------------
 
@@ -457,6 +460,7 @@ public:
 	Activity		GetFlinchActivity( bool bHeavyDamage, bool bGesture );
 	bool			OnCalcBaseMove( AILocalMoveGoal_t *pMoveGoal, float distClear, AIMoveResult_t *pResult );
 	void			HandleAnimEvent( animevent_t *pEvent );
+	void			SignalSequenceFinished(void ); //Lychy
 	
 	bool			ShouldAlwaysThink();
 
@@ -516,6 +520,7 @@ private:
 	void			BackBridge_Teleport( const Vector *newPosition, const QAngle *newAngles, const Vector *newVelocity );
 
 	void			BackBridge_HandleAnimEvent( animevent_t *pEvent );
+	void			BackBridge_SignalSequenceFinished( void );
 
 	CAI_BehaviorBase **AccessBehaviors();
 	int				NumBehaviors();
@@ -887,6 +892,12 @@ inline void CAI_BehaviorBase::BridgeHandleAnimEvent( animevent_t *pEvent )
 	HandleAnimEvent( pEvent );
 }
 
+//-----------------------------------------------------------------------------
+
+inline void CAI_BehaviorBase::BridgeSignalSequenceFinished(void)
+{
+	SignalSequenceFinished();
+}
 //-----------------------------------------------------------------------------
 
 template <class BASE_NPC>
@@ -1465,6 +1476,13 @@ inline void CAI_BehaviorHost<BASE_NPC>::BackBridge_HandleAnimEvent( animevent_t 
 //-------------------------------------
 
 template <class BASE_NPC>
+inline void CAI_BehaviorHost<BASE_NPC>::BackBridge_SignalSequenceFinished()
+{
+	BaseClass::SignalSequenceFinished();
+}
+//-------------------------------------
+
+template <class BASE_NPC>
 inline bool CAI_BehaviorHost<BASE_NPC>::IsValidEnemy( CBaseEntity *pEnemy )
 {
 	if ( m_pCurBehavior )
@@ -1863,6 +1881,17 @@ inline void CAI_BehaviorHost<BASE_NPC>::HandleAnimEvent( animevent_t *pEvent )
 		return m_pCurBehavior->BridgeHandleAnimEvent( pEvent );
 
 	return BaseClass::HandleAnimEvent( pEvent );
+}
+
+//-------------------------------------
+
+template <class BASE_NPC>
+inline void CAI_BehaviorHost<BASE_NPC>::SignalSequenceFinished()
+{
+	if (m_pCurBehavior)
+		return m_pCurBehavior->BridgeSignalSequenceFinished();
+
+	return BaseClass::SignalSequenceFinished();
 }
 
 //-------------------------------------

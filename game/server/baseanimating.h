@@ -93,6 +93,7 @@ public:
 	// FIXME: push transitions support down into CBaseAnimating?
 	virtual bool IsActivityFinished( void ) { return m_bSequenceFinished; }
 	inline bool IsSequenceFinished( void ) { return m_bSequenceFinished; }
+	virtual void SignalSequenceFinished(void) { return; }
 	inline bool SequenceLoops( void ) { return m_bSequenceLoops; }
 	bool		 IsSequenceLooping( CStudioHdr *pStudioHdr, int iSequence );
 	inline bool	 IsSequenceLooping( int iSequence ) { return IsSequenceLooping(GetModelPtr(),iSequence); }
