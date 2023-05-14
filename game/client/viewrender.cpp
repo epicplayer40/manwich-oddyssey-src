@@ -4763,6 +4763,18 @@ void CSkyboxView::DrawInternal( view_id_t iSkyBoxViewID, bool bInvokePreAndPostR
 	// the areas.  We'd have to mark all the clusters in the skybox area in the PVS of any 
 	// cluster with sky.  Then we could just connect the areas to do our vis.
 	//m_bOverrideVisOrigin could hose us here, so call direct
+
+	angles += m_pSky3dParams->angles; //Lychy: have the sky camera rotate, TODO: looks terrible for now
+	/*
+	matrix3x4_t m1, m2;
+	AngleMatrix(angles,		m1);
+	AngleMatrix(m_pSky3dParams->angles, m2);
+	matrix3x4_t megaRotate;
+	ConcatTransforms(m1, m2, megaRotate);
+	QAngle newAngles;
+	MatrixAngles(megaRotate, newAngles);
+	angles = newAngles;
+	*/
 	render->ViewSetupVis( false, 1, &m_pSky3dParams->origin.Get() );
 	render->Push3DView( (*this), m_ClearFlags, pRenderTarget, GetFrustum(), pDepthTarget );
 

@@ -59,6 +59,7 @@ BEGIN_SEND_TABLE_NOBASE( CPlayerLocalData, DT_Local )
 	// 3d skybox data
 	SendPropInt(SENDINFO_STRUCTELEM(m_skybox3d.scale), 12),
 	SendPropVector	(SENDINFO_STRUCTELEM(m_skybox3d.origin),      -1,  SPROP_COORD),
+	SendPropQAngles	(SENDINFO_STRUCTELEM(m_skybox3d.angles),      -1 ), //Lychy
 	SendPropInt	(SENDINFO_STRUCTELEM(m_skybox3d.area),	8, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO_STRUCTELEM( m_skybox3d.fog.enable ), 1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO_STRUCTELEM( m_skybox3d.fog.blend ), 1, SPROP_UNSIGNED ),
@@ -222,15 +223,22 @@ void ClientData_Update( CBasePlayer *pl )
 {
 	// HACKHACK: for 3d skybox 
 	// UNDONE: Support multiple sky cameras?
+	//static Vector prevOrigin;
 	CSkyCamera *pSkyCamera = GetCurrentSkyCamera();
 	if ( pSkyCamera != pl->m_Local.m_pOldSkyCamera )
 	{
 		pl->m_Local.m_pOldSkyCamera = pSkyCamera;
 		pl->m_Local.m_skybox3d.CopyFrom(pSkyCamera->m_skyboxData);
+		//prevOrigin = pSkyCamera->GetAbsOrigin();
 	}
 	else if ( !pSkyCamera )
 	{
 		pl->m_Local.m_skybox3d.area = 255;
+	}
+	else //if (prevOrigin != pSkyCamera->GetAbsOrigin())
+	{
+		pl->m_Local.m_skybox3d.origin = pSkyCamera->GetAbsOrigin(); //Lychy: 
+		pl->m_Local.m_skybox3d.angles = pSkyCamera->GetAbsAngles();
 	}
 }
 

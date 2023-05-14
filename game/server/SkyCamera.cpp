@@ -102,7 +102,8 @@ CSkyCamera::~CSkyCamera()
 
 void CSkyCamera::Spawn( void ) 
 { 
-	m_skyboxData.origin = GetLocalOrigin();
+	m_skyboxData.origin = GetAbsOrigin();
+	m_skyboxData.angles = GetAbsAngles(); //Lychy: rotating must work!
 	m_skyboxData.area = engine->GetArea( m_skyboxData.origin );
 	
 	Precache();

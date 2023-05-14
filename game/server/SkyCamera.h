@@ -18,9 +18,9 @@ class CSkyCamera;
 //
 // Sky Camera Class
 //
-class CSkyCamera : public CLogicalEntity
+class CSkyCamera : public CBaseEntity
 {
-	DECLARE_CLASS( CSkyCamera, CLogicalEntity );
+	DECLARE_CLASS( CSkyCamera, CBaseEntity);
 
 public:
 
