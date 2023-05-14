@@ -177,6 +177,7 @@ BEGIN_RECV_TABLE_NOBASE( CPlayerLocalData, DT_Local )
 	RecvPropInt(RECVINFO(m_skybox3d.scale)),
 	RecvPropVector(RECVINFO(m_skybox3d.origin)),
 	RecvPropQAngles(RECVINFO(m_skybox3d.angles)), //Lychy
+	RecvPropBool(RECVINFO(m_skybox3d.parentable)), //Lychy
 	RecvPropInt(RECVINFO(m_skybox3d.area)),
 
 	// 3d skybox fog data

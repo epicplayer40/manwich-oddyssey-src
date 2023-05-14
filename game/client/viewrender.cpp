@@ -4757,6 +4757,22 @@ void CSkyboxView::DrawInternal( view_id_t iSkyBoxViewID, bool bInvokePreAndPostR
 		VectorScale( origin, scale, origin );
 	}
 	Enable3dSkyboxFog();
+
+	//Lychy: properly rotate the view's fake origin and angles in relation to the sky_camera's angles
+	if (m_pSky3dParams->parentable)
+	{
+		matrix3x4_t playerXforms, cameraXforms, megaRotate;
+		AngleMatrix(angles, playerXforms);
+		AngleMatrix(m_pSky3dParams->angles, cameraXforms);
+
+		ConcatTransforms(cameraXforms, playerXforms, megaRotate);
+		MatrixAngles(megaRotate, angles);
+
+		Vector rotatedOrigin;
+		VectorRotate(origin, cameraXforms, rotatedOrigin);
+		origin = rotatedOrigin;
+	}
+
 	VectorAdd( origin, m_pSky3dParams->origin, origin );
 
 	// BUGBUG: Fix this!!!  We shouldn't need to call setup vis for the sky if we're connecting
@@ -4764,17 +4780,6 @@ void CSkyboxView::DrawInternal( view_id_t iSkyBoxViewID, bool bInvokePreAndPostR
 	// cluster with sky.  Then we could just connect the areas to do our vis.
 	//m_bOverrideVisOrigin could hose us here, so call direct
 
-	angles += m_pSky3dParams->angles; //Lychy: have the sky camera rotate, TODO: looks terrible for now
-	/*
-	matrix3x4_t m1, m2;
-	AngleMatrix(angles,		m1);
-	AngleMatrix(m_pSky3dParams->angles, m2);
-	matrix3x4_t megaRotate;
-	ConcatTransforms(m1, m2, megaRotate);
-	QAngle newAngles;
-	MatrixAngles(megaRotate, newAngles);
-	angles = newAngles;
-	*/
 	render->ViewSetupVis( false, 1, &m_pSky3dParams->origin.Get() );
 	render->Push3DView( (*this), m_ClearFlags, pRenderTarget, GetFrustum(), pDepthTarget );
 
