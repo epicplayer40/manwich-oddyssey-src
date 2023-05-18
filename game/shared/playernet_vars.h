@@ -98,9 +98,8 @@ struct sky3dparams_t
 	// 3d skybox camera data
 	CNetworkVar( int, scale );
 	CNetworkVector( origin );
-	CNetworkQAngle( angles );
+	CNetworkHandle(CBaseEntity, camera);
 	CNetworkVar( int, area );
-	CNetworkVar( bool, parentable );
 
 	// 3d skybox fog data
 	CNetworkVarEmbedded( fogparams_t, fog );

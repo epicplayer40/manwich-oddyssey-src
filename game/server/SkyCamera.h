@@ -25,11 +25,16 @@ class CSkyCamera : public CBaseEntity
 public:
 
 	DECLARE_DATADESC();
+
 	CSkyCamera();
 	~CSkyCamera();
 	virtual void Spawn( void );
 	virtual void Activate();
 
+	inline int UpdateTransmitState()	// always send to all clients
+	{
+		return SetTransmitState(FL_EDICT_ALWAYS);
+	}
 public:
 	sky3dparams_t	m_skyboxData;
 	bool			m_bUseAngles;

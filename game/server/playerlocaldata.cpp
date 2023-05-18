@@ -19,7 +19,7 @@
 #include "tier0/memdbgon.h"
 
 //=============================================================================
-
+void SendProxy_Angles(const SendProp* pProp, const void* pStruct, const void* pData, DVariant* pOut, int iElement, int objectID);
 BEGIN_SEND_TABLE_NOBASE( CPlayerLocalData, DT_Local )
 
 	SendPropArray3  (SENDINFO_ARRAY3(m_chAreaBits), SendPropInt(SENDINFO_ARRAY(m_chAreaBits), 8, SPROP_UNSIGNED)),
@@ -55,12 +55,12 @@ BEGIN_SEND_TABLE_NOBASE( CPlayerLocalData, DT_Local )
 
 	SendPropFloat	(SENDINFO(m_flStepSize), 16, SPROP_ROUNDUP, 0.0f, 128.0f ),
 	SendPropInt		(SENDINFO(m_bAllowAutoMovement),1, SPROP_UNSIGNED ),
-
+	
 	// 3d skybox data
 	SendPropInt(SENDINFO_STRUCTELEM(m_skybox3d.scale), 12),
+	
 	SendPropVector	(SENDINFO_STRUCTELEM(m_skybox3d.origin),      -1,  SPROP_COORD),
-	SendPropQAngles	(SENDINFO_STRUCTELEM(m_skybox3d.angles),      -1 ), //Lychy
-	SendPropBool	(SENDINFO_STRUCTELEM(m_skybox3d.parentable) ), //Lychy
+	SendPropEHandle(SENDINFO_STRUCTELEM(m_skybox3d.camera)), //Lychy
 	SendPropInt	(SENDINFO_STRUCTELEM(m_skybox3d.area),	8, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO_STRUCTELEM( m_skybox3d.fog.enable ), 1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO_STRUCTELEM( m_skybox3d.fog.blend ), 1, SPROP_UNSIGNED ),
@@ -225,7 +225,7 @@ void ClientData_Update( CBasePlayer *pl )
 	// HACKHACK: for 3d skybox 
 	// UNDONE: Support multiple sky cameras?
 	CSkyCamera *pSkyCamera = GetCurrentSkyCamera();
-	if ( pSkyCamera != pl->m_Local.m_pOldSkyCamera )
+	if (pSkyCamera && pSkyCamera != pl->m_Local.m_pOldSkyCamera )
 	{
 		pl->m_Local.m_pOldSkyCamera = pSkyCamera;
 		pl->m_Local.m_skybox3d.CopyFrom(pSkyCamera->m_skyboxData);
@@ -233,11 +233,6 @@ void ClientData_Update( CBasePlayer *pl )
 	else if ( !pSkyCamera )
 	{
 		pl->m_Local.m_skybox3d.area = 255;
-	}
-	else if( pSkyCamera->m_skyboxData.parentable)
-	{
-		pl->m_Local.m_skybox3d.origin = pSkyCamera->GetAbsOrigin(); //Lychy: 
-		pl->m_Local.m_skybox3d.angles = pSkyCamera->GetAbsAngles();
 	}
 }
 

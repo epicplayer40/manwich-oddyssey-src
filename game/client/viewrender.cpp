@@ -4757,13 +4757,20 @@ void CSkyboxView::DrawInternal( view_id_t iSkyBoxViewID, bool bInvokePreAndPostR
 		VectorScale( origin, scale, origin );
 	}
 	Enable3dSkyboxFog();
-
+	
+	
 	//Lychy: properly rotate the view's fake origin and angles in relation to the sky_camera's angles
-	if (m_pSky3dParams->parentable)
+
+	CBaseEntity* pCamera = m_pSky3dParams->camera;
+	Assert(pCamera);
+
+	if (pCamera)
 	{
+
 		matrix3x4_t playerXforms, cameraXforms, megaRotate;
+
 		AngleMatrix(angles, playerXforms);
-		AngleMatrix(m_pSky3dParams->angles, cameraXforms);
+		AngleMatrix(pCamera->GetAbsAngles(), cameraXforms);
 
 		ConcatTransforms(cameraXforms, playerXforms, megaRotate);
 		MatrixAngles(megaRotate, angles);
@@ -4771,9 +4778,9 @@ void CSkyboxView::DrawInternal( view_id_t iSkyBoxViewID, bool bInvokePreAndPostR
 		Vector rotatedOrigin;
 		VectorRotate(origin, cameraXforms, rotatedOrigin);
 		origin = rotatedOrigin;
-	}
 
-	VectorAdd( origin, m_pSky3dParams->origin, origin );
+		VectorAdd(origin, pCamera->GetAbsOrigin(), origin);
+	}
 
 	// BUGBUG: Fix this!!!  We shouldn't need to call setup vis for the sky if we're connecting
 	// the areas.  We'd have to mark all the clusters in the skybox area in the PVS of any 

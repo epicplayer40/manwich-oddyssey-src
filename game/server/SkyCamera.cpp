@@ -16,10 +16,6 @@
 CEntityClassList<CSkyCamera> g_SkyList;
 template <> CSkyCamera *CEntityClassList<CSkyCamera>::m_pClassList = NULL;
 
-enum
-{
-	SF_SKY_CAMERA_PARENTABLE = 0x1,
-};
 //-----------------------------------------------------------------------------
 // Retrives the current skycamera
 //-----------------------------------------------------------------------------
@@ -42,7 +38,6 @@ BEGIN_DATADESC( CSkyCamera )
 	DEFINE_KEYFIELD( m_skyboxData.scale, FIELD_INTEGER, "scale" ),
 	DEFINE_FIELD( m_skyboxData.origin, FIELD_VECTOR ),
 	DEFINE_FIELD( m_skyboxData.area, FIELD_INTEGER ),
-	DEFINE_FIELD( m_skyboxData.parentable, FIELD_BOOLEAN ),
 
 	// Quiet down classcheck
 	// DEFINE_FIELD( m_skyboxData, sky3dparams_t ),
@@ -108,9 +103,7 @@ CSkyCamera::~CSkyCamera()
 void CSkyCamera::Spawn( void ) 
 { 
 	m_skyboxData.origin = GetAbsOrigin();
-	m_skyboxData.angles = GetAbsAngles(); //Lychy: rotating must work!
 	m_skyboxData.area = engine->GetArea( m_skyboxData.origin );
-	m_skyboxData.parentable = HasSpawnFlags(SF_SKY_CAMERA_PARENTABLE);
 	
 	Precache();
 }
@@ -121,6 +114,8 @@ void CSkyCamera::Spawn( void )
 //-----------------------------------------------------------------------------
 void CSkyCamera::Activate( ) 
 {
+	m_skyboxData.camera = this;
+
 	BaseClass::Activate();
 
 	if ( m_bUseAngles )
