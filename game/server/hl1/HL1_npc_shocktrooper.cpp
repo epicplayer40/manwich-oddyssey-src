@@ -228,6 +228,8 @@ DEFINE_KEYFIELD(m_SquadName, FIELD_STRING, "netname"),
 DEFINE_FIELD(m_bInBarnacleMouth, FIELD_BOOLEAN),
 DEFINE_FIELD(m_flLastEnemySightTime, FIELD_TIME),
 DEFINE_FIELD(m_flTalkWaitTime, FIELD_TIME),
+
+DEFINE_USEFUNC(FollowerUse),
 //DEFINE_FIELD( m_iAmmoType, FIELD_INTEGER ),
 
 END_DATADESC()

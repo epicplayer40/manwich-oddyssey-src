@@ -30,11 +30,8 @@ public:
 	~CSkyCamera();
 	virtual void Spawn( void );
 	virtual void Activate();
+	int UpdateTransmitState();	// always send to all clients
 
-	inline int UpdateTransmitState()	// always send to all clients
-	{
-		return SetTransmitState(FL_EDICT_ALWAYS);
-	}
 public:
 	sky3dparams_t	m_skyboxData;
 	bool			m_bUseAngles;

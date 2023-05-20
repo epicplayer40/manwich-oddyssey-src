@@ -563,6 +563,8 @@ void CNPC_Strider::Spawn()
 
 	m_hPlayersMissile.Set( NULL );
 	m_flTimeNextHuntSound = gpGlobals->curtime - 1.0f;
+
+	m_nMuzzleFlashAttachment = LookupAttachment("MiniGun");
 }
 
 void CNPC_Strider::SetupGlobalModelData()

@@ -261,6 +261,8 @@ IMPLEMENT_SERVERCLASS_ST(CBaseAnimating, DT_BaseAnimating)
 	SendPropFloat( SENDINFO( m_fadeMaxDist ), 0, SPROP_NOSCALE ),
 	SendPropFloat( SENDINFO( m_flFadeScale ), 0, SPROP_NOSCALE ),
 
+	SendPropInt(SENDINFO(m_nMuzzleFlashAttachment)), //Lychy
+
 END_SEND_TABLE()
 
 

@@ -105,6 +105,7 @@ public:
 	void Precache( void )
 	{
 		m_spriteTexture = PrecacheModel( "sprites/lgtning.vmt" );
+		PrecacheMaterial( "effects/blueflare1.vmt" );
 
 		BaseClass::Precache();
 	}

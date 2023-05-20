@@ -201,6 +201,8 @@ IMPLEMENT_CLIENTCLASS_DT(C_BaseAnimating, DT_BaseAnimating, CBaseAnimating)
 	RecvPropFloat( RECVINFO( m_fadeMaxDist ) ), 
 	RecvPropFloat( RECVINFO( m_flFadeScale ) ), 
 
+	RecvPropInt(RECVINFO(m_nMuzzleFlashAttachment)),
+
 END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA( C_BaseAnimating )
@@ -3334,7 +3336,11 @@ void C_BaseAnimating::ProcessMuzzleFlashEvent()
 
 			Vector vAttachment, vAng;
 			QAngle angles;
-            GetAttachment( 1, vAttachment, angles ); // set 1 instead "attachment"
+
+			if (m_nMuzzleFlashAttachment == 0)
+				m_nMuzzleFlashAttachment = 1;
+
+            GetAttachment(m_nMuzzleFlashAttachment, vAttachment, angles ); // set 1 instead "attachment"
 
 			AngleVectors( angles, &vAng );
 			vAttachment += vAng * 2;
@@ -3345,9 +3351,9 @@ void C_BaseAnimating::ProcessMuzzleFlashEvent()
 			dl->color.g = 192;
 			dl->color.b = 64;
 			dl->die = gpGlobals->curtime + 0.05f;
-			dl->radius = random->RandomFloat( 245.0f, 256.0f );
+			dl->radius = random->RandomFloat( muzzleflash_minradius.GetFloat(), muzzleflash_maxradius.GetFloat());
 			dl->decay = 512.0f;
-			dl->color.exponent = 5;
+			dl->color.exponent = muzzleflash_exponent.GetInt();
 
 		}
 	}

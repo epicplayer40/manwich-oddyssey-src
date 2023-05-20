@@ -2313,7 +2313,7 @@ void CNPC_ArmyMenRepel::RepelUse(CBaseEntity *pActivator, CBaseEntity *pCaller, 
 // Schedules
 //
 //------------------------------------------------------------------------------
-AI_BEGIN_CUSTOM_NPC(monster_human_grunt, CNPC_ArmyMen)
+AI_BEGIN_CUSTOM_NPC(monster_green_soldier, CNPC_ArmyMen)
 
 DECLARE_ACTIVITY(ACT_GRUNT_LAUNCH_GRENADE)
 DECLARE_ACTIVITY(ACT_GRUNT_TOSS_GRENADE)

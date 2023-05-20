@@ -19,7 +19,6 @@
 #include "view_scene.h"
 #include "c_tracer.h"
 #include "view.h"
-#include "override.h"
 
 #define CGUARD_MSG_SHOT			1
 #define CGUARD_MSG_SHOT_START	2
@@ -358,7 +357,7 @@ public:
 		m_vecColor.Init(1, 1, 1);
 		m_killTime = gpGlobals->curtime + m_dieTime;
 	}
-	virtual void RenderParticles(CParticleRenderIterator* pIterator) override
+	virtual void RenderParticles(CParticleRenderIterator* pIterator) OVERRIDE
 	{
 		CCombineGuardBallParticle* pParticle = (CCombineGuardBallParticle*)pIterator->GetFirst();
 		while (pParticle)
@@ -392,7 +391,7 @@ public:
 		return;
 
 	}
-	virtual void SimulateParticles(CParticleSimulateIterator* pIterator) override
+	virtual void SimulateParticles(CParticleSimulateIterator* pIterator) OVERRIDE
 	{
 		CCombineGuardBallParticle* pParticle = (CCombineGuardBallParticle*)pIterator->GetFirst();
 		float timeDelta = pIterator->GetTimeDelta();

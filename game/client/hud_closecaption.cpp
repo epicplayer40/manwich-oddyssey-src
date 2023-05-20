@@ -2030,8 +2030,13 @@ public:
 				continue;
 
 			// Lookup the data
+			if (caption->dirindex > directories[nFileIndex].m_CaptionDirectory.Size()) //Lychy: prevents korean subtitles, due to messed up race hazards
+				continue;
+
 			CaptionLookup_t &entry = directories[ nFileIndex ].m_CaptionDirectory[ caption->dirindex ];
 			if ( entry.blockNum != nBlockNum )
+				continue;
+			if (entry.length == 0) //Lychy: prevents korean subtitles, due to messed up race hazards
 				continue;
 
 #ifdef WIN32

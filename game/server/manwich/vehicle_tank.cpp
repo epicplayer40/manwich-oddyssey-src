@@ -15,7 +15,6 @@
 #include "vphysics/friction.h"
 #include "particle_parse.h"
 #include "soundent.h"
-#include "override.h"
 
 CBaseEntity* BreakModelCreateSingle(CBaseEntity* pOwner, breakmodel_t* pModel, const Vector& position, const QAngle& angles, const Vector& velocity, const AngularImpulse& angVelocity, int nSkin, const breakablepropparams_t& params);
 
@@ -159,17 +158,17 @@ public:
 	{
 		EnableFiring();
 	}
-	void Spawn() override;
-	void Precache() override;
+	void Spawn() OVERRIDE;
+	void Precache() OVERRIDE;
 	void PrecacheBreakModels();
-	void Think() override;
+	void Think() OVERRIDE;
 	void Event_Killed(const CTakeDamageInfo& info);
 
 	void FireCannon();
-	void DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsDown, int iButtonsReleased) override; // Driving Button handling
-	void SetupMove(CBasePlayer* player, CUserCmd* ucmd, IMoveHelper* pHelper, CMoveData* move) override ;
-	void CreateServerVehicle() override;
-	void ExitVehicle(int nRole) override;
+	void DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsDown, int iButtonsReleased) OVERRIDE; // Driving Button handling
+	void SetupMove(CBasePlayer* player, CUserCmd* ucmd, IMoveHelper* pHelper, CMoveData* move) OVERRIDE ;
+	void CreateServerVehicle() OVERRIDE;
+	void ExitVehicle(int nRole) OVERRIDE;
 
 	void ShootThink();
 	void AimGunAt(Vector* endPos);
@@ -187,7 +186,7 @@ public:
 
 	int DrawDebugTextOverlays();
 
-	int OnTakeDamage(const CTakeDamageInfo& info) override;
+	int OnTakeDamage(const CTakeDamageInfo& info) OVERRIDE;
 	int RandomSmokeEnable();
 	int GetNumSmokePointAttachments();
 	void SpawnFlamingGibsAtAttachment(int iAttachment);
@@ -202,7 +201,7 @@ public:
 	void ApplyPassivePush(bool backward);
 	void UnStickCheckThink();
 
-	void StopLoopingSounds() override;
+	void StopLoopingSounds() OVERRIDE;
 
 	CNPC_VehicleDriver* GetNPCDriver();
 	
@@ -266,12 +265,12 @@ public:
 		m_flNextAimTime = 0.0f;
 	}
 
-	void Weapon_PrimaryRanges(float* flMinRange, float* flMaxRange) override
+	void Weapon_PrimaryRanges(float* flMinRange, float* flMaxRange) OVERRIDE
 	{
 		*flMinRange = 250.0f;
 		*flMaxRange = 9999.0f;
 	}
-	bool NPC_IsOmniDirectional() override 
+	bool NPC_IsOmniDirectional() OVERRIDE 
 	{
 		return true; 
 	}
@@ -286,7 +285,7 @@ public:
 			m_hTank = dynamic_cast<CVehicleTank*>(GetVehicleEnt());
 	}
 	
-	void NPC_DriveVehicle() override
+	void NPC_DriveVehicle() OVERRIDE
 	{
 		//If the tank is unable to get a shot, then dont try fire
 		CheckAndSetTank();
@@ -297,13 +296,13 @@ public:
 	}
 	bool NPC_HasPrimaryWeapon() { return true; }
 
-	void NPC_TurnCenter() override
+	void NPC_TurnCenter() OVERRIDE
 	{
 		m_flTurnDegrees = 0.0f;
 		BaseClass::NPC_TurnCenter();
 	}
 
-	void NPC_AimPrimaryWeapon(Vector vecTarget) override
+	void NPC_AimPrimaryWeapon(Vector vecTarget) OVERRIDE
 	{
 		CheckAndSetTank();
 		if (gpGlobals->curtime > m_flNextAimTime)
@@ -315,7 +314,7 @@ public:
 	}
 
 	//Lychy: The tank should not move if the NPC driver has a good aiming vector
-	void NPC_ThrottleReverse(void) override
+	void NPC_ThrottleReverse(void) OVERRIDE
 	{	
 		CheckAndSetTank();
 		if (GetTank()->ShouldNPCFire())
@@ -324,7 +323,7 @@ public:
 			BaseClass::NPC_ThrottleReverse();
 	}
 
-	void NPC_ThrottleForward(void) override
+	void NPC_ThrottleForward(void) OVERRIDE
 	{
 		CheckAndSetTank();
 		if (GetTank()->ShouldNPCFire())
@@ -333,7 +332,7 @@ public:
 			BaseClass::NPC_ThrottleForward();
 	}
 
-	void NPC_TurnLeft(float flDegrees) override
+	void NPC_TurnLeft(float flDegrees) OVERRIDE
 	{	
 		CheckAndSetTank();
 		if (GetTank()->ShouldNPCFire())
@@ -342,7 +341,7 @@ public:
 			BaseClass::NPC_TurnLeft(flDegrees);
 	}
 
-	void NPC_TurnRight(float flDegrees) override
+	void NPC_TurnRight(float flDegrees) OVERRIDE
 	{
 		CheckAndSetTank();
 		if (GetTank()->ShouldNPCFire())
@@ -1216,7 +1215,7 @@ void CVehicleTank::SpawnMegaGibs()
 
 	for (int i = 0; i < list.Count(); i++)
 	{
-		CPhysicsProp* pGib = CREATE_ENTITY(CPhysicsProp, "prop_physics_override");
+		CPhysicsProp* pGib = CREATE_ENTITY(CPhysicsProp, "prop_physics_OVERRIDE");
 		pGib->SetModel(list[i].modelName);
 
 		Vector velocity = (attachmentOrigin - GetAbsOrigin()).Normalized();

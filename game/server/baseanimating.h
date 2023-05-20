@@ -422,6 +422,10 @@ private:
 	CThreadFastMutex	m_StudioHdrInitLock;
 	CThreadFastMutex	m_BoneSetupMutex;
 
+//Lychy
+public:
+		CNetworkVar(char, m_nMuzzleFlashAttachment);
+
 // FIXME: necessary so that cyclers can hack m_bSequenceFinished
 friend class CFlexCycler;
 friend class CCycler;

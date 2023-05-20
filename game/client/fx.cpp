@@ -54,6 +54,9 @@ CLIENTEFFECT_REGISTER_END()
 
 //Whether or not we should emit a dynamic light
 ConVar muzzleflash_light( "muzzleflash_light", "1", FCVAR_ARCHIVE );
+ConVar muzzleflash_exponent( "muzzleflash_exponent", "1", FCVAR_ARCHIVE );
+ConVar muzzleflash_minradius( "muzzleflash_minradius", "32", FCVAR_ARCHIVE );
+ConVar muzzleflash_maxradius( "muzzleflash_maxradius", "90", FCVAR_ARCHIVE );
 
 extern void FX_TracerSound( const Vector &start, const Vector &end, int iTracerType );
 

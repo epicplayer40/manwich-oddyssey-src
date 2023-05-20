@@ -108,4 +108,10 @@ extern PMaterialHandle g_Mat_BloodPuff[2];
 extern PMaterialHandle g_Mat_Fleck_Glass[2];
 extern PMaterialHandle g_Mat_SMG_Muzzleflash[4];
 extern PMaterialHandle g_Mat_Combine_Muzzleflash[3];
+
+//Lychy: muzzleflash convars
+extern ConVar muzzleflash_light;
+extern ConVar muzzleflash_exponent;
+extern ConVar muzzleflash_minradius;
+extern ConVar muzzleflash_maxradius;
 #endif // FX_H

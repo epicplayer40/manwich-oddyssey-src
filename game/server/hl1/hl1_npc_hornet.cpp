@@ -36,6 +36,7 @@ LINK_ENTITY_TO_CLASS( hornet, CNPC_Hornet );
 
 ConVar sk_plr_dmg_hornet			( "sk_plr_dmg_hornet",			"8", FCVAR_REPLICATED );
 ConVar sk_npc_dmg_hornet			( "sk_npc_dmg_hornet",			"5", FCVAR_REPLICATED );
+ConVar sk_max_hornet("sk_max_hornet", "0", FCVAR_REPLICATED);
 
 BEGIN_DATADESC( CNPC_Hornet )
 	DEFINE_FIELD( m_flStopAttack, FIELD_TIME ),

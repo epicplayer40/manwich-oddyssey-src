@@ -147,3 +147,8 @@ void CSkyCamera::Activate( )
 	}
 #endif
 }
+
+int CSkyCamera::UpdateTransmitState(void)
+{
+	return FL_EDICT_ALWAYS;
+}
