@@ -34,8 +34,12 @@
 
 #include "weapon_immolator.h"
 
-extern ConVar sk_cremator_dmg_immo;
-
+//extern ConVar sk_cremator_dmg_immo;
+ConVar	sk_plr_dmg_immolator("sk_plr_dmg_immolator", "0"); //currently unused  - epicplayer
+ConVar	sk_npc_dmg_immolator("sk_npc_dmg_immolator", "0");
+ConVar	sk_plr_burn_duration_immolator("sk_plr_burn_duration_immolator", "0"); //currently unused  - epicplayer
+ConVar	sk_npc_burn_duration_immolator("sk_npc_burn_duration_immolator", "0"); //currently unused  - epicplayer
+ConVar	sk_immolator_gravity("sk_immolator_gravity", "0");
 
 #define MAX_BURN_RADIUS		256
 #define RADIUS_GROW_RATE	50.0	// units/sec 
@@ -105,7 +109,7 @@ CImmolatorBeam *CImmolatorBeam::BoltCreate( const Vector &vecOrigin, const QAngl
 	pBeam->SetAbsAngles( angAngles );
 	pBeam->Spawn();
 	pBeam->SetOwnerEntity( pentOwner );
-
+//	pBeam->SetGravity(sk_gravity_immolator.GetFloat());
 	return pBeam;
 }
 
@@ -188,7 +192,7 @@ void CImmolatorBeam::Spawn( void )
 	SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_CUSTOM );
 	UTIL_SetSize( this, -Vector(0.3f,0.3f,0.3f), Vector(0.3f,0.3f,0.3f) );
 	SetSolid( SOLID_BBOX );
-	SetGravity( 0.7f );
+	SetGravity(sk_immolator_gravity.GetFloat());
 	AddEffects( EF_NODRAW );
 	//epicplayer
 	SetCollisionGroup( COLLISION_GROUP_PROJECTILE );
@@ -306,7 +310,7 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 	}
 
 		//Lychy: Decided to remove DMG_BURN since it created a red fade that didnt work well with the blu one
-		RadiusDamage( CTakeDamageInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_DISSOLVE | DMG_PLASMA /* | DMG_BURN*/), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL, NULL); //changed from 256 to 128 to correspond with noisebeams
+		RadiusDamage( CTakeDamageInfo( this, GetOwnerEntity(), sk_npc_dmg_immolator.GetFloat(), DMG_DISSOLVE | DMG_PLASMA /* | DMG_BURN*/), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL, NULL); //changed from 256 to 128 to correspond with noisebeams
 		ImmolationDamage(CTakeDamageInfo(this, GetOwnerEntity(), 1, DMG_PLASMA), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL);
 	/*
 	if ( pOther->m_takedamage != DAMAGE_NO )
@@ -320,7 +324,7 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 
 		if( GetOwnerEntity() && GetOwnerEntity()->IsPlayer() && pOther->IsNPC() )
 		{
-			CTakeDamageInfo	dmgInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_DISSOLVE | DMG_PLASMA | DMG_BURN );
+			CTakeDamageInfo	dmgInfo( this, GetOwnerEntity(), sk_npc_dmg_immolator.GetFloat(), DMG_DISSOLVE | DMG_PLASMA | DMG_BURN );
 			dmgInfo.AdjustPlayerDamageInflictedForSkillLevel();
 			CalculateMeleeDamageForce( &dmgInfo, vecNormalizedVel, tr.endpos, 0.7f );
 			dmgInfo.SetDamagePosition( tr.endpos );
@@ -335,7 +339,7 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 		}
 		else
 		{
-			CTakeDamageInfo	dmgInfo( this, GetOwnerEntity(), sk_cremator_dmg_immo.GetFloat(), DMG_DISSOLVE | DMG_PLASMA | DMG_BURN  );
+			CTakeDamageInfo	dmgInfo( this, GetOwnerEntity(), sk_npc_dmg_immolator.GetFloat(), DMG_DISSOLVE | DMG_PLASMA | DMG_BURN  );
 			CalculateMeleeDamageForce( &dmgInfo, vecNormalizedVel, tr.endpos, 0.7f );
 			dmgInfo.SetDamagePosition( tr.endpos );
 			pOther->DispatchTraceAttack( dmgInfo, vecNormalizedVel, &tr );
@@ -387,7 +391,7 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 
 						if ( pEntity != NULL && m_takedamage )
 						{
-							RadiusDamage( CTakeDamageInfo( this, pEntity, sk_cremator_dmg_immo.GetFloat(), DMG_BURN ), tr.endpos, 256,  CLASS_NONE, NULL ); //changed from 256 to 128 to correspond with noisebeams
+							RadiusDamage( CTakeDamageInfo( this, pEntity, sk_npc_dmg_immolator.GetFloat(), DMG_BURN ), tr.endpos, 256,  CLASS_NONE, NULL ); //changed from 256 to 128 to correspond with noisebeams
 						}
 						else
 						{
@@ -750,7 +754,7 @@ void CWeaponImmolator::Operator_ForceNPCFire( CBaseCombatCharacter *pOperator, b
 
 	if ( pEntity != NULL && m_takedamage )
 	{
-		RadiusDamage( CTakeDamageInfo( this, pEntity, sk_cremator_dmg_immo.GetFloat(), DMG_BURN ), tr.endpos, 256,  CLASS_NONE, NULL ); //changed from 256 to 128 to correspond with noisebeams
+		RadiusDamage( CTakeDamageInfo( this, pEntity, sk_npc_dmg_immolator.GetFloat(), DMG_BURN ), tr.endpos, 256,  CLASS_NONE, NULL ); //changed from 256 to 128 to correspond with noisebeams
 	}
 	else
 	{
@@ -1261,7 +1265,7 @@ void CWeaponImmolator::ImmolationDamage( const CTakeDamageInfo &info, const Vect
 				continue;
 			}
 		
-			float lifetime = random->RandomFloat( 3, 5 );
+			float lifetime = random->RandomFloat( 3, 5 ); //needs to make use of sk_npc_burn_duration_immolator and sk_plr_burn_duration_immolator - epicplayer
 
 			CEntityFlame *pFlame = CEntityFlame::Create( pBCC, true );
 			if (pFlame)
