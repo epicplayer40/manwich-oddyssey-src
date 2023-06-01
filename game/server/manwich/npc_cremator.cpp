@@ -68,27 +68,34 @@ public:
 	void DeathSound( const CTakeDamageInfo &info );
 	Activity NPC_TranslateActivity( Activity eNewActivity );
 	void PostNPCInit();
+	int SelectSchedule() OVERRIDE;
+	Vector		GetShootEnemyDir(const Vector& shootOrigin, bool bNoisy = true) OVERRIDE ; //Lychy
+	bool	IsImmolatable(void) OVERRIDE { return false; } 
 private:
 	enum
 	{
-		SCHED_NEWNPC_SCHEDULE = BaseClass::NEXT_SCHEDULE,
-		SCHED_NEWNPC_SCHEDULE2,
+		SCHED_CREMATOR_DIRECTED_ATTACK = BaseClass::NEXT_SCHEDULE,
+		SCHED_CREMATOR_SPRAY_ATTACK,
 		NEXT_SCHEDULE
 	};
 
 	enum 
 	{
-		TASK_NEWNPC_TASK = BaseClass::NEXT_TASK,
-		TASK_NEWNPC_TASK2,
+		TASK_CREMATOR_TASK = BaseClass::NEXT_TASK,
+		TASK_CREMATOR_TASK2,
 		NEXT_TASK
 	};
 
 	enum 
 	{
-		COND_NEWNPC_CONDITION = BaseClass::NEXT_CONDITION,
-		COND_NEWNPC_CONDITION2,
+		COND_CREMATOR_CONDITION = BaseClass::NEXT_CONDITION,
+		COND_CREMATOR_CONDITION2,
 		NEXT_CONDITION
 	};
+private:
+	//Combat vars
+	float m_fNextDirectedBeamTime;
+	float m_fNextSprayTime;
 };
 
 LINK_ENTITY_TO_CLASS( npc_cremator, CNPC_CrematorManod );
@@ -97,6 +104,8 @@ LINK_ENTITY_TO_CLASS( npc_cremator, CNPC_CrematorManod );
 // Save/Restore
 //---------------------------------------------------------
 BEGIN_DATADESC( CNPC_CrematorManod )
+	DEFINE_FIELD(m_fNextDirectedBeamTime,FIELD_FLOAT),
+	DEFINE_FIELD(m_fNextSprayTime, FIELD_FLOAT),
 
 END_DATADESC()
 
@@ -234,21 +243,25 @@ void CNPC_CrematorManod::HandleAnimEvent( animevent_t *pEvent )
 int CNPC_CrematorManod::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 {
 
-	int nDamageTaken = BaseClass::OnTakeDamage_Alive( info );
 
-
-	return nDamageTaken;
 
 
 	CTakeDamageInfo newInfo = info;
 	if( newInfo.GetDamageType() & DMG_BURN)
 	{
-		newInfo.ScaleDamage( 0.0 );
 		DevMsg( "Cremator is immune to fire damage!\n" ); //doesn't currently work, cremator shouldn't be ignitable but could be killed by direct plasma damage from other immolators - epicplayer
+		return 0;
 	}	
 
-	if ( info.GetInflictor() && info.GetInflictor()->GetOwnerEntity() == this )
+	CBaseEntity* inflictor = info.GetInflictor(); 
+	CBaseEntity* owner = info.GetInflictor()->GetOwnerEntity();
+	if (inflictor && owner  == this )
 		return 0;
+
+	int nDamageTaken = BaseClass::OnTakeDamage_Alive(info);
+
+
+	return nDamageTaken;
 }
 
 
@@ -341,4 +354,22 @@ Activity CNPC_CrematorManod::NPC_TranslateActivity( Activity eNewActivity )
 	}
 
 	return BaseClass::NPC_TranslateActivity(eNewActivity);
+}
+	
+Vector	CNPC_CrematorManod::GetShootEnemyDir(const Vector& shootOrigin, bool bNoisy) 
+{
+#if 0 
+	Vector ret = BaseClass::GetShootEnemyDir(shootOrigin, bNoisy);
+	Vector finalAngles;
+	VectorRotate(ret, QAngle(0, -15, 0), finalAngles);
+	return finalAngles;
+#else
+	return BaseClass::GetShootEnemyDir(shootOrigin, bNoisy);
+#endif
+}
+
+int CNPC_CrematorManod::SelectSchedule()
+{
+
+	return BaseClass::SelectSchedule();
 }

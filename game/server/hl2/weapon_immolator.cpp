@@ -192,6 +192,7 @@ void CImmolatorBeam::Spawn( void )
 	SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_CUSTOM );
 	UTIL_SetSize( this, -Vector(0.3f,0.3f,0.3f), Vector(0.3f,0.3f,0.3f) );
 	SetSolid( SOLID_BBOX );
+	SetSolidFlags(FSOLID_NOT_SOLID | FSOLID_TRIGGER);
 	SetGravity(sk_immolator_gravity.GetFloat());
 	AddEffects( EF_NODRAW );
 	//epicplayer
@@ -273,7 +274,7 @@ void CImmolatorBeam::ImmolationDamage( const CTakeDamageInfo &info, const Vector
 	for ( CEntitySphereQuery sphere( vecSrc, flRadius ); (pEntity = sphere.GetCurrentEntity()) != NULL; sphere.NextEntity() )
 	{
 		CBaseCombatCharacter *pBCC = pEntity->MyCombatCharacterPointer();
-		if ( pBCC && pBCC->IsAlive() && !pBCC->IsOnFire() )
+		if ( pBCC && pBCC->IsAlive() && !pBCC->IsOnFire() && pBCC->IsImmolatable() )
 		{
 			// UNDONE: this should check a damage mask, not an ignore
 			if ( iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore )
@@ -312,194 +313,6 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 		//Lychy: Decided to remove DMG_BURN since it created a red fade that didnt work well with the blu one
 		RadiusDamage( CTakeDamageInfo( this, GetOwnerEntity(), sk_npc_dmg_immolator.GetFloat(), DMG_DISSOLVE | DMG_PLASMA /* | DMG_BURN*/), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL, NULL); //changed from 256 to 128 to correspond with noisebeams
 		ImmolationDamage(CTakeDamageInfo(this, GetOwnerEntity(), 1, DMG_PLASMA), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL);
-	/*
-	if ( pOther->m_takedamage != DAMAGE_NO )
-	{
-		trace_t	tr, tr2;
-		tr = BaseClass::GetTouchTrace();
-		Vector	vecNormalizedVel = GetAbsVelocity();
-
-		ClearMultiDamage();
-		VectorNormalize( vecNormalizedVel );
-
-		if( GetOwnerEntity() && GetOwnerEntity()->IsPlayer() && pOther->IsNPC() )
-		{
-			CTakeDamageInfo	dmgInfo( this, GetOwnerEntity(), sk_npc_dmg_immolator.GetFloat(), DMG_DISSOLVE | DMG_PLASMA | DMG_BURN );
-			dmgInfo.AdjustPlayerDamageInflictedForSkillLevel();
-			CalculateMeleeDamageForce( &dmgInfo, vecNormalizedVel, tr.endpos, 0.7f );
-			dmgInfo.SetDamagePosition( tr.endpos );
-			pOther->DispatchTraceAttack( dmgInfo, vecNormalizedVel, &tr );
-
-			CBasePlayer *pPlayer = ToBasePlayer( GetOwnerEntity() );
-			if ( pPlayer )
-			{
-				gamestats->Event_WeaponHit( pPlayer, true, "weapon_immolator", dmgInfo );
-			}
-
-		}
-		else
-		{
-			CTakeDamageInfo	dmgInfo( this, GetOwnerEntity(), sk_npc_dmg_immolator.GetFloat(), DMG_DISSOLVE | DMG_PLASMA | DMG_BURN  );
-			CalculateMeleeDamageForce( &dmgInfo, vecNormalizedVel, tr.endpos, 0.7f );
-			dmgInfo.SetDamagePosition( tr.endpos );
-			pOther->DispatchTraceAttack( dmgInfo, vecNormalizedVel, &tr );
-		}
-
-		ApplyMultiDamage();
-
-		//Adrian: keep going through the glass.
-		if ( pOther->GetCollisionGroup() == COLLISION_GROUP_BREAKABLE_GLASS )
-			 return;
-
-		if ( !pOther->IsAlive() )
-		{
-			// We killed it! 
-			const surfacedata_t *pdata = physprops->GetSurfaceData( tr.surface.surfaceProps );
-			if ( pdata->game.material == CHAR_TEX_GLASS )
-			{
-				return;
-			}
-		}
-
-		SetAbsVelocity( Vector( 0, 0, 0 ) );
-
-		// play body "thwack" sound
-//		EmitSound( "Weapon_Crossbow.BoltHitBody" );
-
-		Vector vForward;
-
-		AngleVectors( GetAbsAngles(), &vForward );
-		VectorNormalize ( vForward );
-
-		UTIL_TraceLine( GetAbsOrigin(),	GetAbsOrigin() + vForward * 128, MASK_BLOCKLOS, pOther, COLLISION_GROUP_NONE, &tr2 );
-
-		if ( tr2.fraction != 1.0f )
-		{
-//			NDebugOverlay::Box( tr2.endpos, Vector( -16, -16, -16 ), Vector( 16, 16, 16 ), 0, 255, 0, 0, 10 );
-//			NDebugOverlay::Box( GetAbsOrigin(), Vector( -16, -16, -16 ), Vector( 16, 16, 16 ), 0, 0, 255, 0, 10 );
-
-			if ( tr2.m_pEnt == NULL || ( tr2.m_pEnt && tr2.m_pEnt->GetMoveType() == MOVETYPE_NONE ) )
-			{
-				CEffectData	data;
-
-				data.m_vOrigin = tr2.endpos;
-				data.m_vNormal = vForward;
-				data.m_nEntIndex = tr2.fraction != 1.0f;
-				
-						CBaseEntity *pEntity;
-						pEntity = tr2.m_pEnt;
-
-						if ( pEntity != NULL && m_takedamage )
-						{
-							RadiusDamage( CTakeDamageInfo( this, pEntity, sk_npc_dmg_immolator.GetFloat(), DMG_BURN ), tr.endpos, 256,  CLASS_NONE, NULL ); //changed from 256 to 128 to correspond with noisebeams
-						}
-						else
-						{
-							// The attack beam struck some kind of entity directly.
-						}
-
-				DispatchEffect( "BoltImpact", data );
-				UTIL_Remove(this);
-			}
-			UTIL_Remove(this);
-		}
-		
-		SetTouch( NULL );
-		SetThink( NULL );
-
-
-		UTIL_Remove( this );
-
-	}
-	else
-	{
-		trace_t	tr;
-		tr = BaseClass::GetTouchTrace();
-
-		// See if we struck the world
-		if ( pOther->GetMoveType() == MOVETYPE_NONE && !( tr.surface.flags & SURF_SKY ) )
-		{
-//			EmitSound( "Weapon_Crossbow.BoltHitWorld" );
-
-			// if what we hit is static architecture, can stay around for a while.
-			Vector vecDir = GetAbsVelocity();
-			float speed = VectorNormalize( vecDir );
-
-			// See if we should reflect off this surface
-			float hitDot = DotProduct( tr.plane.normal, -vecDir );
-			
-			if ( ( hitDot < 0.5f ) && ( speed > 100 ) )
-			{
-				Vector vReflection = 2.0f * tr.plane.normal * hitDot + vecDir;
-				
-				QAngle reflectAngles;
-
-				VectorAngles( vReflection, reflectAngles );
-
-				SetLocalAngles( reflectAngles );
-
-				SetAbsVelocity( vReflection * speed * 0.75f );
-
-				// Start to sink faster
-				SetGravity( 1.0f );
-
-				UTIL_Remove(this);
-			}
-			else
-			{
-				SetThink( &CImmolatorBeam::SUB_Remove );
-				SetNextThink( gpGlobals->curtime + 2.0f );
-				
-				//FIXME: We actually want to stick (with hierarchy) to what we've hit
-				SetMoveType( MOVETYPE_NONE );
-			
-				Vector vForward;
-
-				AngleVectors( GetAbsAngles(), &vForward );
-				VectorNormalize ( vForward );
-
-				CEffectData	data;
-
-				data.m_vOrigin = tr.endpos;
-				data.m_vNormal = vForward;
-				data.m_nEntIndex = 0;
-			
-				//DispatchEffect( "BoltImpact", data );
-				
-				UTIL_ImpactTrace( &tr, DMG_BULLET );
-
-				
-
-				AddEffects( EF_NODRAW );
-				SetTouch( NULL );
-				SetThink( &CImmolatorBeam::SUB_Remove );
-				SetNextThink( gpGlobals->curtime + 2.0f );
-
-				if ( m_pGlowSprite != NULL )
-				{
-					m_pGlowSprite->TurnOn();
-					m_pGlowSprite->FadeAndDie( 3.0f );
-				}
-
-				UTIL_Remove(this);
-			}
-			
-			// Shoot some sparks
-			if ( UTIL_PointContents( GetAbsOrigin() ) != CONTENTS_WATER)
-			{
-				g_pEffects->Sparks( GetAbsOrigin() );
-			}
-
-			UTIL_Remove(this);
-		}
-		else
-		{
-			// Put a mark unless we've hit the sky
-			if ( ( tr.surface.flags & SURF_SKY ) == false )
-			{
-				UTIL_ImpactTrace( &tr, DMG_BULLET );
-			}
-			*/
 			UTIL_Remove( this );
 //		}
 //	}
@@ -621,46 +434,18 @@ void CWeaponImmolator::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseComba
 	switch( pEvent->event )
 	{
 		case EVENT_WEAPON_SMG1:
-		{
-//		Operator_ForceNPCFire( pOperator, 0 );
+		{		
 		Vector	muzzlePoint;
 		QAngle	vecAngles;
-
-		muzzlePoint = GetOwner()->Weapon_ShootPosition();
-
+		
 		CAI_BaseNPC *npc = pOperator->MyNPCPointer();
-
-
-		Vector vecShootDir = npc->GetActualShootTrajectory(muzzlePoint);
-
-		// Fire!
-		Vector vecSrc;
-		Vector vecAiming;
-
-		QAngle	angShootDir;
-		GetAttachment(LookupAttachment("muzzle"), vecSrc, angShootDir);
-		AngleVectors(angShootDir, &vecAiming);
-
-		// look for a better launch location
-		Vector altLaunchPoint;
-		if (GetAttachment("muzzle", altLaunchPoint))
-		{
-			// check to see if it's relativly free
-			trace_t tr;
-			AI_TraceHull(altLaunchPoint, altLaunchPoint + vecShootDir * (10.0f*12.0f), Vector(-24, -24, -24), Vector(24, 24, 24), MASK_NPCSOLID, NULL, &tr);
-
-			if (tr.fraction == 1.0)
-			{
-				muzzlePoint = altLaunchPoint;
-			}
-		}
-
-		vecShootDir = npc->GetActualShootTrajectory(muzzlePoint);
+		GetAttachment("muzzle", muzzlePoint);
+		Vector vecShootDir = npc->GetShootEnemyDir(muzzlePoint);
 		VectorAngles(vecShootDir, vecAngles);
 
-		//	pViewModel->GetAttachment( pViewModel->LookupAttachment( "muzzle" ), beamSrc );
-		CImmolatorBeam *pBeamer = CImmolatorBeam::BoltCreate(vecSrc, angShootDir, pOperator);
-		pBeamer->SetAbsVelocity(vecAiming * BEAM_AIR_VELOCITY);
+
+		CImmolatorBeam *pBeamer = CImmolatorBeam::BoltCreate(muzzlePoint, vecAngles, pOperator);
+		pBeamer->SetAbsVelocity(vecShootDir * BEAM_AIR_VELOCITY);
 		}
 		break;
 		default:
@@ -1257,7 +1042,7 @@ void CWeaponImmolator::ImmolationDamage( const CTakeDamageInfo &info, const Vect
 	for ( CEntitySphereQuery sphere( vecSrc, flRadius ); pEntity = sphere.GetCurrentEntity(); sphere.NextEntity() )
 	{
 		CBaseCombatCharacter *pBCC = pEntity->MyCombatCharacterPointer();
-		if ( pBCC && pBCC->IsAlive() && !pBCC->IsOnFire() )
+		if ( pBCC && pBCC->IsAlive() && !pBCC->IsOnFire() && pBCC->IsImmolatable() )
 		{
 			// UNDONE: this should check a damage mask, not an ignore
 			if ( iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore )
