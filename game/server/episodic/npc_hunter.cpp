@@ -541,6 +541,8 @@ void CHunterFlechette::Spawn()
 
 	// Make us glow until we've hit the wall
 	m_nSkin = 1;
+
+	m_nMuzzleFlashAttachment = LookupAttachment("MiniGunBase");
 }
 
 

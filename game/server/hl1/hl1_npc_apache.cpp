@@ -153,11 +153,11 @@ void CNPC_Apache::Spawn( void )
 	Precache( );
 	SetModel( "models/apache.mdl" );
 
-	UTIL_SetSize( this, Vector( -32, -32, -32 ), Vector( 32, 32, 32 ) );
+	//UTIL_SetSize( this, Vector( -32, -32, -32 ), Vector( 32, 32, 32 ) );
 
-	Vector vecSurroundingMins( -300, -300, -172);
-	Vector vecSurroundingMaxs(300, 300, 8);
-	CollisionProp()->SetSurroundingBoundsType( USE_SPECIFIED_BOUNDS, &vecSurroundingMins, &vecSurroundingMaxs );
+	//Vector vecSurroundingMins( -300, -300, -172);	
+	//Vector vecSurroundingMaxs(300, 300, 8);
+	//CollisionProp()->SetSurroundingBoundsType( USE_SPECIFIED_BOUNDS, &vecSurroundingMins, &vecSurroundingMaxs );
 
 	BaseClass::Spawn();
 	m_iHealth			= 1600;
@@ -245,7 +245,9 @@ void CNPC_Apache::Flight( void )
 	}
 	else
 	{
-		AngleVectors( GetGoalEnt()->GetAbsAngles(), &m_vecGoalOrientation );
+		CBaseEntity* goal = GetGoalEnt();
+		if(goal)
+			AngleVectors( goal->GetAbsAngles(), &m_vecGoalOrientation );
 	}
 //	SetGoalOrientation( vecGoalOrientation );
 	
