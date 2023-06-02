@@ -192,7 +192,8 @@ enum
 {
 	SF_CAN_STOMP_PLAYER					= 0x10000,
 	SF_TAKE_MINIMAL_DAMAGE_FROM_NPCS	= 0x20000,
-	SF_TAKE_REAL_DAMAGE	= 0x40000
+	SF_TAKE_REAL_DAMAGE	= 0x40000, //dont scale the damage down if its an npc
+	SF_TAKE_ALL_DAMAGE	= 0x80000, //take damage from all damage types
 };
 
 const float STRIDER_SPEED = 500;
@@ -3060,11 +3061,16 @@ int CNPC_Strider::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 	if ( info.GetInflictor() && info.GetInflictor()->GetOwnerEntity() == this )
 		return 0;
 
+	if (!IsSmoking() && m_iHealth <= sk_strider_health.GetInt() / 2) //Lychy:moved to front, so its always checked for, even if we return early
+	{
+		StartSmoking();
+	}
+
 	// special interaction with combine balls
 	if ( UTIL_IsCombineBall( info.GetInflictor() ) )
 		return TakeDamageFromCombineBall( info );
 
-	if ( info.GetDamageType() == DMG_GENERIC )
+	if ( info.GetDamageType() == DMG_GENERIC || HasSpawnFlags(SF_TAKE_ALL_DAMAGE))
 		return BaseClass::OnTakeDamage_Alive( info );
 
 	if( IsUsingAggressiveBehavior() )
@@ -3167,10 +3173,6 @@ int CNPC_Strider::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 
 			GetEnemies()->OnTookDamageFrom( info.GetAttacker() );
 
-			if( !IsSmoking() && m_iHealth <= sk_strider_health.GetInt() / 2 )
-			{
-				StartSmoking();
-			}
 			return damage;
 		}
 
