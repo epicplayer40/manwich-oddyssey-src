@@ -56,8 +56,11 @@ ConVar tank_debug("tank_debug", "0");
 #define TANK_CENTIPEDE_LEG_LENGTH 15.0f
 #define TANK_CENTIPEDE_LEG_GAP 5
 
-#define SF_INDESTRUCTIBLE 1 << 0
-
+enum
+{
+	SF_INDESTRUCTIBLE =  1 << 0,
+	SF_TAKE_ALL_DAMAGE = 1 << 1,
+};
 #pragma region Tank Shell
 #define TANKSHELL_MODEL "models/weapons/tank_shell.mdl"
 #define TANKCASING_MODEL "models/shell_casings/missilecasing01.mdl"
@@ -932,7 +935,7 @@ int CVehicleTank::OnTakeDamage(const CTakeDamageInfo& info)
 	if (!HasSpawnFlags(SF_INDESTRUCTIBLE) && info.GetAttacker() != GetDriver())
 	{
 		int prevQuarterDestroyed = (GetMaxHealth() - GetHealth()) / (GetMaxHealth() / 4);
-		if (info.GetDamageType() & DMG_BLAST)
+		if (info.GetDamageType() & DMG_BLAST || HasSpawnFlags(SF_TAKE_ALL_DAMAGE))
 		{
 			int ret = BaseClass::OnTakeDamage(info);
 			int newQuart = (GetMaxHealth() - GetHealth()) / (GetMaxHealth() / 4);
