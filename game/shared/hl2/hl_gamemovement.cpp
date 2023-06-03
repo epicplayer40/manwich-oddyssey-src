@@ -283,7 +283,10 @@ bool CHL2GameMovement::ContinueForcedMove()
 //-----------------------------------------------------------------------------
 bool CHL2GameMovement::OnLadder( trace_t &trace )
 {
-	return ( GetLadder() != NULL ) ? true : false;
+	if (!GetLadder())
+		return BaseClass::OnLadder(trace);
+	else
+		return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -524,9 +527,10 @@ void CHL2GameMovement::FullLadderMove()
 {
 #if !defined( CLIENT_DLL )
 	CFuncLadder *ladder = GetLadder();
-	Assert( ladder );
+	//Assert( ladder );
 	if ( !ladder )
 	{
+		BaseClass::FullLadderMove();
 		return;
 	}
 
@@ -887,7 +891,7 @@ bool CHL2GameMovement::LadderMove( void )
 	if ( player->GetMoveType() == MOVETYPE_NOCLIP )
 	{
 		SetLadder( NULL );
-		return false;
+		return BaseClass::LadderMove();
 	}
 
 	// If being forced to mount/dismount continue to act like we are on the ladder
@@ -954,7 +958,7 @@ bool CHL2GameMovement::LadderMove( void )
 			}
 		}
 
-		return false;
+		return BaseClass::LadderMove();
 	}
 
 	if ( !ladder && 
@@ -968,7 +972,7 @@ bool CHL2GameMovement::LadderMove( void )
 	ladder = GetLadder();
 	if ( !ladder )
 	{
-		return false;
+		return BaseClass::LadderMove();
 	}
 
 	// Don't play the deny sound
@@ -1032,7 +1036,7 @@ bool CHL2GameMovement::LadderMove( void )
 		{
 			mv->m_vecVelocity.z = mv->m_vecVelocity.z + 50;
 		}
-		return false;
+		return BaseClass::LadderMove();
 	}
 
 	if ( forwardSpeed != 0 || rightSpeed != 0 )
@@ -1064,7 +1068,7 @@ bool CHL2GameMovement::LadderMove( void )
 			player->SetMoveType( MOVETYPE_WALK );
 			// Remove from ladder
 			SetLadder( NULL );
-			return false;
+			return BaseClass::LadderMove();
 		}
 
 		bool ishorizontal = fabs( topPosition.z - bottomPosition.z ) < 64.0f ? true : false;
