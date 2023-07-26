@@ -34,7 +34,8 @@ ConVar tank_debug("tank_debug", "0");
 #define SMOKEPOINT_ATTACHMENT "smokepoint"
 
 #define CANNON_MAX_UP_PITCH			70
-#define CANNON_MAX_DOWN_PITCH		20#define CANNON_MAX_LEFT_YAW			180
+#define CANNON_MAX_DOWN_PITCH		20
+#define CANNON_MAX_LEFT_YAW			180
 #define CANNON_MAX_RIGHT_YAW		180
 
 #define TANK_DEFAULTMODEL "models/vehicles/merkava.mdl"
@@ -61,6 +62,7 @@ enum
 	SF_INDESTRUCTIBLE =  1 << 0,
 	SF_TAKE_ALL_DAMAGE = 1 << 1,
 };
+
 #pragma region Tank Shell
 #define TANKSHELL_MODEL "models/weapons/tank_shell.mdl"
 #define TANKCASING_MODEL "models/shell_casings/missilecasing01.mdl"

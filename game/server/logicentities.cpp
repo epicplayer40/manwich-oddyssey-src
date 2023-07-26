@@ -897,7 +897,7 @@ BEGIN_DATADESC( CEnvGlobal )
 	DEFINE_INPUTFUNC( FIELD_INTEGER, "AddToCounter",	InputAddToCounter ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "GetCounter",	InputGetCounter ),
 	
-	DEFINE_OUTPUT( m_outCounter, "Counter" ),
+	DEFINE_OUTPUT( m_outCounter, "CounterOut" ),
 
 END_DATADESC()
 
