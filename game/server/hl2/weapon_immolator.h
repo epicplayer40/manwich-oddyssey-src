@@ -44,7 +44,8 @@ public:
 	void StartImmolating();
 	void StopImmolating();
 //	bool IsImmolating() { return m_flBurnRadius != 0.0; } // VXP: Old style
-	bool IsImmolating() { return m_flBurnRadius != 0.0; }
+//	bool IsImmolating() { return m_flBurnRadius != 0.0; } //Lychy: wtf is this??
+	bool IsImmolating() { return m_fireState == FIRE_CHARGE || m_fireState == FIRE_STARTUP; }
 
 	int		GetMinBurst() { return 50; }
 	int		GetMaxBurst() { return 100; }
@@ -75,6 +76,10 @@ public:
 	IMMOLATOR_FIRESTATE		m_fireState;
 	float				m_flAmmoUseTime;	// since we use < 1 point of ammo per update, we subtract ammo on a timer.
 	float				m_flStartFireTime;
+
+	bool		m_bShootFar;
+
+	static int m_nMuzzleAttachment;
 };
 
 #endif	//WEAPONIMMOLATOR_H

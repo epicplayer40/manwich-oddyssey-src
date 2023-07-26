@@ -536,6 +536,10 @@ protected:
 	CNavArea *m_lastNavArea;
 	CAI_MoveMonitor m_NavAreaUpdateMonitor;
 	int m_registeredNavTeam;	// ugly, but needed to clean up player team counts in nav mesh
+
+	//Lychy
+public:
+	virtual inline bool IsImmolatable(void) { return true; }
 };
 
 
