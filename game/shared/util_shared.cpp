@@ -39,7 +39,7 @@ bool NPC_CheckBrushExclude( CBaseEntity *pEntity, CBaseEntity *pBrush );
 #include "tier0/memdbgon.h"
 
 ConVar r_visualizetraces( "r_visualizetraces", "0", FCVAR_CHEAT );
-ConVar developer("developer", "0", 0, "Set developer message level." ); // developer mode
+ConVar developer("developer", "0", 0, "Set developer message level" ); // developer mode
 
 float UTIL_VecToYaw( const Vector &vec )
 {
@@ -869,24 +869,23 @@ void UTIL_DecalTrace( trace_t *pTrace, char const *decalName )
 
 void UTIL_BloodDecalTrace( trace_t *pTrace, int bloodColor )
 {
-    if ( UTIL_ShouldShowBlood( bloodColor ) )
-    {
-        if ( bloodColor == BLOOD_COLOR_RED )
-        {
-            UTIL_DecalTrace( pTrace, "Blood" );
-        }
-        else if (bloodColor == BLOOD_COLOR_BLUE)
+	if ( UTIL_ShouldShowBlood( bloodColor ) )
+	{
+		if ( bloodColor == BLOOD_COLOR_RED )
+		{
+			UTIL_DecalTrace( pTrace, "Blood" );
+		}
+		else if (bloodColor == BLOOD_COLOR_BLUE)
         {
             // TODO: Define "BlueBlood" in decals.txt and point to the correct decals
             UTIL_DecalTrace( pTrace, "BlueBlood" );
         }
-        else
-        {
-            UTIL_DecalTrace( pTrace, "YellowBlood" );
-        }
-    }
+		else
+		{
+			UTIL_DecalTrace( pTrace, "YellowBlood" );
+		}
+	}
 }
-
 
 //-----------------------------------------------------------------------------
 // Purpose: 

@@ -46,7 +46,6 @@ CLIENTEFFECT_MATERIAL( "effects/huntertracer" )
 CLIENTEFFECT_MATERIAL( "sprites/physcannon_bluelight2" )
 CLIENTEFFECT_MATERIAL( "effects/combinemuzzle1" )
 CLIENTEFFECT_MATERIAL( "effects/combinemuzzle2" )
-CLIENTEFFECT_MATERIAL( "effects/aidstracer" )
 CLIENTEFFECT_MATERIAL( "effects/combinemuzzle2_nocull" )
 #endif
 CLIENTEFFECT_REGISTER_END()
@@ -54,9 +53,6 @@ CLIENTEFFECT_REGISTER_END()
 
 //Whether or not we should emit a dynamic light
 ConVar muzzleflash_light( "muzzleflash_light", "1", FCVAR_ARCHIVE );
-ConVar muzzleflash_exponent( "muzzleflash_exponent", "1", FCVAR_ARCHIVE );
-ConVar muzzleflash_minradius( "muzzleflash_minradius", "32", FCVAR_ARCHIVE );
-ConVar muzzleflash_maxradius( "muzzleflash_maxradius", "90", FCVAR_ARCHIVE );
 
 extern void FX_TracerSound( const Vector &start, const Vector &end, int iTracerType );
 
@@ -939,47 +935,6 @@ void FX_StriderTracer( Vector& start, Vector& end, int velocity, bool makeWhiz )
 	if( makeWhiz )
 	{
 		FX_TracerSound( start, end, TRACER_TYPE_STRIDER );
-	}
-}
-
-void FX_AidsTracer( Vector& start, Vector& end, int velocity, bool makeWhiz )
-{
-	VPROF_BUDGET( "FX_AidsTracer", VPROF_BUDGETGROUP_PARTICLE_RENDERING );
-	Vector	vNear, dStart, dEnd, shotDir;
-	float	totalDist;
-
-	//Get out shot direction and length
-	VectorSubtract( end, start, shotDir );
-	totalDist = VectorNormalize( shotDir );
-
-	//Don't make small tracers
-	if ( totalDist <= 256 )
-		return;
-
-	float length = random->RandomFloat( 64.0f, 128.0f );
-	float life = ( totalDist + length ) / velocity;	//NOTENOTE: We want the tail to finish its run as well
-	
-	//Add it
-	FX_AddDiscreetLine( start, shotDir, velocity, length, totalDist, 2.5f, life, "effects/aidstracer" );
-
-	if( makeWhiz )
-	{
-		FX_TracerSound( start, end, TRACER_TYPE_STRIDER );
-	}
-}
-
-void FX_AidsMuzzleEffect( const Vector &origin, const QAngle &angles, float scale, ClientEntityHandle_t hEntity, unsigned char *pFlashColor )
-{
-	Vector vecDir;
-	AngleVectors( angles, &vecDir );
-
-	float life = 0.3f;
-	float speed = 100.0f;
-
-	for( int i = 0 ; i < 5 ; i++ )
-	{
-		FX_AddDiscreetLine( origin, vecDir, speed, 32, speed * life, 5.0f, life, "effects/aidsmuzzle" );
-		speed *= 1.5f;
 	}
 }
 

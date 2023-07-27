@@ -35,7 +35,6 @@
 #include "c_te_effect_dispatch.h"
 #include "c_props.h"
 #include "c_basedoor.h"
-#include "fx_staticline.h"
 
 // NOTE: Always include this last!
 #include "tier0/memdbgon.h"
@@ -1540,7 +1539,7 @@ void CTempEnts::BloodSprite( const Vector &org, int r, int g, int b, int a, int 
 	{
 		C_LocalTempEntity		*pTemp;
 		int						frameCount = modelinfo->GetModelFrameCount( model );
-		color32					impactcolor = { r, g, b, a };
+		color32					impactcolor = { (byte)r, (byte)g, (byte)b, (byte)a };
 
 		//Large, single blood sprite is a high-priority tent
 		if ( ( pTemp = TempEntAllocHigh( org, model ) ) != NULL )
@@ -1814,7 +1813,7 @@ void CTempEnts::MuzzleFlash( const Vector& pos1, const QAngle& angles, int type,
 
 	switch ( type )
 	{
-
+		
 	//
 	// AR2
 	//
@@ -2971,6 +2970,7 @@ void CTempEnts::MuzzleFlash_AR2_Player(const Vector& origin, const QAngle& angle
 
 #endif
 }
+
 //==================================================
 // Purpose: 
 // Input: 

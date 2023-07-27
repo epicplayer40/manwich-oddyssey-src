@@ -737,7 +737,6 @@ private:
 	void				NextScheduledTask ( void );
 	bool				IsScheduleValid ( void );
 	bool				ShouldSelectIdealState( void );
-
 	
 	// Selecting the ideal state
 	NPC_STATE			SelectIdleIdealState();
@@ -770,8 +769,7 @@ private:
 	float				m_flLastRealThinkTime;
 	int					m_iFrameBlocked;
 	bool				m_bInChoreo;
-
-
+	
 	float	m_flBurnDamage;				// Keeps track of how much burn damage we've incurred in the last few seconds.
 	float	m_flBurnDamageResetTime;	// Time at which we reset the burn damage.
 
@@ -1767,7 +1765,6 @@ public:
 
 	virtual Activity	GetFlinchActivity( bool bHeavyDamage, bool bGesture );
 	
-	virtual bool		ShouldGib( const CTakeDamageInfo &info ) { return false; }	// Always ragdoll, unless specified by the leaf class
 	virtual bool		Event_Gibbed( const CTakeDamageInfo &info );
 	virtual void		Event_Killed( const CTakeDamageInfo &info );
 

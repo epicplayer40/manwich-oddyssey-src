@@ -114,7 +114,8 @@ ConVar	sk_metropolice_stitch_along_hitcount( "sk_metropolice_stitch_along_hitcou
 ConVar	sk_metropolice_health( "sk_metropolice_health","0");
 ConVar	sk_metropolice_simple_health( "sk_metropolice_simple_health","26");
 ConVar	sk_metropolice_stitch_distance( "sk_metropolice_stitch_distance","1000");
-ConVar	sk_metropolice_elite_health( "sk_metropolice_elite_health", "50");
+ConVar	sk_metropolice_elite_health("sk_metropolice_elite_health", "50");
+
 
 ConVar	metropolice_chase_use_follow( "metropolice_chase_use_follow", "0" );
 ConVar  metropolice_move_and_melee("metropolice_move_and_melee", "1" );
@@ -523,7 +524,7 @@ void CNPC_MetroPolice::PrescheduleThink( void )
 		}
 	}
 
-	if( IsOnFire() && GetHealth() <= (m_iMaxHealth * 0.5f) )
+	if (IsOnFire() && GetHealth() <= (m_iMaxHealth * 0.5f))
 	{
 		SetCondition( COND_METROPOLICE_ON_FIRE );
 	}
@@ -577,14 +578,12 @@ void CNPC_MetroPolice::Precache( void )
 	{
 		SetModelName( AllocPooledString("models/police_cheaple.mdl" ) );
 	}
-
 	else
 	{
-		SetModelName( AllocPooledString("models/police.mdl" ) );
+		SetModelName( AllocPooledString("models/police.mdl") );
 	}
 
 	PrecacheModel( STRING( GetModelName() ) );
-
 	PrecacheModel("models/Police_Ally.mdl");
 	PrecacheModel("models/Police_Trench.mdl");
 	PrecacheModel("models/Police_Elite.mdl");
@@ -663,7 +662,7 @@ void CNPC_MetroPolice::Spawn( void )
 	CapabilitiesAdd( bits_CAP_MOVE_GROUND );
 	CapabilitiesAdd( bits_CAP_USE_WEAPONS | bits_CAP_NO_HIT_SQUADMATES );
 	CapabilitiesAdd( bits_CAP_SQUAD );
-	CapabilitiesAdd( bits_CAP_MOVE_JUMP );
+	CapabilitiesAdd(bits_CAP_MOVE_JUMP);
 	CapabilitiesAdd( bits_CAP_DUCK | bits_CAP_DOORS_GROUP );
 	CapabilitiesAdd( bits_CAP_USE_SHOT_REGULATOR );
 
@@ -699,47 +698,46 @@ void CNPC_MetroPolice::Spawn( void )
 			GetActiveWeapon()->AddEffects( EF_NODRAW );
 		}
 
-
-
 		//Trenchcoat Cops and Elite Cops have as much durability as a combine soldier
-		if ( FClassnameIs( pWeapon, "weapon_shotgun" ) )
+		if (FClassnameIs(pWeapon, "weapon_shotgun"))
 		{
-			SetModel( "Models/Police_Trench.mdl" );
-			SetHealth( sk_metropolice_elite_health.GetFloat() ); 
+			SetModel("Models/Police_Trench.mdl");
+			SetHealth(sk_metropolice_elite_health.GetFloat());
 		}
-		if ( FClassnameIs( pWeapon, "weapon_tommygun" ) )
+		if (FClassnameIs(pWeapon, "weapon_tommygun"))
 		{
-			SetModel( "Models/Police_Trench.mdl" );
+			SetModel("Models/Police_Trench.mdl");
 		}
-		if ( FClassnameIs( pWeapon, "weapon_357" ) )
+		if (FClassnameIs(pWeapon, "weapon_357"))
 		{
-			SetModel( "Models/Police_Elite.mdl" );
-			SetHealth( sk_metropolice_elite_health.GetFloat() ); 
+			SetModel("Models/Police_Elite.mdl");
+			SetHealth(sk_metropolice_elite_health.GetFloat());
 		}
-		if ( FClassnameIs( pWeapon, "weapon_ar2" ) )
+		if (FClassnameIs(pWeapon, "weapon_ar2"))
 		{
-			SetModel( "Models/Police_Elite.mdl" );
-			SetHealth( sk_metropolice_elite_health.GetFloat() ); 
+			SetModel("Models/Police_Elite.mdl");
+			SetHealth(sk_metropolice_elite_health.GetFloat());
 		}
-		if ( FClassnameIs( pWeapon, "weapon_ar1" ) )
+		if (FClassnameIs(pWeapon, "weapon_ar1"))
 		{
-			SetModel( "Models/Police_Leak.mdl" );
+			SetModel("Models/Police_Leak.mdl");
 		}
-		if ( FClassnameIs( pWeapon, "weapon_oicw" ) )
+		if (FClassnameIs(pWeapon, "weapon_oicw"))
 		{
-			SetModel( "Models/Police_Leak.mdl" );
+			SetModel("Models/Police_Leak.mdl");
 		}
-		if ( FClassnameIs( pWeapon, "weapon_smg2" ) )
+		if (FClassnameIs(pWeapon, "weapon_smg2"))
 		{
-			SetModel( "Models/Police_Leak.mdl" );
+			SetModel("Models/Police_Leak.mdl");
 		}
-		if ( FClassnameIs( pWeapon, "weapon_dbarrel" ) )
+		if (FClassnameIs(pWeapon, "weapon_dbarrel"))
 		{
-			SetModel( "Models/Police_Trench.mdl" );
-			SetHealth( sk_metropolice_elite_health.GetFloat() ); 
+			SetModel("Models/Police_Trench.mdl");
+			SetHealth(sk_metropolice_elite_health.GetFloat());
 		}
 	}
 
+	
 
 	m_TimeYieldShootSlot.Set( 2, 6 );
 
@@ -1723,7 +1721,7 @@ float CNPC_MetroPolice::AimBurstAtReactionTime( float flReactionTime, float flDi
 #define AIM_AT_SHOT_SPEED_COUNT 6
 #define AIM_AT_SHOT_DIST_COUNT 6
 
-static int s_pShotCountFraction[AIM_AT_TIME_DIST_COUNT][AIM_AT_TIME_SPEED_COUNT] =
+static float s_pShotCountFraction[AIM_AT_TIME_DIST_COUNT][AIM_AT_TIME_SPEED_COUNT] =
 {
 	{  3.0f, 3.0f,  2.5f,  1.5f,  1.0f, 0.0f },
 	{  3.0f, 3.0f,  2.5f,  1.25f, 0.5f, 0.0f },
@@ -3073,18 +3071,18 @@ bool CNPC_MetroPolice::HandleInteraction(int interactionType, void *data, CBaseC
 //-----------------------------------------------------------------------------
 Activity CNPC_MetroPolice::NPC_TranslateActivity( Activity newActivity )
 {
-	if( IsOnFire() && (newActivity == ACT_RUN || newActivity == ACT_RUN_PISTOL || newActivity == ACT_RUN_AIM_PISTOL || newActivity == ACT_RUN_RIFLE || newActivity == ACT_RUN_AIM_RIFLE) )
+	if (IsOnFire() && (newActivity == ACT_RUN || newActivity == ACT_RUN_PISTOL || newActivity == ACT_RUN_AIM_PISTOL || newActivity == ACT_RUN_RIFLE || newActivity == ACT_RUN_AIM_RIFLE))
 	{
 		return ACT_RUN_ON_FIRE;
 	}
 
 	if (newActivity == ACT_RELOAD_SHOTGUN)
 	{
-	if (GetActiveWeapon()->UsesClipsForAmmo1())
+		if (GetActiveWeapon()->UsesClipsForAmmo1())
 		{
-		GetActiveWeapon()->m_iClip1 = GetActiveWeapon()->GetMaxClip1();
-		GetActiveWeapon()->WeaponSound(RELOAD_NPC);
-		return Activity(ACT_RELOAD_SMG1);
+			GetActiveWeapon()->m_iClip1 = GetActiveWeapon()->GetMaxClip1();
+			GetActiveWeapon()->WeaponSound(RELOAD_NPC);
+			return Activity(ACT_RELOAD_SMG1);
 		}
 	}
 
@@ -3441,17 +3439,16 @@ int CNPC_MetroPolice::SelectCombatSchedule()
 	if ( HasCondition( COND_LOW_PRIMARY_AMMO ) || HasCondition( COND_NO_PRIMARY_AMMO ) )
 	{
 		AnnounceOutOfAmmo( );
-		return SCHED_HIDE_AND_RELOAD; //hide_and_reload originally. Changed because the fucking shotgun reload loops otherwise
-
-		if( Weapon_OwnsThisType( "weapon_dbarrel" ) )
+		if (Weapon_OwnsThisType("weapon_dbarrel"))
 		{
 			return SCHED_RELOAD;
 		}
 
-		if( Weapon_OwnsThisType( "weapon_shotgun" ) )
+		if (Weapon_OwnsThisType("weapon_shotgun"))
 		{
 			return SCHED_RELOAD;
 		}
+		return SCHED_HIDE_AND_RELOAD;
 	}
 
 	if ( HasCondition(COND_WEAPON_SIGHT_OCCLUDED) && !HasBaton() )
@@ -4098,15 +4095,15 @@ int CNPC_MetroPolice::SelectSchedule( void )
 	if ( HasCondition(COND_METROPOLICE_ON_FIRE) )
 	{
 		m_Sentences.Speak( "METROPOLICE_ON_FIRE", SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS );
-/*		if ( GetActivity() == ACT_RUN_ON_FIRE )
-		{ 
-			return SCHED_METROPOLICE_BURNING_RUN;
-		}
-		else return SCHED_METROPOLICE_BURNING_STAND;
-*/
-		SetCurrentWeaponProficiency( WEAPON_PROFICIENCY_POOR );
+	/*		if ( GetActivity() == ACT_RUN_ON_FIRE )
+			{
+				return SCHED_METROPOLICE_BURNING_RUN;
+			}
+			else return SCHED_METROPOLICE_BURNING_STAND;
+	*/
+		SetCurrentWeaponProficiency(WEAPON_PROFICIENCY_POOR);
 
-		if ( random->RandomInt(0, 1) == 1 )
+		if (random->RandomInt(0, 1) == 1)
 		{
 			return SCHED_METROPOLICE_BURNING_RUN;
 		}
@@ -4237,12 +4234,12 @@ int CNPC_MetroPolice::SelectSchedule( void )
 		//if( Weapon_OwnsThisType( "weapon_dbarrel" ) )
 		//{
 		//	return SCHED_RELOAD;
-	//	}
+		//	}
 
-	//	if( Weapon_OwnsThisType( "weapon_shotgun" ) )
-	//	{
-	//		return SCHED_RELOAD;
-	//	}
+		//	if( Weapon_OwnsThisType( "weapon_shotgun" ) )
+		//	{
+		//		return SCHED_RELOAD;
+		//	}
 	}
 
 	// If we're clubbing someone who threw something at us. chase them
@@ -4316,11 +4313,10 @@ int CNPC_MetroPolice::SelectFailSchedule( int failedSchedule, int failedTask, AI
 		return SCHED_METROPOLICE_ESTABLISH_LINE_OF_FIRE;
 	}
 
-	if ( failedSchedule == SCHED_HIDE_AND_RELOAD )
+	if (failedSchedule == SCHED_HIDE_AND_RELOAD)
 	{
 		return SCHED_RELOAD;
 	}
-
 	return BaseClass::SelectFailSchedule( failedSchedule, failedTask, taskFailCode );
 }
 
@@ -5064,31 +5060,31 @@ void CNPC_MetroPolice::BuildScheduleTestBits( void )
 //-----------------------------------------------------------------------------
 WeaponProficiency_t CNPC_MetroPolice::CalcWeaponProficiency( CBaseCombatWeapon *pWeapon )
 {
+	if (FClassnameIs(pWeapon, "weapon_357"))
+	{
+		return WEAPON_PROFICIENCY_VERY_GOOD;
+	}
+
 	if( FClassnameIs( pWeapon, "weapon_pistol" ) )
 	{
 		return WEAPON_PROFICIENCY_POOR;
-	}
-	if( FClassnameIs( pWeapon, "weapon_357" ) )
-	{
-		return WEAPON_PROFICIENCY_VERY_GOOD;
 	}
 
 	if( FClassnameIs( pWeapon, "weapon_smg1" ) )
 	{
 		return WEAPON_PROFICIENCY_VERY_GOOD;
 	}
-
-	if( FClassnameIs( pWeapon, "weapon_tommygun" ) )
+	if (FClassnameIs(pWeapon, "weapon_tommygun"))
 	{
 		return WEAPON_PROFICIENCY_VERY_GOOD;
 	}
 
-	if( FClassnameIs( pWeapon, "weapon_ar1" ) )
+	if (FClassnameIs(pWeapon, "weapon_ar1"))
 	{
 		return WEAPON_PROFICIENCY_AVERAGE;
 	}
 
-	if( FClassnameIs( pWeapon, "weapon_dbarrel" ) )
+	if (FClassnameIs(pWeapon, "weapon_dbarrel"))
 	{
 		return WEAPON_PROFICIENCY_VERY_GOOD;
 	}
@@ -5979,38 +5975,37 @@ DEFINE_SCHEDULE
 
 AI_END_CUSTOM_NPC()
 
-
 class CNPC_AllyPolice : public CNPC_MetroPolice
 {
 public:
-    DECLARE_CLASS( CNPC_AllyPolice, CNPC_MetroPolice );
+	DECLARE_CLASS(CNPC_AllyPolice, CNPC_MetroPolice);
 
-    virtual void Precache();
-    void    Spawn( void );
-    Class_T Classify( void );
+	virtual void Precache();
+	void    Spawn(void);
+	Class_T Classify(void);
 };
 
 
-LINK_ENTITY_TO_CLASS( npc_metropolice_ally, CNPC_AllyPolice );
+LINK_ENTITY_TO_CLASS(npc_metropolice_ally, CNPC_AllyPolice);
 
 
 void CNPC_AllyPolice::Precache(void)
 {
 
-    CNPC_MetroPolice::Precache();
-    SetModel("models/Police_Ally.mdl");
+	CNPC_MetroPolice::Precache();
+	SetModel("models/Police_Ally.mdl");
 }
 
-void CNPC_AllyPolice::Spawn( void )
+void CNPC_AllyPolice::Spawn(void)
 {
-    Precache();
+	Precache();
 
-    CNPC_MetroPolice::Spawn();
+	CNPC_MetroPolice::Spawn();
 
 	m_iHealth = sk_metropolice_health.GetFloat();
 }
 
-Class_T    CNPC_AllyPolice::Classify( void )
+Class_T    CNPC_AllyPolice::Classify(void)
 {
-    return    CLASS_PLAYER_ALLY;
+	return    CLASS_PLAYER_ALLY;
 }

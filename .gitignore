@@ -70,3 +70,7 @@ config.cfg
 enc_temp_folder/
 
 *.lib //Lychy STOP PUSHING UR LIB FILES, THEY ARE DIFFERENT FOR EVERYONE
+
+*.bak
+game/server/Debug_mod_episodic/
+game/server/Release_mod_episodic/

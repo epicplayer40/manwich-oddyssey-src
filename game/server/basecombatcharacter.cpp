@@ -235,18 +235,18 @@ bool CBaseCombatCharacter::HasHumanGibs( void )
 		 myClass == CLASS_COMBINE			||
 		 myClass == CLASS_CONSCRIPT			||
 		 myClass == CLASS_METROPOLICE		||
-		 myClass == CLASS_TEAM1				||
-		 myClass == CLASS_TEAM2				||
-		 myClass == CLASS_TEAM3				||
-		 myClass == CLASS_TEAM4				||
+		 myClass == CLASS_TEAM1 ||
+		 myClass == CLASS_TEAM2 ||
+		 myClass == CLASS_TEAM3 ||
+		 myClass == CLASS_TEAM4 ||
 		 myClass == CLASS_PLAYER )	
 		 return true;
 
 #elif defined( HL1_DLL )
 	Class_T myClass = Classify();
-	if (	myClass == CLASS_CONSCRIPT		||
+	if (	myClass == CLASS_CONSCRIPT ||
 			myClass == CLASS_PLAYER_ALLY		||
-			myClass == CLASS_CITIZEN_PASSIVE		||
+			myClass == CLASS_CITIZEN_PASSIVE ||
 			myClass == CLASS_PLAYER )
 	{
 		return true;
@@ -273,7 +273,6 @@ bool CBaseCombatCharacter::HasAlienGibs( void )
 		 myClass == CLASS_STALKER		 ||
 		 myClass == CLASS_ZOMBIE		 ||
 		 myClass == CLASS_VORTIGAUNT	 ||
-		 myClass == CLASS_COMBINE		||
 		 myClass == CLASS_HEADCRAB )
 	{
 		 return true;
@@ -281,11 +280,11 @@ bool CBaseCombatCharacter::HasAlienGibs( void )
 
 #elif defined( HL1_DLL )
 	Class_T myClass = Classify();
-	if ( myClass == CLASS_MILITARY ||
-		 myClass == CLASS_ANTLION	||
-		 myClass == CLASS_STALKER  ||
-		 myClass == CLASS_ANTLION  ||
-		 myClass == CLASS_STALKER )
+	if ( myClass == CLASS_ALIEN_MILITARY ||
+		 myClass == CLASS_ANTLION ||
+		 myClass == CLASS_STALKER ||
+		 myClass == CLASS_ALIEN_PREDATOR  ||
+		 myClass == CLASS_ALIEN_PREY )
 	{
 		return true;
 	}
@@ -1634,14 +1633,15 @@ void CBaseCombatCharacter::Event_Killed( const CTakeDamageInfo &info )
 	if ( ShouldGib( info ) == false )
 	{
 		bool bRagdollCreated = false; //////////////////////added dmg_plasma to dissolve function
-		if ( (info.GetDamageType() & DMG_DISSOLVE ) && CanBecomeRagdoll() )
+		if ( (info.GetDamageType() & DMG_DISSOLVE) && CanBecomeRagdoll() )
 		{
 			int nDissolveType = ENTITY_DISSOLVE_NORMAL;
 			if ( info.GetDamageType() & DMG_SHOCK )
 			{
 				nDissolveType = ENTITY_DISSOLVE_ELECTRICAL;
 			}
-			if ( info.GetDamageType() & DMG_PLASMA )
+
+			if (info.GetDamageType() & DMG_PLASMA)
 			{
 				nDissolveType = ENTITY_DISSOLVE_CORE;
 			}
@@ -2179,12 +2179,12 @@ void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 // Purpose:	Leaves weapon, giving only ammo to the character
 // Input  : Weapon
 //-----------------------------------------------------------------------------
-bool CBaseCombatCharacter::Weapon_EquipAmmoOnly( CBaseCombatWeapon *pWeapon, bool bOnlyAmmo )
+bool CBaseCombatCharacter::Weapon_EquipAmmoOnly(CBaseCombatWeapon* pWeapon, bool bOnlyAmmo)
 {
 	// Check for duplicates
 	for (int i=0;i<MAX_WEAPONS;i++) 
 	{
-		if ( ( m_hMyWeapons[i].Get() && FClassnameIs(m_hMyWeapons[i], pWeapon->GetClassname()) ) || bOnlyAmmo )
+		if ((m_hMyWeapons[i].Get() && FClassnameIs(m_hMyWeapons[i], pWeapon->GetClassname())) || bOnlyAmmo)
 		{
 			// Just give the ammo from the clip
 			int	primaryGiven	= (pWeapon->UsesClipsForAmmo1()) ? pWeapon->m_iClip1 : pWeapon->GetPrimaryAmmoCount();
@@ -2217,7 +2217,7 @@ bool CBaseCombatCharacter::Weapon_EquipAmmoOnly( CBaseCombatWeapon *pWeapon, boo
 			
 			return false;
 		}
-		if ( bOnlyAmmo )
+		if (bOnlyAmmo)
 			break;
 	}
 
@@ -2291,8 +2291,8 @@ CBaseCombatWeapon *CBaseCombatCharacter::Weapon_GetWpnForAmmo( int iAmmoIndex )
 //-----------------------------------------------------------------------------
 bool CBaseCombatCharacter::Weapon_CanUse( CBaseCombatWeapon *pWeapon )
 {
-	acttable_t *pTable		= pWeapon->ActivityList();
-	int			actCount	= pWeapon->ActivityListCount();
+	int	actCount = 0;
+	acttable_t *pTable = pWeapon->ActivityList( actCount );
 
 	if( actCount < 1 )
 	{

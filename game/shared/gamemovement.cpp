@@ -61,11 +61,9 @@ ConVar debug_latch_reset_onduck( "debug_latch_reset_onduck", "1", FCVAR_CHEAT );
 #endif
 #endif
 
-
-ConVar cl_viewbob_enabled	( "cl_viewbob_enabled", "0", 0, "Oscillation Toggle", true, 0, true, 1 );
-ConVar cl_viewbob_timer		( "cl_viewbob_timer", "10", 0, "Speed of Oscillation");
-ConVar cl_viewbob_scale		( "cl_viewbob_scale", "0.025", 0, "Magnitude of Oscillation");
-
+ConVar cl_viewbob_enabled("cl_viewbob_enabled", "0", 0, "Oscillation Toggle", true, 0, true, 1);
+ConVar cl_viewbob_timer("cl_viewbob_timer", "10", 0, "Speed of Oscillation");
+ConVar cl_viewbob_scale("cl_viewbob_scale", "0.025", 0, "Magnitude of Oscillation");
 
 // [MD] I'll remove this eventually. For now, I want the ability to A/B the optimizations.
 bool g_bMovementOptimizations = true;
@@ -524,7 +522,7 @@ void CGameMovement::DiffPrint( char const *fmt, ... )
 #endif // !PREDICTION_ERROR_CHECK_LEVEL
 
 #ifndef _XBOX
-void COM_Log( char *pszFile, const char *fmt, ...)
+void COM_Log( const char *pszFile, const char *fmt, ...)
 {
 	va_list		argptr;
 	char		string[1024];
@@ -1901,13 +1899,12 @@ void CGameMovement::StayOnGround( void )
 void CGameMovement::WalkMove( void )
 {
 
-
- if ( cl_viewbob_enabled.GetInt() == 1 && !engine->IsPaused() )
+	if (cl_viewbob_enabled.GetInt() == 1 && !engine->IsPaused())
 	{
-		float xoffset = sin( gpGlobals->curtime * cl_viewbob_timer.GetFloat() ) * player->GetAbsVelocity().Length() * cl_viewbob_scale.GetFloat() / 100;
-		float yoffset = sin( 2 * gpGlobals->curtime * cl_viewbob_timer.GetFloat() ) * player->GetAbsVelocity().Length() * cl_viewbob_scale.GetFloat() / 400;
-		player->ViewPunch( QAngle( xoffset, yoffset, 0));
- 
+		float xoffset = sin(gpGlobals->curtime * cl_viewbob_timer.GetFloat()) * player->GetAbsVelocity().Length() * cl_viewbob_scale.GetFloat() / 100;
+		float yoffset = sin(2 * gpGlobals->curtime * cl_viewbob_timer.GetFloat()) * player->GetAbsVelocity().Length() * cl_viewbob_scale.GetFloat() / 400;
+		player->ViewPunch(QAngle(xoffset, yoffset, 0));
+
 	}
 
 	int i;
@@ -2163,7 +2160,7 @@ void CGameMovement::FullObserverMove( void )
 {
 	int mode = player->GetObserverMode();
 
-	if ( mode == OBS_MODE_IN_EYE || mode == OBS_MODE_CHASE )
+	if ( mode == OBS_MODE_IN_EYE || mode == OBS_MODE_CHASE || mode == OBS_MODE_POI )
 	{
 		CBaseEntity * target = player->GetObserverTarget();
 

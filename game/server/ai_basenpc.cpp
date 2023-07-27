@@ -155,6 +155,7 @@ ConVar	ai_test_moveprobe_ignoresmall( "ai_test_moveprobe_ignoresmall", "0" );
 
 ConVar	ai_explode_on_fail( "ai_explode_on_fail", "0" ); //something rather devious - epicplayer
 
+
 #ifdef HL2_EPISODIC
 extern ConVar ai_vehicle_avoidance;
 #endif // HL2_EPISODIC
@@ -657,7 +658,6 @@ void CAI_BaseNPC::Ignite( float flFlameLifetime, bool bNPCOnly, float flSize, bo
 		}
 	}
 #endif
-
 }
 
 //-----------------------------------------------------------------------------
@@ -4778,7 +4778,6 @@ void CAI_BaseNPC::PrescheduleThink( void )
 			m_iDesiredWeaponState = DESIREDWEAPONSTATE_IGNORE;
 		}
 	}
-
 	//Lychy
 	if (IsSequenceFinished())
 	{
@@ -6901,8 +6900,6 @@ void CAI_BaseNPC::NPCInit ( void )
 				Weapon_Equip( pWeapon );
 			}
 		}
-
-		
 	}
 
 	// Robin: Removed this, since it stomps the weapon's settings, and it's stomped
@@ -7587,8 +7584,6 @@ void CAI_BaseNPC::TaskFail( AI_TaskFailureCode_t code )
 		ExplosionCreate(GetAbsOrigin(), GetAbsAngles(), GetOwnerEntity(), (GetMaxHealth() * 2 + 10), 100, SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE, 0.0f, this);
 		EmitSound("BaseExplosionEffect.FunnySound");
 	} //Explode for the funny, explosion damage is taken from entity's health - epicplayer
-
-
 	// Handy tool for debugging
 	//if (IsCurSchedule(SCHED_PUT_NAME_HERE))
 	//{
@@ -7742,7 +7737,9 @@ CBaseEntity *CAI_BaseNPC::BestEnemy( void )
 		if (!pEnemy || !pEnemy->IsAlive())
 		{
 			if ( pEnemy )
+			{
 				DbgEnemyMsg( this, "    %s rejected: dead\n", pEnemy->GetDebugName() );
+			}
 			continue;
 		}
 		
@@ -7817,7 +7814,9 @@ CBaseEntity *CAI_BaseNPC::BestEnemy( void )
 		{
 			DbgEnemyMsg( this, "    %s accepted (1)\n", pEnemy->GetDebugName() );
 			if ( pBestEnemy )
+			{
 				DbgEnemyMsg( this, "    (%s displaced)\n", pBestEnemy->GetDebugName() );
+			}
 
 			iBestPriority	 = IRelationPriority ( pEnemy );
 			iBestDistSq		 = (pEnemy->GetAbsOrigin() - GetAbsOrigin() ).LengthSqr();
@@ -7831,7 +7830,9 @@ CBaseEntity *CAI_BaseNPC::BestEnemy( void )
 		{
 			DbgEnemyMsg( this, "    %s accepted\n", pEnemy->GetDebugName() );
 			if ( pBestEnemy )
+			{
 				DbgEnemyMsg( this, "    (%s displaced due to priority, %d > %d )\n", pBestEnemy->GetDebugName(), IRelationPriority( pEnemy ), iBestPriority );
+			}
 			// this entity is disliked MORE than the entity that we
 			// currently think is the best visible enemy. No need to do
 			// a distance check, just get mad at this one for now.
@@ -7965,7 +7966,9 @@ CBaseEntity *CAI_BaseNPC::BestEnemy( void )
 
 			DbgEnemyMsg( this, "    %s accepted\n", pEnemy->GetDebugName() );
 			if ( pBestEnemy )
+			{
 				DbgEnemyMsg( this, "    (%s displaced due to distance/visibility)\n", pBestEnemy->GetDebugName() );
+			}
 			fBestSeen		 = fCurSeen;
 			fBestVisible	 = fCurVisible;
 			iBestDistSq		 = iDistSq;
@@ -7974,7 +7977,9 @@ CBaseEntity *CAI_BaseNPC::BestEnemy( void )
 			bBestUnreachable = bUnreachable;
 		}
 		else
+		{
 			DbgEnemyMsg( this, "    %s rejected: lower priority\n", pEnemy->GetDebugName() );
+		}
 	}
 
 	DbgEnemyMsg( this, "} == %s\n", pBestEnemy->GetDebugName() );
@@ -8065,6 +8070,7 @@ float CAI_BaseNPC::CalcIdealYaw( const Vector &vecTarget )
 	{
 		vecProjection.x = -vecTarget.y;
 		vecProjection.y = vecTarget.x;
+		vecProjection.z = 0;
 
 		return UTIL_VecToYaw( vecProjection - GetLocalOrigin() );
 	}
@@ -8072,6 +8078,7 @@ float CAI_BaseNPC::CalcIdealYaw( const Vector &vecTarget )
 	{
 		vecProjection.x = vecTarget.y;
 		vecProjection.y = vecTarget.x;
+		vecProjection.z = 0;
 
 		return UTIL_VecToYaw( vecProjection - GetLocalOrigin() );
 	}
@@ -10923,8 +10930,9 @@ void CAI_BaseNPC::Precache( void )
 	PrecacheScriptSound( "AI_BaseNPC.BodyDrop_Heavy" );
 	PrecacheScriptSound( "AI_BaseNPC.BodyDrop_Light" );
 	PrecacheScriptSound( "AI_BaseNPC.SentenceStop" );
-
+	
 	if ( ai_explode_on_fail.GetBool() == true ) { PrecacheScriptSound( "BaseExplosionEffect.FunnySound" ); }
+
 
 	BaseClass::Precache();
 }

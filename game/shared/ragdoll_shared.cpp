@@ -40,7 +40,7 @@ void CRagdollLowViolenceManager::SetLowViolence( const char *pMapName )
 
 #if !defined( CLIENT_DLL )
 	// the server doesn't worry about low violence during multiplayer games
-	if ( g_pGameRules->IsMultiplayer() )
+	if ( g_pGameRules && g_pGameRules->IsMultiplayer() )
 	{
 		m_bLowViolence = false;
 	}
@@ -742,8 +742,12 @@ bool ShouldRemoveThisRagdoll( CBaseAnimating *pRagdoll )
 		return false;
 	*/
 
+	// Bail if we have a null ragdoll pointer.
+	if ( !pRagdoll->m_pRagdoll )
+		return true;
+
 	Vector vMins, vMaxs;
-		
+
 	Vector origin = pRagdoll->m_pRagdoll->GetRagdollOrigin();
 	pRagdoll->m_pRagdoll->GetRagdollBounds( vMins, vMaxs );
 
@@ -1163,11 +1167,9 @@ C_EntityFlame *FireEffect( C_BaseAnimating *pTarget, C_BaseEntity *pServerFire, 
 		}
 #endif
 
-
-
 		//Play a sound
 		CPASAttenuationFilter filter( pTarget );
-		pTarget->EmitSound( filter, pTarget->GetSoundSourceIndex(), szSoundEffect );
+		pTarget->EmitSound(filter, pTarget->GetSoundSourceIndex(), szSoundEffect);
 
 		pFire->SetNextClientThink( gpGlobals->curtime + 7.0f );
 	}

@@ -37,8 +37,6 @@ PMaterialHandle g_Blood_Core = NULL;
 PMaterialHandle g_Blood_Gore = NULL;
 PMaterialHandle g_Blood_Drops = NULL;
 
-ConVar manod_old_blood("manod_old_blood", "0");
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : bloodtype - 
@@ -477,9 +475,8 @@ struct ParticleForBlood_t
 ParticleForBlood_t	bloodCallbacks[] =
 {
 	{ BLOOD_COLOR_RED,		"blood_impact_red_01" },
-	{ BLOOD_COLOR_GREEN,	"blood_impact_green_01" }, //blood_impact_green_01 by def.. FUCK!
+	{ BLOOD_COLOR_GREEN,	"blood_impact_green_01" },
 	{ BLOOD_COLOR_YELLOW,	"blood_impact_yellow_01" },
-	{ BLOOD_COLOR_BLUE,		"blood_impact_blue_01" },
 #if defined( HL2_EPISODIC )
 	{ BLOOD_COLOR_ANTLION,			"blood_impact_antlion_01" },		// FIXME: Move to Base HL2
 	{ BLOOD_COLOR_ZOMBIE,			"blood_impact_zombie_01" },			// FIXME: Move to Base HL2
@@ -507,18 +504,17 @@ void BloodImpactCallback( const CEffectData & data )
 	bool bFoundBlood = false;
 
 	// Find which sort of blood we are
-	if (!manod_old_blood.GetBool())
-		for (int i = 0; i < ARRAYSIZE(bloodCallbacks); i++)
+	for ( int i = 0; i < ARRAYSIZE( bloodCallbacks ); i++ )
+	{
+		if ( bloodCallbacks[i].nColor == data.m_nColor )
 		{
-			if (bloodCallbacks[i].nColor == data.m_nColor)
-			{
-				QAngle	vecAngles;
-				VectorAngles(-data.m_vNormal, vecAngles);
-				DispatchParticleEffect(bloodCallbacks[i].lpszParticleSystemName, data.m_vOrigin, vecAngles);
-				bFoundBlood = true;
-				break;
-			}
+			QAngle	vecAngles;
+			VectorAngles( -data.m_vNormal, vecAngles );
+			DispatchParticleEffect( bloodCallbacks[i].lpszParticleSystemName, data.m_vOrigin, vecAngles );
+			bFoundBlood = true;
+			break;
 		}
+	}
 
 	if ( bFoundBlood == false )
 	{

@@ -146,23 +146,23 @@ struct citizen_expression_list_t
 // Scared
 citizen_expression_list_t ScaredExpressions[STATES_WITH_EXPRESSIONS] =
 {
-	{ "scenes/Expressions/citizen_scared_idle_01.vcd" },
-	{ "scenes/Expressions/citizen_scared_alert_01.vcd" },
-	{ "scenes/Expressions/citizen_scared_combat_01.vcd" },
+	{ { "scenes/Expressions/citizen_scared_idle_01.vcd" } },
+	{ { "scenes/Expressions/citizen_scared_alert_01.vcd" } },
+	{ { "scenes/Expressions/citizen_scared_combat_01.vcd" } },
 };
 // Normal
 citizen_expression_list_t NormalExpressions[STATES_WITH_EXPRESSIONS] =
 {
-	{ "scenes/Expressions/citizen_normal_idle_01.vcd" },
-	{ "scenes/Expressions/citizen_normal_alert_01.vcd" },
-	{ "scenes/Expressions/citizen_normal_combat_01.vcd" },
+	{ { "scenes/Expressions/citizen_normal_idle_01.vcd" } },
+	{ { "scenes/Expressions/citizen_normal_alert_01.vcd" } },
+	{ { "scenes/Expressions/citizen_normal_combat_01.vcd" } },
 };
 // Angry
 citizen_expression_list_t AngryExpressions[STATES_WITH_EXPRESSIONS] =
 {
-	{ "scenes/Expressions/citizen_angry_idle_01.vcd" },
-	{ "scenes/Expressions/citizen_angry_alert_01.vcd" },
-	{ "scenes/Expressions/citizen_angry_combat_01.vcd" },
+	{ { "scenes/Expressions/citizen_angry_idle_01.vcd" } },
+	{ { "scenes/Expressions/citizen_angry_alert_01.vcd" } },
+	{ { "scenes/Expressions/citizen_angry_combat_01.vcd" } },
 };
 
 //-----------------------------------------------------------------------------
@@ -463,6 +463,7 @@ void CNPC_Citizen::Spawn()
 	if ( m_Type != CT_UNIQUE ) { //only scale the default models
 		SetModelScale(random->RandomFloat(0.96, 1.04) ); //0.96, 1.04 by default. Any lower or higher and it gets ridiculous
 	}
+	
 #ifdef _XBOX
 	// Always fade the corpse
 	AddSpawnFlags( SF_NPC_FADE_CORPSE );
@@ -503,14 +504,12 @@ void CNPC_Citizen::Spawn()
 			SetIdealActivity( ACT_DO_NOT_DISTURB );
 		}
 	}
-
+	
 	if ( GetMoveParent() && FClassnameIs( GetMoveParent(), "func_breakable" ) )
 	{
 		CapabilitiesRemove( bits_CAP_MOVE_GROUND );
 		SetMoveType( MOVETYPE_NONE );
 	}
-
-
 
 	m_flStopManhackFlinch = -1;
 
@@ -4235,8 +4234,6 @@ void CNPC_Citizen::AddInsignia()
 
 void CNPC_Citizen::RemoveInsignia()
 {
-	// This is crap right now.
-	CBaseEntity *FirstEnt();
 	CBaseEntity *pEntity = gEntList.FirstEnt();
 
 	while( pEntity )
@@ -4301,8 +4298,6 @@ int CNPC_Citizen::DrawDebugTextOverlays( void )
 	}
 	return text_offset;
 }
-
-
 
 class CNPC_KleinerCombat : public CNPC_Citizen
 {

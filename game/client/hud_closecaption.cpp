@@ -844,6 +844,7 @@ CHudCloseCaption::CHudCloseCaption( const char *pElementName )
 	HOOK_HUD_MESSAGE( CHudCloseCaption, CloseCaption );
 
 	char uilanguage[ 64 ];
+	uilanguage[0] = 0;
 	engine->GetUILanguage( uilanguage, sizeof( uilanguage ) );
 
 	if ( !Q_stricmp( uilanguage, "english" ) )
@@ -1506,7 +1507,8 @@ void CHudCloseCaption::Process( const wchar_t *stream, float duration, const cha
 		wchar_t args[ 256 ];
 
 		const wchar_t *prevpos = curpos;
-
+		
+		
 #if 1
 		if (!wcscmp(curpos, L"Combine"))
 		{
@@ -2032,7 +2034,7 @@ public:
 			// Lookup the data
 			if (caption->dirindex > directories[nFileIndex].m_CaptionDirectory.Size()) //Lychy: prevents korean subtitles, due to messed up race hazards
 				continue;
-
+				
 			CaptionLookup_t &entry = directories[ nFileIndex ].m_CaptionDirectory[ caption->dirindex ];
 			if ( entry.blockNum != nBlockNum )
 				continue;
@@ -2518,8 +2520,7 @@ void CHudCloseCaption::MsgFunc_CloseCaption(bf_read &msg)
 		wchar_t *pcheck = g_pVGuiLocalize->Find( tokenname );
 		if ( !pcheck )
 		{
-			// SHUT THE FUCK UP
-			// Warning( "No caption found for '%s'\n", tokenname );
+			Warning( "No caption found for '%s'\n", tokenname );
 		}
 	}
 
@@ -2765,6 +2766,7 @@ void OnCaptionLanguageChanged( IConVar *pConVar, const char *pOldString, float f
 	}
 
 	char uilanguage[ 64 ];
+	uilanguage[0] = 0;
 	engine->GetUILanguage( uilanguage, sizeof( uilanguage ) );
 
 	CHudCloseCaption *hudCloseCaption = GET_HUDELEMENT( CHudCloseCaption );

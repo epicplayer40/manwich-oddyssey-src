@@ -46,7 +46,6 @@ void FX_Tracer( Vector& start, Vector& end, int velocity, bool makeWhiz = true )
 void FX_GunshipTracer( Vector& start, Vector& end, int velocity, bool makeWhiz = true );
 void FX_StriderTracer( Vector& start, Vector& end, int velocity, bool makeWhiz = true );
 void FX_HunterTracer( Vector& start, Vector& end, int velocity, bool makeWhiz = true );
-void FX_AidsTracer( Vector& start, Vector& end, int velocity, bool makeWhiz = true );
 void FX_PlayerTracer( Vector& start, Vector& end );
 void FX_BulletPass( Vector& start, Vector& end );
 void FX_MetalSpark( const Vector &position, const Vector &direction, const Vector &surfaceNormal, int iScale = 1 );
@@ -65,7 +64,6 @@ void FX_DustImpact( const Vector &origin, trace_t *tr, float flScale );
 void FX_MuzzleEffect( const Vector &origin, const QAngle &angles, float scale, ClientEntityHandle_t hEntity, unsigned char *pFlashColor = NULL, bool bOneFrame = false );
 void FX_MuzzleEffectAttached( float scale, ClientEntityHandle_t hEntity, int attachmentIndex, unsigned char *pFlashColor = NULL, bool bOneFrame = false  );
 void FX_StriderMuzzleEffect( const Vector &origin, const QAngle &angles, float scale, ClientEntityHandle_t hEntity, unsigned char *pFlashColor = NULL );
-void FX_AidsMuzzleEffect( const Vector &origin, const QAngle &angles, float scale, ClientEntityHandle_t hEntity, unsigned char *pFlashColor = NULL );
 void FX_GunshipMuzzleEffect( const Vector &origin, const QAngle &angles, float scale, ClientEntityHandle_t hEntity, unsigned char *pFlashColor = NULL );
 CSmartPtr<CSimpleEmitter> FX_Smoke( const Vector &origin, const Vector &velocity, float scale, int numParticles, float flDietime, unsigned char *pColor, int iAlpha, const char *pMaterial, float flRoll, float flRollDelta );
 void FX_Smoke( const Vector &origin, const QAngle &angles, float scale, int numParticles, unsigned char *pColor = NULL, int iAlpha = -1 );
@@ -108,10 +106,4 @@ extern PMaterialHandle g_Mat_BloodPuff[2];
 extern PMaterialHandle g_Mat_Fleck_Glass[2];
 extern PMaterialHandle g_Mat_SMG_Muzzleflash[4];
 extern PMaterialHandle g_Mat_Combine_Muzzleflash[3];
-
-//Lychy: muzzleflash convars
-extern ConVar muzzleflash_light;
-extern ConVar muzzleflash_exponent;
-extern ConVar muzzleflash_minradius;
-extern ConVar muzzleflash_maxradius;
 #endif // FX_H

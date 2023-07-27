@@ -26,7 +26,6 @@ extern ConVar muzzleflash_light;
 
 CLIENTEFFECT_REGISTER_BEGIN( PrecacheTracers )
 CLIENTEFFECT_MATERIAL( "effects/gunshiptracer" )
-CLIENTEFFECT_MATERIAL( "effects/aidstracer" )
 CLIENTEFFECT_MATERIAL( "effects/combinemuzzle1" )
 CLIENTEFFECT_MATERIAL( "effects/combinemuzzle2_nocull" )
 CLIENTEFFECT_REGISTER_END()
@@ -55,16 +54,6 @@ void StriderTracerCallback( const CEffectData &data )
 }
 
 DECLARE_CLIENT_EFFECT( "StriderTracer", StriderTracerCallback );
-
-void AidsTracerCallback( const CEffectData &data )
-{
-	float flVelocity = data.m_flScale;
-	bool bWhiz = (data.m_fFlags & TRACER_FLAG_WHIZ);
-	FX_AidsTracer( (Vector&)data.m_vStart, (Vector&)data.m_vOrigin, flVelocity, bWhiz );
-}
-
-DECLARE_CLIENT_EFFECT( "AidsTracer", AidsTracerCallback );
-
 
 //-----------------------------------------------------------------------------
 // Purpose: Hunter's Tracer
