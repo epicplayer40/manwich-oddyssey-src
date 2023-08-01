@@ -737,6 +737,12 @@ private:
 	void ResetStringTablePointers();
 
 	CUtlVector< IMaterial * > m_CachedMaterials;
+
+	//Lychy
+private:
+	void MountEpisodicPath(const char* szBaseDir);
+	void MountEp2Path(const char* szBaseDir);
+	void MountEpisodes();
 };
 
 
@@ -932,6 +938,7 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 	if ( ( gamestatsuploader = (IUploadGameStats *)appSystemFactory( INTERFACEVERSION_UPLOADGAMESTATS, NULL )) == NULL )
 		return false;
 #endif
+	MountEpisodes();
 
 #if defined( REPLAY_ENABLED )
 	if ( IsPC() && (g_pEngineReplay = (IEngineReplay *)appSystemFactory( ENGINE_REPLAY_INTERFACE_VERSION, NULL )) == NULL )
@@ -1141,21 +1148,24 @@ void CHLClient::PostInit()
 
 	g_ClientVirtualReality.StartupComplete();
 
-#ifdef HL1MP_CLIENT_DLL
-	if ( s_cl_load_hl1_content.GetBool() && steamapicontext && steamapicontext->SteamApps() )
-	{
-		char szPath[ MAX_PATH*2 ];
-		int ccFolder= steamapicontext->SteamApps()->GetAppInstallDir( 280, szPath, sizeof(szPath) );
-		if ( ccFolder > 0 )
-		{
-			V_AppendSlash( szPath, sizeof(szPath) );
-			V_strncat( szPath, "hl1", sizeof( szPath ) );
 
-			g_pFullFileSystem->AddSearchPath( szPath, "HL1" );
-			g_pFullFileSystem->AddSearchPath( szPath, "GAME" );
+
+//		engine->ClientCmd("snd_restart"); // Need to restart otherwise sound stuff breaks
+#ifdef HL1MP_CLIENT_DLL
+		if (s_cl_load_hl1_content.GetBool()&&)
+		{
+			ccFolder = steamapicontext->SteamApps()->GetAppInstallDir(280, szPath, sizeof(szPath));
+			if (ccFolder > 0)
+			{
+				V_AppendSlash(szPath, sizeof(szPath));
+				V_strncat(szPath, "hl1", sizeof(szPath));
+
+				g_pFullFileSystem->AddSearchPath(szPath, "HL1");
+				g_pFullFileSystem->AddSearchPath(szPath, "GAME");
+			}
 		}
-	}
 #endif
+
 }
 
 //-----------------------------------------------------------------------------
@@ -2626,3 +2636,77 @@ CSteamID GetSteamIDForPlayerIndex( int iPlayerIndex )
 }
 
 #endif
+
+void CHLClient::MountEpisodicPath(const char* szBaseDir)
+{
+	char szPath[MAX_PATH * 2];
+	V_strcpy(szPath, szBaseDir);
+	V_AppendSlash(szPath, sizeof(szPath));
+	V_strncat(szPath, "episodic", sizeof(szPath));
+
+	g_pFullFileSystem->AddSearchPath(szPath, "EP1");
+	g_pFullFileSystem->AddSearchPath(szPath, "GAME");
+
+	V_AppendSlash(szPath, sizeof(szPath));
+	V_strncat(szPath, "ep1_pak.vpk", sizeof(szPath));
+
+	g_pFullFileSystem->AddSearchPath(szPath, "EP1");
+	g_pFullFileSystem->AddSearchPath(szPath, "GAME");
+}
+
+void CHLClient::MountEp2Path(const char* szBaseDir)
+{
+	char szPath[MAX_PATH * 2];
+	V_strcpy(szPath, szBaseDir);
+	V_AppendSlash(szPath, sizeof(szPath));
+	V_strncat(szPath, "ep2", sizeof(szPath));
+
+	g_pFullFileSystem->AddSearchPath(szPath, "EP2");
+	g_pFullFileSystem->AddSearchPath(szPath, "GAME");
+
+	V_AppendSlash(szPath, sizeof(szPath));
+	V_strncat(szPath, "ep2_pak.vpk", sizeof(szPath));
+
+	g_pFullFileSystem->AddSearchPath(szPath, "EP1");
+	g_pFullFileSystem->AddSearchPath(szPath, "GAME");
+}
+
+void CHLClient::MountEpisodes()
+{
+	if (steamapicontext && steamapicontext->SteamApps())
+	{
+		char szPath[MAX_PATH * 2];
+		int ccFolder;
+
+		ccFolder = steamapicontext->SteamApps()->GetAppInstallDir(243730, szPath, sizeof(szPath));
+
+		if (ccFolder > 0)
+		{
+			MountEpisodicPath(szPath);
+			MountEp2Path(szPath);
+		}
+		else
+		{
+			ccFolder = steamapicontext->SteamApps()->GetAppInstallDir(380, szPath, sizeof(szPath));
+			if (ccFolder > 0)
+			{
+				MountEpisodicPath(szPath);
+			}
+			else
+			{
+				Warning("Episode 1 content not mounted!\n");
+			}
+
+			ccFolder = steamapicontext->SteamApps()->GetAppInstallDir(420, szPath, sizeof(szPath));
+
+			if (ccFolder > 0)
+			{
+				MountEp2Path(szPath);
+			}
+			else
+			{
+				Warning("Episode 2 content not mounted!\n");
+			}
+		}
+	}
+}

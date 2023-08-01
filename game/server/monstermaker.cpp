@@ -786,13 +786,9 @@ CNPCSpawnDestination *CTemplateNPCMaker::FindSpawnDestination()
 {
 	CNPCSpawnDestination *pDestinations[ MAX_DESTINATION_ENTS ];
 	CBaseEntity *pEnt = NULL;
-	CBasePlayer *pPlayer = UTIL_GetLocalPlayer();
+	CBasePlayer *pPlayer = NULL;
 	int	count = 0;
 
-	if( !pPlayer )
-	{
-		return NULL;
-	}
 
 	// Collect all the qualifiying destination ents
 	pEnt = gEntList.FindEntityByName( NULL, m_iszDestinationGroup );
@@ -820,21 +816,43 @@ CNPCSpawnDestination *CTemplateNPCMaker::FindSpawnDestination()
 				Vector vecTopOfHull = NAI_Hull::Maxs( HULL_HUMAN );
 				vecTopOfHull.x = 0;
 				vecTopOfHull.y = 0;
-				bool fVisible = (pPlayer->FVisible( vecTest ) || pPlayer->FVisible( vecTest + vecTopOfHull ) );
-
-				if( m_CriterionVisibility == TS_YN_YES )
+				bool fVisible = false;
+				
+				if (gpGlobals->maxClients > 1)
 				{
-					if( !fVisible )
-						fValid = false;
+					for (int i = 1; i <= gpGlobals->maxClients; i++)
+					{
+						pPlayer = UTIL_PlayerByIndex(i);
+						if (!pPlayer)
+							continue;
+
+						fVisible = pPlayer->FVisible(vecTest) || pPlayer->FVisible(vecTest + vecTopOfHull);
+						if (fVisible)
+							break;
+					}
 				}
 				else
 				{
-					if( fVisible )
+					pPlayer = UTIL_GetLocalPlayer();
+					fVisible = pPlayer->FVisible(vecTest) || pPlayer->FVisible(vecTest + vecTopOfHull);
+
+
+
+
+					if (m_CriterionVisibility == TS_YN_YES)
 					{
-						if ( !(pPlayer->GetFlags() & FL_NOTARGET) )
+						if (!fVisible)
 							fValid = false;
-						else
-							DevMsg( 2, "Spawner %s spawning even though seen due to notarget\n", STRING( GetEntityName() ) );
+					}
+					else
+					{
+						if (fVisible)
+						{
+							if (!(pPlayer->GetFlags() & FL_NOTARGET))
+								fValid = false;
+							else
+								DevMsg(2, "Spawner %s spawning even though seen due to notarget\n", STRING(GetEntityName()));
+						}
 					}
 				}
 			}

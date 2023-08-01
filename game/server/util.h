@@ -633,4 +633,7 @@ bool UTIL_LoadAndSpawnEntitiesFromScript( CUtlVector <CBaseEntity*> &entities, c
 // Given a vector, clamps the scalar axes to MAX_COORD_FLOAT ranges from worldsize.h
 void UTIL_BoundToWorldSize( Vector *pVecPos );
 
+//Lychy: multiplay usefulness
+CBasePlayer* UTIL_GetNearestPlayer(const Vector& origin);
+CBasePlayer* UTIL_GetFirstPlayer();
 #endif // UTIL_H

@@ -23,7 +23,7 @@ public:
 
 	CHLMachineGun();
 	
-	DECLARE_SERVERCLASS();
+	DECLARE_NETWORKCLASS();
 
 	void	PrimaryAttack( void );
 
@@ -71,7 +71,7 @@ public:
 
 	CHLSelectFireMachineGun( void );
 	
-	DECLARE_SERVERCLASS();
+	DECLARE_NETWORKCLASS();
 
 	virtual void	ItemPostFrame( void );
 	virtual float	GetBurstCycleRate( void );

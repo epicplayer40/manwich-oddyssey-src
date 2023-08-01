@@ -70,8 +70,8 @@ protected:
 	float	m_flNextGrenadeCheck;
 };
 
-IMPLEMENT_SERVERCLASS_ST(CWeaponSMG1, DT_WeaponSMG1)
-END_SEND_TABLE()
+BEGIN_NETWORK_TABLE(CWeaponSMG1, DT_WeaponSMG1)
+END_NETWORK_TABLE()
 
 LINK_ENTITY_TO_CLASS( weapon_smg1, CWeaponSMG1 );
 PRECACHE_WEAPON_REGISTER(weapon_smg1);

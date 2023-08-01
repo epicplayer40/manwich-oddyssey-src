@@ -3317,6 +3317,53 @@ void CC_CollisionTest( const CCommand &args )
 }
 static ConCommand collision_test("collision_test", CC_CollisionTest, "Tests collision system", FCVAR_CHEAT );
 
+//Lychy
+CBasePlayer* UTIL_GetNearestPlayer(const Vector& origin)
+{
+	if (g_pGameRules->IsMultiplayer())
+	{
+		CBasePlayer* idealPlayer = NULL;
+		vec_t idealDistance = FLT_MAX;
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer* pPlayer = UTIL_PlayerByIndex(i);
 
+			if (!pPlayer)
+			{
+				continue;
+			}
 
+			vec_t distance = (origin - pPlayer->GetAbsOrigin()).LengthSqr();
 
+			if (distance < idealDistance)
+			{
+				idealPlayer = pPlayer;
+				idealDistance = distance;
+			}
+		}
+		return idealPlayer;
+	}
+	else
+	{
+		return UTIL_GetLocalPlayer();
+	}
+}
+
+CBasePlayer* UTIL_GetFirstPlayer()
+{
+	if (g_pGameRules->IsMultiplayer())
+	{
+		CBasePlayer* pPlayer = NULL;
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			pPlayer = UTIL_PlayerByIndex(i);
+			if (pPlayer)
+				return pPlayer;
+		}
+		return NULL;
+	}
+	else
+	{
+		return UTIL_GetLocalPlayer();
+	}
+}

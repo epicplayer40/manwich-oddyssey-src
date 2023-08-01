@@ -24,6 +24,15 @@ END_NETWORK_TABLE()
 IMPLEMENT_AUTO_LIST( IBaseProjectileAutoList );
 #endif // !CLIENT_DLL
 
+#ifdef GAME_DLL
+
+BEGIN_DATADESC(CBaseProjectile)
+	DEFINE_THINKFUNC(CollideWithTeammatesThink),
+END_DATADESC()
+
+#endif // GAME_DLL
+
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Constructor.

@@ -98,6 +98,10 @@ private:
 
 	int						DefaultFOV( void ) { return 75; }
 #endif
+#ifdef  MULTIPLAYER
+	inline bool		IsMultiplayer() OVERRIDE { return gpGlobals->maxClients > 1; }
+	inline bool			IsConnectedUserInfoChangeAllowed(CBasePlayer* pPlayer) OVERRIDE { return true; }
+#endif //  MULTIPLAYER
 };
 
 
