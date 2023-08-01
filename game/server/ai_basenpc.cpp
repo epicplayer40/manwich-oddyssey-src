@@ -595,6 +595,8 @@ void CAI_BaseNPC::Event_Killed( const CTakeDamageInfo &info )
 
 	CleanupOnDeath( info.GetAttacker() );
 
+	GetMotor()->MoveStop(); //Lychy: Stop blending animations so death anims dont look goofy
+
 	StopLoopingSounds();
 	DeathSound( info );
 
