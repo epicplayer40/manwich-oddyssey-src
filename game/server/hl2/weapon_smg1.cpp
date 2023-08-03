@@ -23,7 +23,11 @@
 
 extern ConVar    sk_plr_dmg_smg1_grenade;	
 
-ConVar	weapon_smg1_firerate ("weapon_smg1_firerate", "0.075" );
+ConVar	weapon_smg1_firerate ("weapon_smg1_firerate", "0.075" ,FCVAR_REPLICATED);
+
+#ifdef CLIENT_DLL
+#define CWeaponSMG1 C_WeaponSMG1
+#endif
 
 class CWeaponSMG1 : public CHLSelectFireMachineGun
 {
@@ -33,7 +37,7 @@ public:
 
 	CWeaponSMG1();
 
-	DECLARE_SERVERCLASS();
+	DECLARE_NETWORKCLASS();
 	
 	void	Precache( void );
 	void	AddViewKick( void );
@@ -70,7 +74,7 @@ protected:
 	float	m_flNextGrenadeCheck;
 };
 
-BEGIN_NETWORK_TABLE(CWeaponSMG1, DT_WeaponSMG1)
+IMPLEMENT_NETWORKCLASS_DT(CWeaponSMG1, DT_WeaponSMG1)
 END_NETWORK_TABLE()
 
 LINK_ENTITY_TO_CLASS( weapon_smg1, CWeaponSMG1 );
