@@ -60,6 +60,7 @@ STUB_WEAPON_CLASS(weapon_sniperrifle, WeaponSniperRifle, C_BaseHLCombatWeapon);
 //STUB_WEAPON_CLASS(weapon_manhack, Weapon_Manhack, C_BaseHLCombatWeapon);
 STUB_WEAPON_CLASS(weapon_OICW, WeaponOICW, C_HLMachineGun);
 //STUB_WEAPON_CLASS(weapon_molotov, WeaponMolotov, C_BaseHLCombatWeapon);
+STUB_WEAPON_CLASS( weapon_hopwire, WeaponHopwire, C_BaseHLCombatWeapon );
 
 
 

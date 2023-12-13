@@ -18,7 +18,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-ConVar hopwire_vortex( "hopwire_vortex", "0" );
+ConVar hopwire_vortex( "hopwire_vortex", "1" );
 ConVar hopwire_trap( "hopwire_trap", "1" );
 ConVar hopwire_strider_kill_dist_h( "hopwire_strider_kill_dist_h", "300" );
 ConVar hopwire_strider_kill_dist_v( "hopwire_strider_kill_dist_v", "256" );
@@ -286,10 +286,10 @@ void CGravityVortexController::PullThink( void )
 		SetThink( &CGravityVortexController::PullThink );
 		SetNextThink( gpGlobals->curtime + 0.1f );
 	}
-	else
+	else if (m_flMass > 0.0f) //Doesn't make a ball if nothing is consumed, otherwise it'll make a prop that crashes the game when shot - epicplayer
 	{
-		//Msg( "Consumed %.2f kilograms\n", m_flMass );
-		//CreateDenseBall();
+		DevMsg( "Consumed %.2f kilograms\n", m_flMass );
+		CreateDenseBall();
 	}
 }
 
@@ -334,7 +334,7 @@ END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( vortex_controller, CGravityVortexController );
 
-#define GRENADE_MODEL_CLOSED	"models/roller.mdl"
+#define GRENADE_MODEL_CLOSED	"models/weapons/w_gasnade.mdl"
 #define GRENADE_MODEL_OPEN		"models/roller_spikes.mdl"
 
 BEGIN_DATADESC( CGrenadeHopwire )
@@ -379,8 +379,8 @@ bool CGrenadeHopwire::CreateVPhysics()
 void CGrenadeHopwire::Precache( void )
 {
 	// FIXME: Replace
-	//PrecacheSound("NPC_Strider.Shoot");
-	//PrecacheSound("d3_citadel.weapon_zapper_beam_loop2");
+	PrecacheScriptSound("NPC_Strider.Shoot");
+	PrecacheScriptSound("explode_6");
 
 	PrecacheModel( GRENADE_MODEL_OPEN );
 	PrecacheModel( GRENADE_MODEL_CLOSED );
@@ -490,8 +490,8 @@ void CGrenadeHopwire::CombatThink( void )
 	KillStriders();
 
 	// FIXME: Replace
-	//EmitSound("NPC_Strider.Shoot");
-	//EmitSound("d3_citadel.weapon_zapper_beam_loop2");
+	EmitSound("NPC_Strider.Shoot");
+	EmitSound("explode_6");
 
 	// Quick screen flash
 	CBasePlayer *pPlayer = ToBasePlayer( GetThrower() );
