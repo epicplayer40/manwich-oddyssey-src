@@ -27,6 +27,7 @@
 #include "te_particlesystem.h"
 #include "weapon_immolator.h"
 #include "soundenvelope.h"
+#include "ai_baseactor.h"
 
 #define CREMATOR_MODEL "models/cremator.mdl"
 #define CREMATOR_MODEL_BODY "models/cremator_body.mdl" //The Cremator's head is gonna get blown off if the killing blow is a headshot - epicplayer
@@ -57,9 +58,9 @@ Activity ACT_CREMATOR_GUN_JAM;
 
 //=========================================================
 //=========================================================
-class CNPC_CrematorManod : public CAI_BaseNPC
+class CNPC_CrematorManod : public CAI_BaseActor
 {
-	DECLARE_CLASS( CNPC_CrematorManod, CAI_BaseNPC );
+	DECLARE_CLASS(CNPC_CrematorManod, CAI_BaseActor);
 	DECLARE_DATADESC();
 	DEFINE_CUSTOM_AI;
 
@@ -98,6 +99,7 @@ public:
 	void StartMadBreathe();
 	void DampenBreathing();
 	void StopLoopingSounds() OVERRIDE;
+	virtual float	MaxYawSpeed( void );
 
 private:
 	enum
@@ -443,7 +445,7 @@ int CNPC_CrematorManod::SelectSchedule()
 					}
 				}
 
-				if (enemyCount > 1 && gpGlobals->curtime > m_fNextSprayTime)
+				if ((enemyCount > 1 && gpGlobals->curtime > m_fNextSprayTime) || HasCondition(COND_CAN_MELEE_ATTACK1))
 				{
 					m_fNextSprayTime = gpGlobals->curtime + 20;
 					pImmolator->m_bShootFar = false;
@@ -588,6 +590,38 @@ void CNPC_CrematorManod::AlertSound()
 	DampenBreathing();
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+float CNPC_CrematorManod::MaxYawSpeed( void )
+{
+	Activity eActivity = GetActivity();
+
+	CBaseEntity *pEnemy = GetEnemy();
+
+	if ( pEnemy != NULL && pEnemy->IsPlayer() == false )
+		return 16.0f;
+
+	switch( eActivity )
+	{
+	case ACT_TURN_LEFT:
+	case ACT_TURN_RIGHT:
+		return 40.0f;
+		break;
+	
+	case ACT_RANGE_ATTACK1:
+	case ACT_SPECIAL_ATTACK1:
+	case ACT_SPECIAL_ATTACK2:
+		return 0.0f; //Don't turn while immolating
+		break;
+
+	case ACT_RUN:
+	default:
+		return 20.0f;
+		break;
+	}
+}
+
 AI_BEGIN_CUSTOM_NPC(npc_cremator, CNPC_CrematorManod)
 	DECLARE_ANIMEVENT(AE_CREMATOR_TURNONHOSE)
 	DECLARE_ANIMEVENT(AE_CREMATOR_TURNOFFHOSE)
@@ -602,6 +636,8 @@ DEFINE_SCHEDULE
 	"		TASK_FACE_ENEMY			0"
 	"		TASK_SPECIAL_ATTACK1	0"
 	""
+	"	Interrupts"
+	"		COND_HEAVY_DAMAGE"
 );
 DEFINE_SCHEDULE
 (
@@ -609,7 +645,7 @@ DEFINE_SCHEDULE
 
 	"	Tasks"
 	"		TASK_STOP_MOVING		0"
-	"		TASK_FACE_ENEMY			0"
+//	"		TASK_FACE_ENEMY			0"
 	"		TASK_SPECIAL_ATTACK2	0"
 	""
 );
