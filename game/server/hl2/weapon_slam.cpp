@@ -67,7 +67,7 @@ void CWeapon_SLAM::Spawn( )
 
 	SetThink( NULL );
 
-	m_tSlamState		= SLAM_TRIPMINE_READY;
+	m_tSlamState		= SLAM_SATCHEL_THROW;
 	m_flWallSwitchTime	= 0;
 
 	// Give 1 piece of default ammo when first picked up
@@ -680,7 +680,7 @@ void CWeapon_SLAM::ItemPostFrame( void )
 	{
 		PrimaryAttack();
 	}
-	else if (pOwner->m_nButtons & IN_RELOAD && m_flNextSecondaryAttack <= gpGlobals->curtime)
+	else if (pOwner->m_nButtons & IN_RELOAD && m_flNextSecondaryAttack <= gpGlobals->curtime && (pOwner->GetAmmoCount(m_iSecondaryAmmoType) > 0) )
 	{
 		ChangeAttackMode();
 	}
@@ -915,7 +915,12 @@ bool CWeapon_SLAM::Deploy( void )
 
 	// If detonator is already armed
 	m_bNeedReload = false;
-	if (m_bDetonatorArmed)
+
+	if (m_tSlamState == SLAM_TRIPMINE_READY) //Use tripmine draw when switching weapons - epicplayer
+	{
+		iActivity = ACT_SLAM_TRIPMINE_DRAW;
+	}
+	else if (m_bDetonatorArmed)
 	{
 		if (pOwner->GetAmmoCount(m_iSecondaryAmmoType) <= 0)
 		{
@@ -992,7 +997,7 @@ void CWeapon_SLAM::ChangeAttackMode(void)
 	else
 	{
 		// Play sound for going to tripmine mode
-		EmitSound("Weapon_SLAM.TripMineMode");
+		//EmitSound("Weapon_SLAM.TripMineMode"); //Handled in anim event now - epicplayer
 
 		if (m_tSlamState == SLAM_SATCHEL_ATTACH)
 		{
