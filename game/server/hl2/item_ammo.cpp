@@ -1072,12 +1072,12 @@ public:
 	void Spawn(void)
 	{
 		Precache();
-		SetModel("models/items/boxbuckshot.mdl");
+		SetModel("models/items/boxslug.mdl");
 		BaseClass::Spawn();
 	}
 	void Precache(void)
 	{
-		PrecacheModel("models/items/boxbuckshot.mdl");
+		PrecacheModel("models/items/boxslug.mdl");
 	}
 	bool MyTouch(CBasePlayer* pPlayer)
 	{
