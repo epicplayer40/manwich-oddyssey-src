@@ -278,6 +278,7 @@ public:
 	}
 };
 LINK_ENTITY_TO_CLASS(item_box_largerounds, CItem_BoxLargeRounds);
+LINK_ENTITY_TO_CLASS(item_ammo_hmg, CItem_BoxLargeRounds);
 
 // ========================================================================
 //	>> LargeBoxLRounds
@@ -311,6 +312,7 @@ public:
 	}
 };
 LINK_ENTITY_TO_CLASS(item_large_box_largerounds, CItem_LargeBoxLargeRounds);
+LINK_ENTITY_TO_CLASS(item_ammo_hmg_large, CItem_LargeBoxLargeRounds);
 
 
 // ========================================================================
@@ -589,6 +591,7 @@ public:
 	}
 };
 LINK_ENTITY_TO_CLASS(item_box_sniper_rounds, CItem_BoxSniperRounds);
+LINK_ENTITY_TO_CLASS(item_ammo_sniper, CItem_BoxSniperRounds);
 
 
 // ========================================================================
@@ -679,6 +682,10 @@ enum
 	AMMOCRATE_AR2_ALTFIRE,
 	AMMOCRATE_SMG_ALTFIRE,
 	AMMOCRATE_ML,
+	AMMOCRATE_HMG,
+	AMMOCRATE_SLUG,
+	AMMOCRATE_LARGE_ROUNDS_ALT,
+	AMMOCRATE_SLAM,
 	NUM_AMMO_CRATE_TYPES,
 };
 
@@ -760,13 +767,17 @@ const char *CItem_AmmoCrate::m_lpzModelNames[NUM_AMMO_CRATE_TYPES] =
 	"models/items/ammocrate_rockets.mdl",	// RPG rounds
 	"models/items/ammocrate_buckshot.mdl",	// Buckshot
 	"models/items/ammocrate_grenade.mdl",	// Grenades
-	"models/items/ammocrate_smg1.mdl",		// 357
+	"models/items/ammocrate_357.mdl",		// 357
 	"models/items/ammocrate_smg1.mdl",	// Crossbow
 	
 	//FIXME: This model is incorrect!
 	"models/items/ammocrate_ar2.mdl",		// Combine Ball 
 	"models/items/ammocrate_smg2.mdl",	    // smg grenade
-	"models/items/ammocrate_ml.mdl",	// Missile Launcher grenade
+	"models/items/ammocrate_ml.mdl",		// Missile Launcher grenade
+	"models/items/ammocrate_hmg.mdl",		// HMG Rounds
+	"models/items/ammocrate_slug.mdl",		// Slug
+	"models/items/ammocrate_ar2alt.mdl",	// Medium rounds alt model
+	"models/items/ammocrate_slam.mdl",		// SLAMs
 };
 
 // Ammo type names
@@ -783,6 +794,10 @@ const char *CItem_AmmoCrate::m_lpzAmmoNames[NUM_AMMO_CRATE_TYPES] =
 	"AR2AltFire",
 	"SMG1_Grenade",
 	"ML_Grenade",
+	"Largeround",
+	"Slug",
+	"AR2",
+	"Slam",
 };
 
 // Ammo amount given per +use
@@ -798,7 +813,11 @@ int CItem_AmmoCrate::m_nAmmoAmounts[NUM_AMMO_CRATE_TYPES] =
 	50,		// Crossbow
 	3,		// AR2 alt-fire
 	5,
-	1,
+	1,		//ML
+	300,	//HMG
+	24,		//Slug
+	300,	//AR2
+	5,		//SLAMs
 };
 
 const char *CItem_AmmoCrate::m_pGiveWeapon[NUM_AMMO_CRATE_TYPES] =
@@ -814,6 +833,10 @@ const char *CItem_AmmoCrate::m_pGiveWeapon[NUM_AMMO_CRATE_TYPES] =
 	NULL,		// AR2 alt-fire
 	NULL,		// SMG alt-fire
 	"weapon_ml",		// Missile Launcher
+	NULL,		// HMG
+	NULL,		// Slug
+	NULL,		// AR2
+	"weapon_slam",		// SLAMs
 };
 
 #define	AMMO_CRATE_CLOSE_DELAY	1.5f
