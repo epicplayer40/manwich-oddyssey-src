@@ -97,7 +97,7 @@ void CWeapon_SLAM::Precache( void )
 //------------------------------------------------------------------------------
 void CWeapon_SLAM::SetPickupTouch( void )
 {
-	SetTouch(SlamTouch);
+	SetTouch(&CWeapon_SLAM::SlamTouch);
 }
 
 //-----------------------------------------------------------------------------
@@ -203,7 +203,7 @@ void CWeapon_SLAM::PrimaryAttack( void )
 //-----------------------------------------------------------------------------
 void CWeapon_SLAM::SecondaryAttack( void )
 {
-	return; // Nothin for now. SLAM's just a tripmine.
+//	return; // Nothin for now. SLAM's just a tripmine.
 
 	CBaseCombatCharacter *pOwner  = GetOwner();
 	if (!pOwner)
@@ -214,42 +214,6 @@ void CWeapon_SLAM::SecondaryAttack( void )
 	if (m_bDetonatorArmed)
 	{
 		StartSatchelDetonate();
-	}
-	else if (pOwner->GetAmmoCount(m_iSecondaryAmmoType) > 0)
-	{
-		if (m_tSlamState == SLAM_TRIPMINE_READY)
-		{
-			// Play sound for going to throw mode
-			EmitSound( "Weapon_SLAM.ThrowMode" );
-
-			if (CanAttachSLAM())
-			{
-				SetSlamState(SLAM_SATCHEL_ATTACH);
-				SendWeaponAnim( ACT_SLAM_TRIPMINE_TO_STICKWALL_ND );
-			}
-			else
-			{
-				SetSlamState(SLAM_SATCHEL_THROW);
-				SendWeaponAnim( ACT_SLAM_TRIPMINE_TO_THROW_ND );
-			}
-		}
-		else
-		{
-			// Play sound for going to tripmine mode
-			EmitSound( "Weapon_SLAM.TripMineMode" );
-
-			if (m_tSlamState == SLAM_SATCHEL_ATTACH)
-			{
-				SetSlamState(SLAM_TRIPMINE_READY);
-				SendWeaponAnim( ACT_SLAM_STICKWALL_TO_TRIPMINE_ND );
-			}
-			else
-			{
-				SetSlamState(SLAM_TRIPMINE_READY);
-				SendWeaponAnim( ACT_SLAM_THROW_TO_TRIPMINE_ND );
-			}
-		}
-		m_flNextSecondaryAttack = gpGlobals->curtime + SequenceDuration();
 	}
 }
 
@@ -364,6 +328,7 @@ void CWeapon_SLAM::TripmineAttach( void )
 
 			CTripmineGrenade *pMine = (CTripmineGrenade *)pEnt;
 			pMine->m_hOwner = GetOwner();
+			pMine->SetThrower(GetOwner());
 
 			pOwner->RemoveAmmo( 1, m_iSecondaryAmmoType );
 
@@ -715,6 +680,10 @@ void CWeapon_SLAM::ItemPostFrame( void )
 	{
 		PrimaryAttack();
 	}
+	else if (pOwner->m_nButtons & IN_RELOAD && m_flNextSecondaryAttack <= gpGlobals->curtime)
+	{
+		ChangeAttackMode();
+	}
 
 	// -----------------------
 	//  No buttons down
@@ -934,7 +903,7 @@ bool CWeapon_SLAM::Deploy( void )
 	m_bDetonatorArmed = AnyUndetonatedCharges();
 
 
-	SetThink( SLAMThink );
+	SetThink( &CWeapon_SLAM::SLAMThink );
 	SetNextThink( gpGlobals->curtime + 0.1f );
 
 	SetModel( GetViewModel() );
@@ -993,4 +962,48 @@ CWeapon_SLAM::CWeapon_SLAM(void)
 	m_bAttachTripmine		= false;
 	m_bNeedDetonatorDraw	= false;
 	m_bNeedDetonatorHolster	= false;
+}
+
+
+void CWeapon_SLAM::ChangeAttackMode(void)
+{
+	CBaseCombatCharacter* pOwner = GetOwner();
+	if (!pOwner)
+	{
+		return;
+	}
+
+	if (m_tSlamState == SLAM_TRIPMINE_READY)
+	{
+		// Play sound for going to throw mode
+		EmitSound("Weapon_SLAM.ThrowMode");
+
+		if (CanAttachSLAM())
+		{
+			SetSlamState(SLAM_SATCHEL_ATTACH);
+			SendWeaponAnim(ACT_SLAM_TRIPMINE_TO_STICKWALL_ND);
+		}
+		else
+		{
+			SetSlamState(SLAM_SATCHEL_THROW);
+			SendWeaponAnim(ACT_SLAM_TRIPMINE_TO_THROW_ND);
+		}
+	}
+	else
+	{
+		// Play sound for going to tripmine mode
+		EmitSound("Weapon_SLAM.TripMineMode");
+
+		if (m_tSlamState == SLAM_SATCHEL_ATTACH)
+		{
+			SetSlamState(SLAM_TRIPMINE_READY);
+			SendWeaponAnim(ACT_SLAM_STICKWALL_TO_TRIPMINE_ND);
+		}
+		else
+		{
+			SetSlamState(SLAM_TRIPMINE_READY);
+			SendWeaponAnim(ACT_SLAM_THROW_TO_TRIPMINE_ND);
+		}
+	}
+	m_flNextSecondaryAttack = gpGlobals->curtime + SequenceDuration();
 }

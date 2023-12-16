@@ -35,6 +35,7 @@ public:
 
 	void MakeBeam( void );
 	void KillBeam( void );
+	const Vector& GetBeamStartPoint() const;
 
 public:
 	EHANDLE		m_hOwner;
@@ -42,6 +43,7 @@ public:
 private:
 	float		m_flPowerUp;
 	Vector		m_vecDir;
+	Vector		m_vecLightAttach;
 	Vector		m_vecEnd;
 	float		m_flBeamLength;
 

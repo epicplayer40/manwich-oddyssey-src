@@ -72,6 +72,10 @@ public:
 
 	virtual float		GetShakeAmplitude( void ) { return 25.0; }
 	virtual float		GetShakeRadius( void ) { return 750.0; }
+#ifndef CLIENT_DLL
+	virtual int OnTakeDamage_Alive(const CTakeDamageInfo& info);
+#endif // !CLIENT_DLL
+
 
 	// Damage accessors.
 	virtual float GetDamage()

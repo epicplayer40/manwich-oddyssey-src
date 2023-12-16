@@ -28,6 +28,7 @@ BEGIN_DATADESC( CTripmineGrenade )
 	DEFINE_FIELD( m_hOwner,		FIELD_EHANDLE ),
 	DEFINE_FIELD( m_flPowerUp,	FIELD_TIME ),
 	DEFINE_FIELD( m_vecDir,		FIELD_VECTOR ),
+	DEFINE_FIELD( m_vecLightAttach, FIELD_POSITION_VECTOR),
 	DEFINE_FIELD( m_vecEnd,		FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( m_flBeamLength, FIELD_FLOAT ),
 	DEFINE_FIELD( m_pBeam,		FIELD_CLASSPTR ),
@@ -35,16 +36,17 @@ BEGIN_DATADESC( CTripmineGrenade )
 	DEFINE_FIELD( m_angleOwner,	FIELD_VECTOR ),
 
 	// Function Pointers
-	DEFINE_FUNCTION( WarningThink ),
-	DEFINE_FUNCTION( PowerupThink ),
-	DEFINE_FUNCTION( BeamBreakThink ),
-	DEFINE_FUNCTION( DelayDeathThink ),
+	DEFINE_THINKFUNC( WarningThink ),
+	DEFINE_THINKFUNC( PowerupThink ),
+	DEFINE_THINKFUNC( BeamBreakThink ),
+	DEFINE_THINKFUNC( DelayDeathThink ),
 
 END_DATADESC()
 
 CTripmineGrenade::CTripmineGrenade()
 {
 	m_vecDir.Init();
+	m_vecLightAttach.Init();
 	m_vecEnd.Init();
 	m_posOwner.Init();
 	m_angleOwner.Init();
@@ -59,8 +61,9 @@ void CTripmineGrenade::Spawn( void )
 	AddSolidFlags( FSOLID_NOT_SOLID );
 	SetModel( "models/Weapons/w_slam.mdl" );
 
+	GetAttachment("beam_attach", m_vecLightAttach);
 
-	m_flCycle		= 0;
+	SetCycle(0);
 	m_nBody			= 3;
 	m_flDamage		= sk_plr_dmg_tripmine.GetFloat();
 	m_DmgRadius		= sk_tripmine_radius.GetFloat();
@@ -72,7 +75,7 @@ void CTripmineGrenade::Spawn( void )
 
 	m_flPowerUp = gpGlobals->curtime + 2.0;
 	
-	SetThink( PowerupThink );
+	SetThink( &CTripmineGrenade::PowerupThink );
 	SetNextThink( gpGlobals->curtime + 0.2 );
 
 	m_takedamage		= DAMAGE_YES;
@@ -86,7 +89,7 @@ void CTripmineGrenade::Spawn( void )
 	angles.x -= 90;
 
 	AngleVectors( angles, &m_vecDir );
-	m_vecEnd = GetLocalOrigin() + m_vecDir * 2048;
+	m_vecEnd = GetBeamStartPoint() + m_vecDir * 2048;
 }
 
 
@@ -106,7 +109,7 @@ void CTripmineGrenade::Precache( void )
 void CTripmineGrenade::WarningThink( void  )
 {
 	// set to power up
-	SetThink( PowerupThink );
+	SetThink(&CTripmineGrenade::PowerupThink );
 	SetNextThink( gpGlobals->curtime + 1.0f );
 }
 
@@ -140,7 +143,7 @@ void CTripmineGrenade::MakeBeam( void )
 {
 	trace_t tr;
 
-	UTIL_TraceLine( GetAbsOrigin(), m_vecEnd, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
+	UTIL_TraceLine(GetBeamStartPoint(), m_vecEnd, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
 
 	m_flBeamLength = tr.fraction;
 
@@ -156,23 +159,24 @@ void CTripmineGrenade::MakeBeam( void )
 	if (pBCC)
 	{
 		SetOwnerEntity( pBCC );
-		UTIL_TraceLine( GetAbsOrigin(), m_vecEnd, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
+		UTIL_TraceLine(GetBeamStartPoint(), m_vecEnd, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
 		m_flBeamLength = tr.fraction;
 		SetOwnerEntity( NULL );
 		
 	}
 
 	// set to follow laser spot
-	SetThink( BeamBreakThink );
+	SetThink(&CTripmineGrenade::BeamBreakThink );
 
 	// Delay first think slightly so beam has time
 	// to appear if person right in front of it
 	SetNextThink( gpGlobals->curtime + 1.0f );
 
-	Vector vecTmpEnd = GetLocalOrigin() + m_vecDir * 2048 * drawLength;
+	Vector vecTmpEnd = GetBeamStartPoint() + m_vecDir * 2048 * drawLength;
 
 	m_pBeam = CBeam::BeamCreate( g_pModelNameLaser, 1.0 );
 	m_pBeam->PointEntInit( vecTmpEnd, this );
+	m_pBeam->SetEndAttachment(LookupAttachment("beam_attach"));
 	m_pBeam->SetColor( 0, 214, 198 );
 	m_pBeam->SetScrollRate( 25.6 );
 	m_pBeam->SetBrightness( 64 );
@@ -198,7 +202,7 @@ void CTripmineGrenade::BeamBreakThink( void  )
 	trace_t tr;
 
 	// NOT MASK_SHOT because we want only simple hit boxes
-	UTIL_TraceLine( GetAbsOrigin(), m_vecEnd, MASK_SOLID, this, COLLISION_GROUP_NONE, &tr );
+	UTIL_TraceLine(GetBeamStartPoint(), m_vecEnd, MASK_SOLID, this, COLLISION_GROUP_NONE, &tr );
 
 	// ALERT( at_console, "%f : %f\n", tr.flFraction, m_flBeamLength );
 
@@ -213,6 +217,11 @@ void CTripmineGrenade::BeamBreakThink( void  )
 
 	CBaseEntity *pEntity = tr.m_pEnt;
 	CBaseCombatCharacter *pBCC  = ToBaseCombatCharacter( pEntity );
+
+	if (pBCC && pBCC->IRelationType(GetThrower()) == D_LI)
+	{
+		return;
+	}
 
 	if (pBCC || fabs( m_flBeamLength - tr.fraction ) > 0.001)
 	{
@@ -230,7 +239,7 @@ int CTripmineGrenade::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 	{
 		// disable
 		// Create( "weapon_tripmine", GetLocalOrigin() + m_vecDir * 24, GetAngles() );
-		SetThink( SUB_Remove );
+		SetThink( &CBaseEntity::SUB_Remove );
 		SetNextThink( gpGlobals->curtime + 0.1f );
 		KillBeam();
 		return FALSE;
@@ -247,7 +256,7 @@ void CTripmineGrenade::Event_Killed( const CTakeDamageInfo &info )
 {
 	m_takedamage		= DAMAGE_NO;
 
-	SetThink( DelayDeathThink );
+	SetThink(&CTripmineGrenade::DelayDeathThink );
 	SetNextThink( gpGlobals->curtime + 0.5 );
 
 	EmitSound( "TripmineGrenade.StopSound" );
@@ -262,5 +271,10 @@ void CTripmineGrenade::DelayDeathThink( void )
 	UTIL_ScreenShake( GetAbsOrigin(), 25.0, 150.0, 1.0, 750, SHAKE_START );
 
 	Explode( &tr, DMG_BLAST );
+}
+
+const Vector& CTripmineGrenade::GetBeamStartPoint() const
+{
+	return m_vecLightAttach;
 }
 

@@ -71,6 +71,7 @@ public:
 	void				SatchelAttach( void );
 	bool				Deploy( void );
 	bool				Holster( CBaseCombatWeapon *pSwitchingTo = NULL );
+	void				ChangeAttackMode(void);
 
 
 	CWeapon_SLAM();

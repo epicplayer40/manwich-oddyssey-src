@@ -543,6 +543,19 @@ CBaseGrenade::CBaseGrenade(void)
 	SetSimulatedEveryTick( true );
 };
 
+#ifndef CLIENT_DLL
+int CBaseGrenade::OnTakeDamage_Alive(const CTakeDamageInfo& info)
+{
+	int damage = floor(info.GetDamage());
+	if (damage == 0)
+	{
+		return 0;
+	}
+	m_iHealth -= damage;
+	return 1;
+}
+
+#endif // !CLIENT_DLL
 
 
 

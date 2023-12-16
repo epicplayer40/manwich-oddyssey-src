@@ -186,6 +186,8 @@ ConVar	sk_npc_dmg_airboat		( "sk_npc_dmg_airboat", "0", FCVAR_REPLICATED );
 
 ConVar	sk_max_gauss_round		( "sk_max_gauss_round", "0", FCVAR_REPLICATED );
 
+ConVar    sk_max_slam			("sk_max_slam", "0", FCVAR_REPLICATED);
+
 // Gunship & Dropship cannons
 ConVar	sk_npc_dmg_gunship			( "sk_npc_dmg_gunship", "0", FCVAR_REPLICATED );
 ConVar	sk_npc_dmg_gunship_to_plr	( "sk_npc_dmg_gunship_to_plr", "0", FCVAR_REPLICATED );
@@ -2324,6 +2326,7 @@ CAmmoDef *GetAmmoDef()
 
 		//More manod stuff
 		def.AddAmmoType("Hornet", DMG_BULLET, TRACER_NONE, "sk_plr_dmg_hornet", "sk_npc_dmg_hornet", "sk_max_hornet", BULLET_IMPULSE(100, 1200), 0);
+		def.AddAmmoType("Slam", DMG_BURN, TRACER_NONE, NULL, NULL, "sk_max_slam", 0, 0);
 
 	}
 
