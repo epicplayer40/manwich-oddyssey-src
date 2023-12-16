@@ -1059,3 +1059,37 @@ void CItem_AmmoCrate::InputKill( inputdata_t &data )
 	UTIL_Remove( this );
 }
 
+
+
+// ========================================================================
+//	>> BoxSlug
+// ========================================================================
+class CItem_BoxSlug : public CItem
+{
+public:
+	DECLARE_CLASS(CItem_BoxSlug, CItem);
+
+	void Spawn(void)
+	{
+		Precache();
+		SetModel("models/items/boxbuckshot.mdl");
+		BaseClass::Spawn();
+	}
+	void Precache(void)
+	{
+		PrecacheModel("models/items/boxbuckshot.mdl");
+	}
+	bool MyTouch(CBasePlayer* pPlayer)
+	{
+		if (ITEM_GiveAmmo(pPlayer, SIZE_AMMO_SLUG, "Slug"))
+		{
+			if (g_pGameRules->ItemShouldRespawn(this) == GR_ITEM_RESPAWN_NO)
+			{
+				UTIL_Remove(this);
+			}
+			return true;
+		}
+		return false;
+	}
+};
+LINK_ENTITY_TO_CLASS(item_box_slugs, CItem_BoxSlug);

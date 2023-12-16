@@ -134,6 +134,11 @@ ConVar	sk_npc_dmg_buckshot		( "sk_npc_dmg_buckshot","0", FCVAR_REPLICATED);
 ConVar	sk_max_buckshot			( "sk_max_buckshot","0", FCVAR_REPLICATED);
 ConVar	sk_plr_num_shotgun_pellets( "sk_plr_num_shotgun_pellets","7", FCVAR_REPLICATED);
 
+
+ConVar	sk_plr_dmg_slug("sk_plr_dmg_slug", "0", FCVAR_REPLICATED);
+ConVar	sk_npc_dmg_slug("sk_npc_dmg_slug", "0", FCVAR_REPLICATED);
+ConVar	sk_max_slug("sk_max_slug", "0", FCVAR_REPLICATED);
+
 ConVar	sk_plr_dmg_rpg_round	( "sk_plr_dmg_rpg_round","0", FCVAR_REPLICATED);
 ConVar	sk_npc_dmg_rpg_round	( "sk_npc_dmg_rpg_round","0", FCVAR_REPLICATED);
 ConVar	sk_max_rpg_round		( "sk_max_rpg_round","0", FCVAR_REPLICATED);
@@ -2327,6 +2332,7 @@ CAmmoDef *GetAmmoDef()
 		//More manod stuff
 		def.AddAmmoType("Hornet", DMG_BULLET, TRACER_NONE, "sk_plr_dmg_hornet", "sk_npc_dmg_hornet", "sk_max_hornet", BULLET_IMPULSE(100, 1200), 0);
 		def.AddAmmoType("Slam", DMG_BURN, TRACER_NONE, NULL, NULL, "sk_max_slam", 0, 0);
+		def.AddAmmoType("Slug", DMG_BULLET, TRACER_LINE_AND_WHIZ, "sk_plr_dmg_slug", "sk_npc_dmg_slug", "sk_max_slug", BULLET_IMPULSE(400, 1560), 0);
 
 	}
 
