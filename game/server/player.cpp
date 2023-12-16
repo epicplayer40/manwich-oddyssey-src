@@ -6154,6 +6154,8 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveAmmo( 150,  "GaussEnergy" );
 		GiveAmmo( 1,    "ML_Grenade" );
 		GiveAmmo( 200,  "Largeround" );
+		GiveAmmo( 24,  "Slug" );
+		GiveAmmo( 5,  "Slam" );
 #ifdef HL2_EPISODIC
 		GiveAmmo( 5,	"Hopwire" );
 #endif		
@@ -6187,6 +6189,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_flaregun" );
 		GiveNamedItem( "weapon_ml" );
 		GiveNamedItem( "weapon_hopwire" );
+		GiveNamedItem( "weapon_slam" );
 
 #ifdef HL2_EPISODIC
 		// GiveNamedItem( "weapon_magnade" );
