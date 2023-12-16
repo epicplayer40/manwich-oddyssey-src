@@ -592,20 +592,6 @@ void CWeaponImmolator::Precache( void )
 //-----------------------------------------------------------------------------
 void CWeaponImmolator::PrimaryAttack( void )
 {
-/*
-	CBasePlayer *pOwner = ToBasePlayer( GetOwner() );
-	if ( pOwner == NULL )
-		return;
-	WeaponSound( SINGLE );
-	if( !IsImmolating() )
-	{
-		StartImmolating();
-	} 
-	// VXP
-	pOwner->m_fEffects |= EF_MUZZLEFLASH;
-	m_flNextPrimaryAttack = gpGlobals->curtime + GetFireRate();
-*/
-
 	switch( m_fireState )
 	{
 		case FIRE_OFF:
@@ -619,7 +605,7 @@ void CWeaponImmolator::PrimaryAttack( void )
 			}
 
 			m_flAmmoUseTime = gpGlobals->curtime;// start using ammo ASAP.
-			
+
 			EmitSound( "Weapon_Immolator.Start" ); // VXP: Play startup sound here
 			
 			SendWeaponAnim( ACT_VM_PRIMARYATTACK );
@@ -634,8 +620,6 @@ void CWeaponImmolator::PrimaryAttack( void )
 
 		case FIRE_STARTUP:
 		{
-		//	StartImmolating();
-
 			if ( gpGlobals->curtime >= ( m_flStartFireTime + 0.3 ) )
 			{
 				EmitSound( "Weapon_Immolator.Run" );
@@ -653,10 +637,7 @@ void CWeaponImmolator::PrimaryAttack( void )
 
 		case FIRE_CHARGE:
 		{
-			if( !IsImmolating() )
-			{
-				StartImmolating();
-			}
+			StartImmolating();
 
 			if ( !HasAmmo() )
 			{
