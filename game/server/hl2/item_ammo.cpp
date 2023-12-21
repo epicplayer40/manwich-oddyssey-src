@@ -287,12 +287,12 @@ public:
 	void Spawn( void )
 	{ 
 		Precache( );
-		SetModel( "models/items/generic_rifle_cartridge01.mdl");
+		SetModel( "models/items/largeboxmrounds.mdl");
 		BaseClass::Spawn( );
 	}
 	void Precache( void )
 	{
-		PrecacheModel ("models/items/generic_rifle_cartridge01.mdl");
+		PrecacheModel ("models/items/largeboxmrounds.mdl");
 	}
 	bool MyTouch( CBasePlayer *pPlayer )
 	{
