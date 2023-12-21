@@ -242,6 +242,73 @@ public:
 LINK_ENTITY_TO_CLASS(item_large_box_lrounds, CItem_LargeBoxLRounds);
 LINK_ENTITY_TO_CLASS(item_ammo_ar2_large, CItem_LargeBoxLRounds);
 
+//Added alternate model version of AR2 ammo - epicplayer
+// ========================================================================
+//	>> BoxLRounds
+// ========================================================================
+class CItem_BoxLRoundsAlt : public CItem
+{
+public:
+	DECLARE_CLASS( CItem_BoxLRoundsAlt, CItem );
+
+	void Spawn( void )
+	{ 
+		Precache( );
+		SetModel( "models/items/generic_rifle_cartridge01.mdl");
+		BaseClass::Spawn( );
+	}
+	void Precache( void )
+	{
+		PrecacheModel ("models/items/generic_rifle_cartridge01.mdl");
+	}
+	bool MyTouch( CBasePlayer *pPlayer )
+	{
+		if (ITEM_GiveAmmo( pPlayer, SIZE_AMMO_AR2, "AR2"))
+		{
+			if ( g_pGameRules->ItemShouldRespawn( this ) == GR_ITEM_RESPAWN_NO )
+			{
+				UTIL_Remove(this);	
+			}	
+			return true;
+		}
+		return false;
+	}
+};
+LINK_ENTITY_TO_CLASS(item_ammo_ar2_alt, CItem_BoxLRoundsAlt);
+
+// ========================================================================
+//	>> LargeBoxLRounds
+// ========================================================================
+class CItem_LargeBoxLRoundsAlt : public CItem
+{
+public:
+	DECLARE_CLASS( CItem_LargeBoxLRoundsAlt, CItem );
+
+	void Spawn( void )
+	{ 
+		Precache( );
+		SetModel( "models/items/generic_rifle_cartridge01.mdl");
+		BaseClass::Spawn( );
+	}
+	void Precache( void )
+	{
+		PrecacheModel ("models/items/generic_rifle_cartridge01.mdl");
+	}
+	bool MyTouch( CBasePlayer *pPlayer )
+	{
+		if (ITEM_GiveAmmo( pPlayer, SIZE_AMMO_AR2_LARGE, "AR2"))
+		{
+			if ( g_pGameRules->ItemShouldRespawn( this ) == GR_ITEM_RESPAWN_NO )
+			{
+				UTIL_Remove(this);	
+			}	
+			return true;
+		}
+		return false;
+	}
+};
+LINK_ENTITY_TO_CLASS(item_ammo_ar2_alt_large, CItem_LargeBoxLRoundsAlt);
+
 //
 // 
 // 
