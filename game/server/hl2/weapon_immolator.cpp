@@ -35,11 +35,10 @@
 
 #include "weapon_immolator.h"
 
-//extern ConVar sk_cremator_dmg_immo;
-ConVar	sk_plr_dmg_immolator("sk_plr_dmg_immolator", "0"); //currently unused  - epicplayer
+ConVar	sk_plr_dmg_immolator("sk_plr_dmg_immolator", "0");
 ConVar	sk_npc_dmg_immolator("sk_npc_dmg_immolator", "0");
-ConVar	sk_plr_burn_duration_immolator("sk_plr_burn_duration_immolator", "0"); //currently unused  - epicplayer
-ConVar	sk_npc_burn_duration_immolator("sk_npc_burn_duration_immolator", "0"); //currently unused  - epicplayer
+ConVar	sk_plr_burn_duration_immolator("sk_plr_burn_duration_immolator", "0");
+ConVar	sk_npc_burn_duration_immolator("sk_npc_burn_duration_immolator", "0");
 ConVar	sk_immolator_gravity("sk_immolator_gravity", "0");
 
 ConVar immolator_debug("immolator_debug", "0");
@@ -48,9 +47,10 @@ ConVar immolator_debug("immolator_debug", "0");
 #define RADIUS_GROW_RATE	50.0	// units/sec 
 
 #define IMMOLATOR_TARGET_INVALID Vector( FLT_MAX, FLT_MAX, FLT_MAX )
+#define IMMOLATOR_BEAM_AIR_VELOCITY	1500
+#define IMMOLATOR_BEAM_SPECIAL_MULTIPLIER 2
 
 #define BEAM_MODEL	"models/crossbow_bolt.mdl"
-#define BEAM_AIR_VELOCITY	1500
 
 int CWeaponImmolator::m_nMuzzleAttachment = 0;
 
@@ -290,7 +290,15 @@ void CImmolatorBeam::ImmolationDamage( const CTakeDamageInfo &info, const Vector
 				continue;
 			}
 		
-			float lifetime = random->RandomFloat( 3, 5 );
+			float lifetime;
+			if (pBCC->IsPlayer())
+			{
+				lifetime = sk_npc_burn_duration_immolator.GetFloat(); //How long the player should burn, ask epicplayer why the convar is named this
+			}
+			else
+			{
+				lifetime = sk_plr_burn_duration_immolator.GetFloat();
+			}
 
 			CEntityFlame* pFlame = CEntityFlame::Create(pBCC, true, true);
 			if (pFlame)
@@ -319,25 +327,31 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 		if ( ( pOther->m_takedamage == DAMAGE_NO ) || ( pOther->m_takedamage == DAMAGE_EVENTS_ONLY ) )
 			return;
 	}
+	float damage;
+	if (pOther->IsPlayer())
+	{
+		damage = sk_plr_dmg_immolator.GetFloat();
+	}
+	else
+	{
+		damage = sk_npc_dmg_immolator.GetFloat();
+	}
+	//Lychy: Decided to remove DMG_BURN since it created a red fade that didnt work well with the blu one
+	RadiusDamage( CTakeDamageInfo( this, GetOwnerEntity(), damage, DMG_DISSOLVE | DMG_PLASMA /* | DMG_BURN*/), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL, NULL); //changed from 256 to 128 to correspond with noisebeams
+	ImmolationDamage(CTakeDamageInfo(this, GetOwnerEntity(), 1, DMG_PLASMA), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL);
+	if (immolator_debug.GetBool())
+	{
+		Vector pos = GetAbsOrigin();
+		pos.z = 0;
+		Vector delta = pos - startpos;
+		delta.z = 0;
+		Msg("End point: %f %f\n", pos.x, pos.y);
+		Msg("Delta: %f %f\n", delta.x, delta.y);
+		Msg("Length: %f\n", delta.Length());
 
-		//Lychy: Decided to remove DMG_BURN since it created a red fade that didnt work well with the blu one
-		RadiusDamage( CTakeDamageInfo( this, GetOwnerEntity(), sk_npc_dmg_immolator.GetFloat(), DMG_DISSOLVE | DMG_PLASMA /* | DMG_BURN*/), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL, NULL); //changed from 256 to 128 to correspond with noisebeams
-		ImmolationDamage(CTakeDamageInfo(this, GetOwnerEntity(), 1, DMG_PLASMA), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL);
-		if (immolator_debug.GetBool())
-		{
-			Vector pos = GetAbsOrigin();
-			pos.z = 0;
-			Vector delta = pos - startpos;
-			delta.z = 0;
-			Msg("End point: %f %f\n", pos.x, pos.y);
-			Msg("Delta: %f %f\n", delta.x, delta.y);
-			Msg("Length: %f\n", delta.Length());
+	}
 
-		}
-
-		UTIL_Remove(this);
-//		}
-//	}
+	UTIL_Remove(this);
 }
 
 //-----------------------------------------------------------------------------
@@ -448,8 +462,6 @@ CWeaponImmolator::CWeaponImmolator( void )
 {
 	m_fMaxRange1 = 1200;
 	m_fMinRange1 = 200;
-
-//	StopImmolating();
 }
 
 void CWeaponImmolator::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator )
@@ -461,21 +473,11 @@ void CWeaponImmolator::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseComba
 		Vector	muzzlePoint;
 		QAngle	vecAngles;
 		
-
+		GetActivity();
 		GetAttachment("muzzle", muzzlePoint, vecAngles);
 		Vector vecShootDir;	
-#ifdef CREMATOR_AIM_HACK
-		CAI_BaseNPC* npc = pOperator->MyNPCPointer();
-		vecShootDir = npc->GetShootEnemyDir(muzzlePoint);   //This preproc block if you want the the beam to head directly towards the enemy
-		VectorAngles(vecShootDir, vecAngles);
-		//vecAngles.x = -GetMortaringAngle(npc->GetEnemyLKP());
-#else
-		AngleVectors(vecAngles, &vecShootDir);  //Or this one if you want the beam to head from the end of the muzzle
-#endif //CREMATOR_AIM_HACK
-
-		//StartImmolating();
-		//CImmolatorBeam *pBeamer = CImmolatorBeam::BoltCreate(muzzlePoint, vecAngles, pOperator);
-		//pBeamer->SetAbsVelocity(vecShootDir * BEAM_AIR_VELOCITY);
+		WeaponSound(SINGLE);
+		FireBeam();
 		}
 		break;
 		default:
@@ -501,7 +503,7 @@ void CWeaponImmolator::Operator_ForceNPCFire( CBaseCombatCharacter *pOperator, b
 
 	//	pViewModel->GetAttachment( pViewModel->LookupAttachment( "muzzle" ), beamSrc );
 	CImmolatorBeam *pBeamer = CImmolatorBeam::BoltCreate(muzzlePoint, vecAngles, pOperator);
-	pBeamer->SetAbsVelocity(muzzlePoint * BEAM_AIR_VELOCITY);
+	pBeamer->SetAbsVelocity(muzzlePoint * GetBeamVelocity());
 
 }
 
@@ -756,157 +758,7 @@ void CWeaponImmolator::UpdateThink( void )
 	}
 
 	FireBeam();
-	//Update();
 	SetNextThink( gpGlobals->curtime + 0.05 );
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-void CWeaponImmolator::Update()
-{
-	float flDuration = gpGlobals->curtime - m_flTimeLastUpdatedRadius;
-	if( flDuration != 0.0 )
-	{
-		m_flBurnRadius += RADIUS_GROW_RATE * flDuration;
-	}
-
-	// Clamp
-	m_flBurnRadius = min( m_flBurnRadius, MAX_BURN_RADIUS );
-
-	CBasePlayer *pOwner = ToBasePlayer( GetOwner() );
-
-	Vector vecSrc;
-	Vector vecStart;
-	Vector vecAiming;
-	QAngle dummy;
-
-	if( pOwner )
-	{
-		vecSrc	 = pOwner->Weapon_ShootPosition( );
-
-		CBaseViewModel *pViewModel = pOwner->GetViewModel();
-		pViewModel->GetAttachment( pViewModel->LookupAttachment( "muzzle" ), vecStart, dummy );
-
-		vecAiming = pOwner->GetAutoaimVector(AUTOAIM_2DEGREES);
-	}
-	else
-	{
-		CBaseCombatCharacter *pOwner = GetOwner();
-
-		vecSrc = pOwner->Weapon_ShootPosition( );
-		vecAiming = m_vecImmolatorTarget - vecSrc;
-		VectorNormalize( vecAiming );
-
-		vecStart = vecSrc;
-	}
-
-	trace_t	tr;
-	UTIL_TraceLine( vecSrc, vecSrc + vecAiming * MAX_TRACE_LENGTH, MASK_SHOT, pOwner, COLLISION_GROUP_NONE, &tr );
-
-	CSoundEnt::InsertSound( SOUND_DANGER, m_vecImmolatorTarget, 256, 5.0, GetOwner() );
-
-	if ( gpGlobals->curtime >= m_flAmmoUseTime )
-	{
-		UseAmmo( 1 );
-		ImmolationDamage( CTakeDamageInfo( this, this, 1, DMG_PLASMA ), tr.endpos, m_flBurnRadius, CLASS_NONE );
-		
-		if ( !HasAmmo() )
-		{
-			StopImmolating();
-		}
-		
-		m_flAmmoUseTime = gpGlobals->curtime + 0.1;
-	}
-
-	int brightness;
-	brightness = 255 * (m_flBurnRadius/MAX_BURN_RADIUS);
-/*
-	UTIL_Beam(  vecSrc,
-				tr.endpos,
-				m_beamIndex,
-				0,		//halo index
-				0,		//frame start
-				2.0f,	//framerate
-				0.1f,	//life
-				20,		// width
-				1,		// endwidth
-				0,		// fadelength,
-				1,		// noise
-				0,		// red
-				255,	// green
-				0,		// blue,
-				brightness, // bright
-				100  // speed
-				);
-*/
-	CBeam *pBeam = CBeam::BeamCreate( "sprites/bluelaser1.vmt", 20 );
-	pBeam->PointEntInit( vecStart, this );
-	pBeam->SetAbsStartPos( tr.endpos );
-	pBeam->SetEndAttachment( 1 );
-	pBeam->SetScrollRate( 2.0f );		//framerate
-	pBeam->LiveForTime( 0.1f );			//life
-	pBeam->SetEndWidth( 1 );			// endwidth
-	pBeam->SetFadeLength( 0 );			// fadelength,
-	pBeam->SetNoise( 1 );				// noise
-	pBeam->SetColor( 0, 255, 0 );		// red, green, blue,
-//	pBeam->SetColor( 0, 165, 255 );		// red, green, blue,
-	pBeam->SetBrightness( brightness );	// bright
-
-	if( true || tr.DidHitWorld() )
-	{
-		int beams;
-
-		for( beams = 0 ; beams < 5 ; beams++ )
-		{
-			Vector vecDest;
-
-			// Random unit vector
-			vecDest.x = random->RandomFloat( -1, 1 );
-			vecDest.y = random->RandomFloat( -1, 1 );
-			vecDest.z = random->RandomFloat( 0, 1 );
-
-			// Push out to radius dist.
-			vecDest = tr.endpos + vecDest * m_flBurnRadius;
-
-			UTIL_Beam(  tr.endpos,
-						vecDest,
-						m_beamIndex,
-						0,		//halo index
-						0,		//frame start
-						2.0f,	//framerate
-						0.15f,	//life
-						20,		// width
-						1.75,	// endwidth
-						0.75,	// fadelength,
-						15,		// noise
-
-					//	0,		// red
-					//	255,	// green
-					//	0,		// blue,
-
-						0,		// red
-						255,	// green
-						0,	// blue,
-
-						128, // bright
-						100  // speed
-						);
-		}
-
-	//	ImmolationDamage( CTakeDamageInfo( this, this, 1, DMG_BURN ), tr.endpos, m_flBurnRadius, CLASS_NONE );
-	//	ImmolationDamage( CTakeDamageInfo( this, this, 1, DMG_PLASMA ), tr.endpos, m_flBurnRadius, CLASS_NONE );
-	}
-	else
-	{
-		// The attack beam struck some kind of entity directly.
-	}
-
-	m_flTimeLastUpdatedRadius = gpGlobals->curtime;
-
-/*	if( m_flBurnRadius >= MAX_BURN_RADIUS )
-	{
-		StopImmolating();
-	}*/
 }
 
 //-----------------------------------------------------------------------------
@@ -917,9 +769,6 @@ void CWeaponImmolator::ItemPostFrame( void )
 	BaseClass::ItemPostFrame();
 }
 
-// AARIKFIXME : Too tired right now fix this later.
-#pragma warning(disable : 4706)
-
 void CWeaponImmolator::ImmolationDamage( const CTakeDamageInfo &info, const Vector &vecSrcIn, float flRadius, int iClassIgnore )
 {
 	CBaseEntity *pEntity = NULL;
@@ -929,7 +778,7 @@ void CWeaponImmolator::ImmolationDamage( const CTakeDamageInfo &info, const Vect
 	Vector vecSrc = vecSrcIn;
 
 	// iterate on all entities in the vicinity.
-	for ( CEntitySphereQuery sphere( vecSrc, flRadius ); pEntity = sphere.GetCurrentEntity(); sphere.NextEntity() )
+	for ( CEntitySphereQuery sphere( vecSrc, flRadius ); (pEntity = sphere.GetCurrentEntity()) != 0; sphere.NextEntity() )
 	{
 		CBaseCombatCharacter *pBCC = pEntity->MyCombatCharacterPointer();
 		if ( pBCC && pBCC->IsAlive() && !pBCC->IsOnFire() && pBCC->IsImmolatable() )
@@ -940,7 +789,15 @@ void CWeaponImmolator::ImmolationDamage( const CTakeDamageInfo &info, const Vect
 				continue;
 			}
 		
-			float lifetime = random->RandomFloat( 3, 5 ); //needs to make use of sk_npc_burn_duration_immolator and sk_plr_burn_duration_immolator - epicplayer
+			float lifetime;
+			if (pBCC->IsPlayer())
+			{
+				lifetime = sk_plr_burn_duration_immolator.GetFloat();
+			}
+			else
+			{
+				lifetime = sk_npc_burn_duration_immolator.GetFloat();
+			}
 
 			CEntityFlame *pFlame = CEntityFlame::Create( pBCC, true );
 			if (pFlame)
@@ -968,7 +825,6 @@ void CWeaponImmolator::WeaponIdle( void )
 //-----------------------------------------------------------------------------
 void CWeaponImmolator::SecondaryAttack( void )
 {
-//	FireBeam();
 }
 
 //-----------------------------------------------------------------------------
@@ -977,7 +833,6 @@ void CWeaponImmolator::SecondaryAttack( void )
 void CWeaponImmolator::FireBeam( void )
 {
 	CBaseCombatCharacter* pOwner = GetOwner();
-	CAI_BaseNPC* pNPC = pOwner->MyNPCPointer();
 	CBasePlayer* pPlayer = NULL;
 	if (pOwner->IsPlayer())
 	{
@@ -1007,7 +862,6 @@ void CWeaponImmolator::FireBeam( void )
 	Vector	vForward, vRight, vUp;
 	AngleVectors(angEyes, &vForward, &vRight, &vUp);
 
-
 	Vector muzzlePoint = vecSrc;
 	if (pPlayer)
 	{
@@ -1015,15 +869,7 @@ void CWeaponImmolator::FireBeam( void )
 	}
 	CImmolatorBeam* pBeam = CImmolatorBeam::BoltCreate(muzzlePoint, angEyes, pOwner);
 
-	if (pNPC)
-	{
-		//vForward = pNPC->GetShootEnemyDir(muzzlePoint, false); // REMOVE
-	}
-	Vector velocity = vForward * BEAM_AIR_VELOCITY;
-	if (m_bShootFar)
-	{
-		velocity *= 2;	
-	}
+	Vector velocity = vForward * GetBeamVelocity();
 	pBeam->SetAbsVelocity(velocity);
 
 	UseAmmo(1);
@@ -1041,4 +887,26 @@ void CWeaponImmolator::FireBeam( void )
 	}
 
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->curtime + 0.75;
+}
+
+float CWeaponImmolator::GetBeamVelocity() const
+{
+	float velocity = IMMOLATOR_BEAM_AIR_VELOCITY;
+	if (m_bShootFar)
+	{
+		velocity *= IMMOLATOR_BEAM_SPECIAL_MULTIPLIER;
+	}
+	return velocity;
+}
+
+void CWeaponImmolator::EnableShootFar(bool shootFar)
+{
+	m_bShootFar = shootFar;
+	CalculateMaxDistance();
+}
+
+void CWeaponImmolator::CalculateMaxDistance()
+{
+	float velocity = GetBeamVelocity();
+	m_fMaxRange1 = (velocity * velocity) / (GetCurrentGravity() * sk_immolator_gravity.GetFloat());
 }

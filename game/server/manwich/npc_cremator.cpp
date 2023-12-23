@@ -28,6 +28,7 @@
 #include "weapon_immolator.h"
 #include "soundenvelope.h"
 #include "ai_baseactor.h"
+#include "movevars_shared.h"
 
 #define CREMATOR_MODEL "models/cremator.mdl"
 #define CREMATOR_MODEL_BODY "models/cremator_body.mdl" //The Cremator's head is gonna get blown off if the killing blow is a headshot - epicplayer
@@ -398,11 +399,56 @@ Activity CNPC_CrematorManod::NPC_TranslateActivity( Activity eNewActivity )
 
 	return BaseClass::NPC_TranslateActivity(eNewActivity);
 }
-	
+
+extern ConVar sk_immolator_gravity;
 Vector	CNPC_CrematorManod::GetShootEnemyDir(const Vector& shootOrigin, bool bNoisy)
 {
-	//Extra stuff?
-	return BaseClass::GetShootEnemyDir(shootOrigin, bNoisy);
+	CBaseEntity* pEnemy = GetEnemy();
+	CWeaponImmolator* pImmolator = GetImmolator();
+
+	if (pEnemy)
+	{
+		bNoisy = true;
+		Vector vecEnemyLKP = GetEnemyLKP();
+		Vector vecEnemyOffset = pEnemy->WorldSpaceCenter() - pEnemy->GetAbsOrigin();
+		if (bNoisy)
+		{
+			vecEnemyOffset *= RandomFloat(0.4f, 1.5f);
+		}
+
+		Vector delta = vecEnemyOffset + vecEnemyLKP - shootOrigin;
+		Vector vecDir = delta.Normalized();
+		VectorNormalize(vecDir);
+		QAngle angles;
+		VectorAngles(vecDir, angles);
+
+		NDebugOverlay::Line(shootOrigin, shootOrigin + delta, 255, 0, 0, 0, 0.1f);
+		//
+		// Using angle = arctan(( v^2 + sqrt( v^4 - g(gx^2 + 2yv^2)) / gx)
+		//
+		float x = Min((sqrtf((delta.x * delta.x) + (delta.y * delta.y))), pImmolator->m_fMaxRange1);
+		float y = delta.z;
+		float v = pImmolator->GetBeamVelocity();
+		float g = GetCurrentGravity() * sk_immolator_gravity.GetFloat();
+		float projectionAngle = RAD2DEG(atan2f(powf(v, 2) - sqrtf(powf(v, 4) - g * (g * powf(x, 2) + 2 * y * pow(v, 2))), g * x));
+		Msg("Projection angle: %f\n", projectionAngle);
+		if (projectionAngle != projectionAngle) //Invalid, cannot reach with the current velocity
+		{
+			projectionAngle = 45;
+		}
+	
+		Vector retVal;
+		angles.x = -projectionAngle;
+		angles.y += RandomFloat(-2.0f, 2.0f);
+		AngleVectors(angles, &retVal);
+		return retVal;
+	}
+	else
+	{
+		Vector forward;
+		AngleVectors(GetLocalAngles(), &forward);
+		return forward;
+	}
 
 }
 
@@ -412,16 +458,17 @@ int CNPC_CrematorManod::SelectSchedule()
 	switch (m_NPCState)
 	{
 	case NPC_STATE_COMBAT:
-		if (pImmolator && HasCondition(COND_CAN_RANGE_ATTACK1))
+		if (pImmolator)
 		{
-			pImmolator->m_fMaxRange1 *= 2; //Cremator can shoot further with his special attack
-			Vector delta = GetEnemyLKP() - GetAbsOrigin();
-			if (m_bDontHose)
+			if (HasCondition(COND_CAN_RANGE_ATTACK1))
 			{
-				ClearCondition(COND_CAN_RANGE_ATTACK1);
-			}
-			if (delta.IsLengthLessThan(1200))
-			{
+				pImmolator->EnableShootFar(false);
+				Vector delta = GetEnemyLKP() - GetAbsOrigin();
+				if (m_bDontHose)
+				{
+					ClearCondition(COND_CAN_RANGE_ATTACK1);
+					return BaseClass::SelectSchedule();
+				}
 				CBaseEntity* pEntityList[8];
 				int entityCount = UTIL_EntitiesInSphere(pEntityList, 8, GetAbsOrigin(), 1200, FL_NPC);
 				int enemyCount = 0;
@@ -448,28 +495,25 @@ int CNPC_CrematorManod::SelectSchedule()
 				if ((enemyCount > 1 && gpGlobals->curtime > m_fNextSprayTime) || HasCondition(COND_CAN_MELEE_ATTACK1))
 				{
 					m_fNextSprayTime = gpGlobals->curtime + 20;
-					pImmolator->m_bShootFar = false;
 					return SCHED_SPECIAL_ATTACK2;
 				}
+				return BaseClass::SelectSchedule(); //Should do SCHED_RANGE_ATTACK1 or similar
 			}
-			else if (gpGlobals->curtime > m_fNextDirectedBeamTime)
+			if (HasCondition(COND_ENEMY_TOO_FAR) && HasCondition(COND_HAVE_ENEMY_LOS) && gpGlobals->curtime > m_fNextDirectedBeamTime)
 			{
 				m_fNextDirectedBeamTime = gpGlobals->curtime + 20;
-				pImmolator->m_bShootFar = true;
+				pImmolator->EnableShootFar(true);
 				return SCHED_SPECIAL_ATTACK1;
 			}
-			pImmolator->m_bShootFar = false;
-			pImmolator->m_fMaxRange1 /= 2; //Reset dat
-			return BaseClass::SelectSchedule();
+			// We fell through, no conditions met for attacking, stop firing
+			BridgeStopImmolating(pImmolator);
 		}
-		break;
 	}
-	if (pImmolator)
-	{
-		BridgeStopImmolating(pImmolator);
-	}
+
 	return BaseClass::SelectSchedule();
 }
+
+
 
 int CNPC_CrematorManod::TranslateSchedule(int scheduleType)
 {
