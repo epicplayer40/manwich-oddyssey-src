@@ -393,6 +393,8 @@ BEGIN_DATADESC( CWeaponImmolator )
 	DEFINE_FIELD( m_fireState, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flAmmoUseTime, FIELD_TIME ),
 	DEFINE_FIELD( m_flStartFireTime, FIELD_TIME ),
+	DEFINE_FIELD (m_bUsingAnimEvents, FIELD_BOOLEAN ),
+
 	DEFINE_ENTITYFUNC( UpdateThink ),
 END_DATADESC()
 
@@ -457,6 +459,17 @@ IMPLEMENT_ACTTABLE( CWeaponImmolator );
 
 void CWeaponImmolator::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator )
 {
+	int event = pEvent->event;
+	switch (event)
+	{
+	case EVENT_WEAPON_SMG1:
+		{
+			m_iPrimaryAmmoType = -1;
+			m_bUsingAnimEvents = true;
+			m_flStartFireTime = gpGlobals->curtime;
+			StartImmolating();
+		}
+	}
 
 }
 
@@ -737,6 +750,12 @@ void CWeaponImmolator::UpdateThink( void )
 	CBaseCombatCharacter *pOwner = GetOwner();
 
 	if( pOwner && !pOwner->IsAlive() )
+	{
+		StopImmolating();
+		return;
+	}
+
+	if (m_bUsingAnimEvents && gpGlobals->curtime > m_flStartFireTime + 1.0f)
 	{
 		StopImmolating();
 		return;

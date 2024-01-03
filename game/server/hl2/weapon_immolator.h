@@ -76,6 +76,7 @@ private:
 	IMMOLATOR_FIRESTATE		m_fireState;
 	float				m_flAmmoUseTime;	// since we use < 1 point of ammo per update, we subtract ammo on a timer.
 	float				m_flStartFireTime;	
+	bool				m_bUsingAnimEvents;
 };
 
 #endif	//WEAPONIMMOLATOR_H
