@@ -470,7 +470,7 @@ void CWeaponImmolator::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseComba
 			StartImmolating();
 		}
 	}
-
+	BaseClass::Operator_HandleAnimEvent(pEvent, pOperator);
 }
 
 void CWeaponImmolator::Operator_ForceNPCFire( CBaseCombatCharacter *pOperator, bool bSecondary )
@@ -756,7 +756,7 @@ void CWeaponImmolator::UpdateThink( void )
 		return;
 	}
 
-	if (m_bUsingAnimEvents && gpGlobals->curtime > m_flStartFireTime + 1.0f)
+	if (m_bUsingAnimEvents && gpGlobals->curtime > m_flStartFireTime + 0.5f)
 	{
 		StopImmolating();
 		return;
