@@ -297,6 +297,11 @@ void CNPC_CrematorManod::HandleAnimEvent( animevent_t *pEvent )
 			ClearCondition(COND_NO_SECONDARY_AMMO);
 		}
 		break;
+	case EVENT_WEAPON_SMG1:
+		if (GetImmolator())
+		{
+			break;
+		}
 	default:
 		BaseClass::HandleAnimEvent( pEvent );
 		break;
@@ -432,6 +437,11 @@ Vector	CNPC_CrematorManod::GetShootEnemyDir(const Vector& shootOrigin, bool bNoi
 	{
 		Vector vecEnemyLKP = GetEnemyLKP();
 		Vector vecEnemyOffset = pEnemy->WorldSpaceCenter() - pEnemy->GetAbsOrigin();
+
+		if (vecEnemyLKP.z <= GetAbsOrigin().z)
+		{
+			VectorClear(vecEnemyOffset);
+		}
 
 		Vector delta = vecEnemyOffset + vecEnemyLKP - shootOrigin;
 		if (immolator_debug.GetBool())
@@ -881,6 +891,7 @@ DEFINE_SCHEDULE
 	"	Interrupts "
 	"		COND_NEW_ENEMY"
 	"		COND_ENEMY_DEAD"
+	"		COND_SEE_ENEMY"
 	"		COND_LOST_ENEMY"
 	"		COND_CAN_RANGE_ATTACK1"
 	"		COND_CAN_MELEE_ATTACK1"
