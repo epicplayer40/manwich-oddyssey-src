@@ -688,7 +688,9 @@ int CNPC_CrematorManod::SelectCombatSchedule()
 					if (!pCharacter || pCharacter == this)
 						continue;
 
-					if (FindEntityRelationship(pCharacter)->disposition == D_HT)
+					trace_t tr;
+					UTIL_TraceLine(WorldSpaceCenter(), pCharacter->WorldSpaceCenter(), MASK_SHOT, this, COLLISION_GROUP_NPC, &tr);
+					if (tr.fraction == 1.0 && FindEntityRelationship(pCharacter)->disposition == D_HT)
 					{
 						enemyCount++;
 					}
