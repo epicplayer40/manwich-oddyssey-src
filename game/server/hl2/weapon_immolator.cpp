@@ -40,6 +40,7 @@ ConVar	sk_npc_dmg_immolator("sk_npc_dmg_immolator", "0");
 ConVar	sk_plr_burn_duration_immolator("sk_plr_burn_duration_immolator", "0");
 ConVar	sk_npc_burn_duration_immolator("sk_npc_burn_duration_immolator", "0");
 ConVar	sk_immolator_gravity("sk_immolator_gravity", "0");
+ConVar	sk_immolator_speed("sk_immolator_speed", "0");
 
 extern ConVar sk_cremator_maxrange;
 extern ConVar sk_cremator_minrange;
@@ -50,7 +51,6 @@ ConVar immolator_debug("immolator_debug", "0");
 #define RADIUS_GROW_RATE	50.0	// units/sec 
 
 #define IMMOLATOR_TARGET_INVALID Vector( FLT_MAX, FLT_MAX, FLT_MAX )
-#define IMMOLATOR_BEAM_AIR_VELOCITY	1500
 
 #define BEAM_MODEL	"models/crossbow_bolt.mdl"
 
@@ -895,7 +895,7 @@ void CWeaponImmolator::FireBeam( void )
 
 float CWeaponImmolator::GetBeamVelocity() const
 {
-	return IMMOLATOR_BEAM_AIR_VELOCITY;
+	return sk_immolator_speed.GetFloat();
 }
 
 void CWeaponImmolator::CalculateMaxDistance()
