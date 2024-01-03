@@ -24,10 +24,9 @@ public:
 	DECLARE_CLASS( CWeaponImmolator, CBaseHLCombatWeapon );
 
 	DECLARE_SERVERCLASS();
-
-	CWeaponImmolator( void );
 	
 	void Precache( void );
+	void Spawn( void );
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
 	void ItemPostFrame( void );
@@ -42,7 +41,7 @@ public:
 
 	void StartImmolating();
 	void StopImmolating();
-	bool IsImmolating() { return m_fireState == FIRE_CHARGE || m_fireState == FIRE_STARTUP; }
+	bool IsImmolating() { return m_fireState == FIRE_CHARGE; }
 
 	int		GetMinBurst() { return 50; }
 	int		GetMaxBurst() { return 100; }
@@ -60,12 +59,13 @@ public:
 	void	FireBeam( void );
 
 	float GetBeamVelocity() const;
-	void EnableShootFar(bool shootfar);
 	void CalculateMaxDistance();
+	void StopLoopingSounds();
 
 	DECLARE_ACTTABLE();
 	DECLARE_DATADESC();
 
+private:
 	int	m_beamIndex;
 
 	float m_flBurnRadius;
@@ -75,12 +75,7 @@ public:
 
 	IMMOLATOR_FIRESTATE		m_fireState;
 	float				m_flAmmoUseTime;	// since we use < 1 point of ammo per update, we subtract ammo on a timer.
-	float				m_flStartFireTime;
-	
-	static int m_nMuzzleAttachment;
-
-private:
-	bool m_bShootFar;
+	float				m_flStartFireTime;	
 };
 
 #endif	//WEAPONIMMOLATOR_H

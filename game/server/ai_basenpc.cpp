@@ -8461,7 +8461,16 @@ void CAI_BaseNPC::HandleAnimEvent( animevent_t *pEvent )
 	
 			break;
 		}
-
+	case EVENT_WEAPON_REFILL:
+		if (GetActiveWeapon())
+		{
+			CBaseCombatWeapon* pWeapon = GetActiveWeapon();
+			GiveAmmo(pWeapon->GetDefaultClip1(), pWeapon->m_iPrimaryAmmoType, true);
+			ClearCondition(COND_LOW_PRIMARY_AMMO);
+			ClearCondition(COND_NO_PRIMARY_AMMO);
+			ClearCondition(COND_NO_SECONDARY_AMMO);
+		}
+		break;
 	default:
 		if ((pEvent->type & AE_TYPE_NEWEVENTSYSTEM) && (pEvent->type & AE_TYPE_SERVER))
 		{

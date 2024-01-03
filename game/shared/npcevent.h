@@ -69,6 +69,7 @@ struct animevent_t
 #define EVENT_WEAPON_SMG1_BURSTN		3102		// 2, 3 rounds
 #define EVENT_WEAPON_AR2_ALTFIRE		3103
 #define EVENT_WEAPON_DROP				3104		//Lychy	- when to drop the weapon
+#define EVENT_WEAPON_REFILL				3105		//Lychy	- Replenish to full ammo
 
 #define EVENT_WEAPON_SEQUENCE_FINISHED	3900
 

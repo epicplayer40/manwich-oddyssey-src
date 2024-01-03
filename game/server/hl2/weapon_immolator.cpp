@@ -41,6 +41,9 @@ ConVar	sk_plr_burn_duration_immolator("sk_plr_burn_duration_immolator", "0");
 ConVar	sk_npc_burn_duration_immolator("sk_npc_burn_duration_immolator", "0");
 ConVar	sk_immolator_gravity("sk_immolator_gravity", "0");
 
+extern ConVar sk_cremator_maxrange;
+extern ConVar sk_cremator_minrange;
+
 ConVar immolator_debug("immolator_debug", "0");
 
 #define MAX_BURN_RADIUS		256
@@ -48,11 +51,8 @@ ConVar immolator_debug("immolator_debug", "0");
 
 #define IMMOLATOR_TARGET_INVALID Vector( FLT_MAX, FLT_MAX, FLT_MAX )
 #define IMMOLATOR_BEAM_AIR_VELOCITY	1500
-#define IMMOLATOR_BEAM_SPECIAL_MULTIPLIER 2
 
 #define BEAM_MODEL	"models/crossbow_bolt.mdl"
-
-int CWeaponImmolator::m_nMuzzleAttachment = 0;
 
 //#define CREMATOR_AIM_HACK
 
@@ -208,6 +208,7 @@ void CImmolatorBeam::Spawn( void )
 	SetCollisionGroup( COLLISION_GROUP_PROJECTILE );
 
 	m_immobeamIndex = engine->PrecacheModel("sprites/bluelaser1.vmt");
+
 
 	// Make sure we're updated if we're underwater
 	UpdateWaterState();
@@ -392,8 +393,6 @@ BEGIN_DATADESC( CWeaponImmolator )
 	DEFINE_FIELD( m_fireState, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flAmmoUseTime, FIELD_TIME ),
 	DEFINE_FIELD( m_flStartFireTime, FIELD_TIME ),
-	DEFINE_FIELD( m_bShootFar, FIELD_BOOLEAN ),
-
 	DEFINE_ENTITYFUNC( UpdateThink ),
 END_DATADESC()
 
@@ -455,35 +454,10 @@ acttable_t CWeaponImmolator::m_acttable[] =
 
 IMPLEMENT_ACTTABLE( CWeaponImmolator );
 
-//-----------------------------------------------------------------------------
-// Constructor
-//-----------------------------------------------------------------------------
-CWeaponImmolator::CWeaponImmolator( void )
-{
-	m_fMaxRange1 = 1200;
-	m_fMinRange1 = 200;
-}
 
 void CWeaponImmolator::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator )
 {
-	switch( pEvent->event )
-	{
-		case EVENT_WEAPON_SMG1:
-		{		
-		Vector	muzzlePoint;
-		QAngle	vecAngles;
-		
-		GetActivity();
-		GetAttachment("muzzle", muzzlePoint, vecAngles);
-		Vector vecShootDir;	
-		WeaponSound(SINGLE);
-		FireBeam();
-		}
-		break;
-		default:
-			BaseClass::Operator_HandleAnimEvent( pEvent, pOperator );
-			break;
-	}
+
 }
 
 void CWeaponImmolator::Operator_ForceNPCFire( CBaseCombatCharacter *pOperator, bool bSecondary )
@@ -535,7 +509,7 @@ bool CWeaponImmolator::HasAmmo( void )
 
 void CWeaponImmolator::UseAmmo( int count )
 {
-	CBasePlayer *pOwner = ToBasePlayer( GetOwner() );
+	CBaseCombatCharacter *pOwner = ToBaseCombatCharacter( GetOwner() );
 	if ( pOwner == NULL )
 		return;
 
@@ -547,12 +521,16 @@ void CWeaponImmolator::UseAmmo( int count )
 
 void CWeaponImmolator::StartImmolating()
 {
-	// Start the radius really tiny because we use radius == 0.0 to 
-	// determine whether the immolator is operating or not.
+	if (IsImmolating())
+	{
+		return;
+	}
+	EmitSound("Weapon_Immolator.Run");
 	m_flBurnRadius = 0.1;
 	m_flTimeLastUpdatedRadius = gpGlobals->curtime;
 	SetThink( &CWeaponImmolator::UpdateThink );
 	SetNextThink( gpGlobals->curtime );
+	m_fireState = FIRE_CHARGE;
 }
 
 void CWeaponImmolator::StopImmolating()
@@ -587,6 +565,16 @@ void CWeaponImmolator::Precache( void )
 	PrecacheScriptSound( "Weapon_Immolator.Start" );
 	PrecacheScriptSound( "Weapon_Immolator.Run" );
 	PrecacheScriptSound( "Weapon_Immolator.Off" );
+}
+
+void CWeaponImmolator::Spawn(void)
+{
+	BaseClass::Spawn();
+
+	if (m_nMuzzleFlashAttachment == 0)
+	{
+		m_nMuzzleFlashAttachment = LookupAttachment("muzzle");
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -624,8 +612,7 @@ void CWeaponImmolator::PrimaryAttack( void )
 		{
 			if ( gpGlobals->curtime >= ( m_flStartFireTime + 0.3 ) )
 			{
-				EmitSound( "Weapon_Immolator.Run" );
-
+				StartImmolating();
 				m_fireState = FIRE_CHARGE;
 			}
 
@@ -639,8 +626,6 @@ void CWeaponImmolator::PrimaryAttack( void )
 
 		case FIRE_CHARGE:
 		{
-			StartImmolating();
-
 			if ( !HasAmmo() )
 			{
 				StopImmolating();
@@ -734,7 +719,7 @@ int CWeaponImmolator::WeaponRangeAttack1Condition( float flDot, float flDist )
 		flDist = vecToTarget.Length();
 	}
 	
-	if (flDist < MIN(m_fMinRange1, m_fMinRange2))
+	if (flDist < m_fMinRange1)
 		return COND_TOO_CLOSE_TO_ATTACK;
 
 	//if (m_flNextPrimaryAttack > gpGlobals->curtime)
@@ -891,22 +876,19 @@ void CWeaponImmolator::FireBeam( void )
 
 float CWeaponImmolator::GetBeamVelocity() const
 {
-	float velocity = IMMOLATOR_BEAM_AIR_VELOCITY;
-	if (m_bShootFar)
-	{
-		velocity *= IMMOLATOR_BEAM_SPECIAL_MULTIPLIER;
-	}
-	return velocity;
-}
-
-void CWeaponImmolator::EnableShootFar(bool shootFar)
-{
-	m_bShootFar = shootFar;
-	CalculateMaxDistance();
+	return IMMOLATOR_BEAM_AIR_VELOCITY;
 }
 
 void CWeaponImmolator::CalculateMaxDistance()
 {
-	float velocity = GetBeamVelocity();
-	m_fMaxRange1 = (velocity * velocity) / (GetCurrentGravity() * sk_immolator_gravity.GetFloat());
+	m_fMinRange1 = sk_cremator_minrange.GetFloat();
+	m_fMinRange2 = sk_cremator_minrange.GetFloat();
+	m_fMaxRange1 = sk_cremator_maxrange.GetFloat();
+	m_fMaxRange2 = sk_cremator_maxrange.GetFloat();
+}
+
+void CWeaponImmolator::StopLoopingSounds()
+{
+	StopSound("Weapon_Immolator.Run");
+	BaseClass::StopLoopingSounds();
 }

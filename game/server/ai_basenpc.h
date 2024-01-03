@@ -1157,7 +1157,7 @@ protected:
 	void CalculateForcedInteractionPosition( void );
 	CAI_BaseNPC *GetInteractionPartner( void );
 
-private:
+protected:
 	// Forced interactions
 	CHandle<CAI_BaseNPC>				 m_hForcedInteractionPartner;
 	Vector								 m_vecForcedWorldPosition;
