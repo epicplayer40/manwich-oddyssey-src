@@ -916,7 +916,7 @@ bool CWeapon_SLAM::Deploy( void )
 	// If detonator is already armed
 	m_bNeedReload = false;
 
-	if (m_tSlamState == SLAM_TRIPMINE_READY) //Use tripmine draw when switching weapons - epicplayer
+	if (pOwner->GetAmmoCount(m_iSecondaryAmmoType) > 0 && m_tSlamState == SLAM_TRIPMINE_READY) //Use tripmine draw when switching weapons - epicplayer
 	{
 		iActivity = ACT_SLAM_TRIPMINE_DRAW;
 	}
