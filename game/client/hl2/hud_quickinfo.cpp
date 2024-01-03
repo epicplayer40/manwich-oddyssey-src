@@ -301,7 +301,7 @@ void CHUDQuickInfo::Paint()
 		m_fFade = QINFO_FADE_TIME;
 		m_lastAmmo = ammo;
 
-		if (!(pWeapon->GetWeaponFlags() & ITEM_FLAG_NOWARNINGSOUND) && ((float)ammo / (float)pWeapon->GetMaxClip1()) <= (1.0f - CLIP_PERC_THRESHOLD))
+		if ((pWeapon->GetMaxClip1() > 1) && !(pWeapon->GetWeaponFlags() & ITEM_FLAG_NOWARNINGSOUND) && ((float)ammo / (float)pWeapon->GetMaxClip1()) <= (1.0f - CLIP_PERC_THRESHOLD))
 		{
 			if (m_warnAmmo == false)
 			{
