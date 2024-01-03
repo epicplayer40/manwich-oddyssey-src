@@ -584,6 +584,7 @@ void CWeaponImmolator::Spawn(void)
 {
 	BaseClass::Spawn();
 
+	m_bUsingAnimEvents = false;
 	if (m_nMuzzleFlashAttachment == 0)
 	{
 		m_nMuzzleFlashAttachment = LookupAttachment("muzzle");
