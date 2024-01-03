@@ -36,7 +36,6 @@ BEGIN_DATADESC( CWeapon_SLAM )
 
 	// Function Pointers
 	DEFINE_FUNCTION( SLAMThink ),
-	DEFINE_FUNCTION( SlamTouch ),
 
 END_DATADESC()
 
@@ -88,55 +87,6 @@ void CWeapon_SLAM::Precache( void )
 	PrecacheScriptSound( "Weapon_SLAM.SatchelThrow" );
 	PrecacheScriptSound( "Weapon_SLAM.SatchelAttach" );
 
-}
-
-//------------------------------------------------------------------------------
-// Purpose : Override to use slam's pickup touch function
-// Input   :
-// Output  :
-//------------------------------------------------------------------------------
-void CWeapon_SLAM::SetPickupTouch( void )
-{
-	SetTouch(&CWeapon_SLAM::SlamTouch);
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: Override so give correct ammo
-// Input  : pOther - the entity that touched me
-// Output :
-//-----------------------------------------------------------------------------
-void CWeapon_SLAM::SlamTouch( CBaseEntity *pOther )
-{
-	CBaseCombatCharacter* pBCC = ToBaseCombatCharacter( pOther );
-
-	// Can I even pick stuff up?
-	if ( pBCC && !pBCC->IsAllowedToPickupWeapons() )
-		return;
-
-	// ---------------------------------------------------
-	//  First give weapon to touching entity if allowed
-	// ---------------------------------------------------
-	BaseClass::DefaultTouch(pOther);
-
-	// ----------------------------------------------------
-	//  Give slam ammo if touching client
-	// ----------------------------------------------------
-	if (pOther->GetFlags() & FL_CLIENT)
-	{
-		// ------------------------------------------------
-		//  If already owned weapon of this type remove me
-		// ------------------------------------------------
-		CWeapon_SLAM* oldWeapon = (CWeapon_SLAM*)pBCC->Weapon_OwnsThisType( GetClassname() );
-		if (oldWeapon != this)
-		{
-			UTIL_Remove( this );
-		}
-		else
-		{
-			pBCC->GiveAmmo( 1, m_iSecondaryAmmoType );
-			SetThink(NULL);
-		}
-	}
 }
 
 //------------------------------------------------------------------------------

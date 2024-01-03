@@ -53,8 +53,6 @@ public:
 	void				WeaponSwitch( void );
 	void				SLAMThink( void );
 	
-	void				SetPickupTouch( void );
-	void				SlamTouch( CBaseEntity *pOther );	// default weapon touch
 	void				ItemPostFrame( void );	
 	bool				Reload( void );
 	void				SetSlamState( SlamState_t newState );
