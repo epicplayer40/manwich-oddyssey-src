@@ -349,11 +349,11 @@ void CWeapon_SLAM::SatchelThrow( void )
 	// Only the player fires this way so we can cast
 	CBasePlayer *pPlayer = ToBasePlayer( GetOwner() );
 
-	Vector vecSrc	 = pPlayer->WorldSpaceCenter();
+	Vector vecSrc	 = pPlayer->Weapon_ShootPosition();
 	Vector vecFacing = pPlayer->BodyDirection3D( );
 	vecSrc = vecSrc + vecFacing * 18.0;
 	// BUGBUG: is this because vecSrc is not from Weapon_ShootPosition()???
-	vecSrc.z += 24.0f;
+	vecSrc.z -= 6.0f;
 
 	Vector vecThrow;
 	GetOwner()->GetVelocity( &vecThrow, NULL );
