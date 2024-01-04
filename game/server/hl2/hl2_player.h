@@ -302,10 +302,11 @@ private:
 	void				OnSquadMemberKilled( inputdata_t &data );
 
 
+public:
 	// This player's HL2 specific data that should only be replicated to 
 	//  the player and not to other players.
 	CNetworkVarEmbedded( CHL2PlayerLocalData, m_HL2Local );
-
+private:
 	float				m_flTimeAllSuitDevicesOff;
 
 	bool				m_bSprintEnabled;		// Used to disable sprint temporarily

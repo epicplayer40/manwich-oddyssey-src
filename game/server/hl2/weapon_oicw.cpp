@@ -22,6 +22,7 @@
 #include "materialsystem/imaterial.h"
 #include "materialsystem/imesh.h"
 #include "materialsystem/imaterialvar.h"
+#include "hl2_player.h"
 
 
 //extern ConVar    sk_plr_dmg_ar2_grenade;	
@@ -132,7 +133,7 @@ bool CWeaponOICW::Deploy( void )
 //-----------------------------------------------------------------------------
 void CWeaponOICW::ItemPostFrame( void )
 {
-	CBasePlayer *pOwner = ToBasePlayer( GetOwner() );
+	CHL2_Player * pOwner = dynamic_cast<CHL2_Player*>(GetOwner());
 	if (!pOwner)
 		return;
 
@@ -142,16 +143,10 @@ void CWeaponOICW::ItemPostFrame( void )
 	}
 
 
-	if (pOwner->m_afButtonPressed & IN_ATTACK3)
+	if (pOwner->m_afButtonPressed & IN_ATTACK3 && !pOwner->m_HL2Local.m_bZooming )
 	{
 		Zoom();
 	}
-	if (pOwner->m_afButtonPressed & IN_ATTACK2 )
-	{
-		GLaunch();
-	}
-
-
 
 	//Zoom in
 	//if ( pOwner->m_afButtonPressed & IN_ATTACK2 )
@@ -449,4 +444,9 @@ void CWeaponOICW::Drop( const Vector &velocity )
 	}
 
 	BaseClass::Drop( velocity );
+}
+
+void CWeaponOICW::SecondaryAttack(void)
+{
+	GLaunch();
 }
