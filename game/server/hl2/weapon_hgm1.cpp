@@ -77,6 +77,8 @@ public:
 
 	bool Reload();
 
+	Activity GetPrimaryAttackActivity(void);
+
 	DECLARE_ACTTABLE();
 };
 
@@ -187,4 +189,22 @@ bool CWeaponHMG1::Reload()
 		WeaponSound( RELOAD );
 	}
 	return BaseClass::Reload();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+// Output : Activity
+//-----------------------------------------------------------------------------
+Activity CWeaponHMG1::GetPrimaryAttackActivity(void)
+{
+	if (m_nShotsFired < 2)
+		return ACT_VM_PRIMARYATTACK;
+
+	if (m_nShotsFired < 10)
+		return ACT_VM_HITLEFT;
+
+	if (m_nShotsFired < 16)
+		return ACT_VM_HITLEFT2;
+
+	return ACT_VM_HITRIGHT;
 }
