@@ -38,13 +38,13 @@ float RateOfFire[ MAX_SETTINGS ] =
 	1.0,
 };
 
-float Damage[ MAX_SETTINGS ] =
+const ConVar* DamageConVars[ MAX_SETTINGS ] =
 {
-	sk_plr_dmg_ar1_firerate1.GetFloat(),
-	sk_plr_dmg_ar1_firerate2.GetFloat(),
-	sk_plr_dmg_ar1_firerate3.GetFloat(),
-	sk_plr_dmg_ar1_firerate4.GetFloat(),
-	sk_plr_dmg_ar1_firerate5.GetFloat(),
+	&sk_plr_dmg_ar1_firerate1,
+	&sk_plr_dmg_ar1_firerate2,
+	&sk_plr_dmg_ar1_firerate3,
+	&sk_plr_dmg_ar1_firerate4,
+	&sk_plr_dmg_ar1_firerate5
 };
 
 
@@ -160,7 +160,7 @@ void CWeaponAR1::Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatChara
 			ASSERT( npc != NULL );
 			vecShootDir = npc->GetActualShootTrajectory( vecShootOrigin );
 			WeaponSound(SINGLE_NPC);
-			pOperator->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_PRECALCULATED, MAX_TRACE_LENGTH, m_iPrimaryAmmoType, Damage[ m_ROF ] );
+			pOperator->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_PRECALCULATED, MAX_TRACE_LENGTH, m_iPrimaryAmmoType, DamageConVars[ m_ROF ]->GetFloat() );
 			pOperator->DoMuzzleFlash();
 
 		}
@@ -337,7 +337,7 @@ void CWeaponAR1::FireBullets( const FireBulletsInfo_t& info )
 {
 
 	FireBulletsInfo_t newInfo = info;
-	newInfo.m_flDamage = Damage[m_ROF];
+	newInfo.m_flDamage = DamageConVars[m_ROF]->GetFloat();
 
 	if (CBasePlayer *pPlayer = ToBasePlayer(GetOwner()))
 	{
