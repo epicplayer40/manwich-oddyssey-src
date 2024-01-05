@@ -35,6 +35,9 @@ END_SEND_TABLE()
 #ifndef HL2MP
 LINK_ENTITY_TO_CLASS( weapon_crowbar, CWeaponCrowbar );
 PRECACHE_WEAPON_REGISTER( weapon_crowbar );
+
+LINK_ENTITY_TO_CLASS( weapon_knife, CWeaponCrowbar ); //Very temp knife addition
+PRECACHE_WEAPON_REGISTER( weapon_knife );
 #endif
 
 acttable_t CWeaponCrowbar::m_acttable[] = 
