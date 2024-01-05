@@ -284,7 +284,7 @@ void CNPC_CombineGuard::Precache( void )
 
 	engine->PrecacheModel("sprites/blueflare1.vmt");
 
-	PrecacheScriptSound( "NPC_FastZombie.CarEnter1" );
+	PrecacheScriptSound( "NPC_CombineGuard.ArmorBreak" );
 	PrecacheScriptSound( "NPC_Hunter.ChargeHitEnemy" );
 
 	PrecacheScriptSound("NPC_CombineGuard.FootstepLeft");
@@ -410,6 +410,12 @@ void CNPC_CombineGuard::Spawn( void )
 	m_fHasInitedArmor = false;
 
 	m_fOffBalance = false;
+
+	// We need to bloat the absbox to encompass all the hitboxes
+	Vector absMin = -Vector(100,100,0);
+	Vector absMax = Vector(100,100,128);
+
+	CollisionProp()->SetSurroundingBoundsType( USE_SPECIFIED_BOUNDS, &absMin, &absMax );
 }
 
 //-----------------------------------------------------------------------------
@@ -818,33 +824,35 @@ float CNPC_CombineGuard::GetLegDamage( void )
 //-----------------------------------------------------------------------------
 Activity CNPC_CombineGuard::NPC_TranslateActivity( Activity baseAct )
 {
-	if ( baseAct == ACT_RUN )
+	if ( m_NPCState != NPC_STATE_SCRIPT ) //don't get movement restricted when doing a scripted sequence - epicplayer
 	{
-		float	legDamage = GetLegDamage();
-
-		if ( legDamage > 0.75f )
+		if ( baseAct == ACT_RUN )
 		{
-			//TODO: LIMP
+			float	legDamage = GetLegDamage();
+
+			if ( legDamage > 0.75f )
+			{
+				//TODO: LIMP
+				return (Activity) ACT_WALK;
+			}
+			else if ( legDamage > 0.5f )
+			{
+				return (Activity) ACT_WALK;
+			}
+		}
+
+		if ( baseAct == ACT_RUN && ( m_flLastRangeTime < gpGlobals->curtime ) ) //let the combine guard run if he isn't ready to shoot yet - epicplayer
+		{
+			// Don't run at all.
 			return (Activity) ACT_WALK;
 		}
-		else if ( legDamage > 0.5f )
-		{
-			return (Activity) ACT_WALK;
-		}
-	}
-
-	if ( baseAct == ACT_RUN && ( m_flLastRangeTime < gpGlobals->curtime ) ) //let the combine guard run if he isn't ready to shoot yet - epicplayer
-	{
-		// Don't run at all.
-		return (Activity) ACT_WALK;
-	}
 	
-	//Translate our idle if we're angry
-	if ( baseAct == ACT_IDLE && m_NPCState != NPC_STATE_IDLE )
-	{
-		return (Activity) ACT_IDLE_ANGRY;
+		//Translate our idle if we're angry
+		if ( baseAct == ACT_IDLE && m_NPCState != NPC_STATE_IDLE )
+		{
+			return (Activity) ACT_IDLE_ANGRY;
+		}
 	}
-
 	return baseAct;
 }
 
@@ -979,7 +987,7 @@ void CNPC_CombineGuard::DestroyArmorPiece( int pieceID )
 	int iModelIndex = modelinfo->GetModelIndex( g_PropDataSystem.GetRandomChunkModel( "MetalChunks" ) );	
 	te->BreakModel( filter, 0.0, vecDamagePoint, vecDamageAngles, vecSize, vecVelocity, iModelIndex, 100, 0, 2.5, BREAK_METAL );
 
-	EmitSound("NPC_FastZombie.CarEnter1");
+	EmitSound("NPC_CombineGuard.ArmorBreak");
 
 	//ExplosionCreate( vecDamagePoint, vecDamageAngles, this, 16.0f, 0, false );
 	
@@ -1119,12 +1127,31 @@ int	CNPC_CombineGuard::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 		InitArmorPieces();
 	}
 	*/
-	CTakeDamageInfo newInfo = info;
-	int nDamageTaken = BaseClass::OnTakeDamage_Alive( newInfo );
 
-	if ( info.GetDamageType() & DMG_CRUSH && info.GetInflictor() && !AllArmorDestroyed() )
+	if ( AllArmorDestroyed() )
 	{
-		IPhysicsObject *pPhysObject;
+		return BaseClass::OnTakeDamage_Alive( info );
+	}
+
+	//CTakeDamageInfo newInfo = info;
+	//int nDamageTaken = BaseClass::OnTakeDamage_Alive( newInfo );
+	
+	//int nDamageTaken = 0;
+
+	if ( ((info.GetDamageType() & DMG_BLAST) || UTIL_IsCombineBall( info.GetInflictor() ) ) && ( info.GetDamage() >= sk_combineguard_blastdamage.GetFloat() && gpGlobals->curtime > m_flNextClobberTime ) && !AllArmorDestroyed() ) //React to explosive damage - epicplayer
+	{
+		SetCondition( COND_COMBINEGUARD_CLOBBERED );
+		m_flNextClobberTime = gpGlobals->curtime + 0.5;
+		//newInfo.ScaleDamage( 0.5f );
+		//return nDamageTaken;
+	}
+
+	if ( info.GetInflictor() && info.GetInflictor()->GetOwnerEntity() == this )
+		return 0;
+
+	if ( /*info.GetDamageType() & DMG_CRUSH && */ info.GetInflictor() && !AllArmorDestroyed() )
+	{
+/*		IPhysicsObject *pPhysObject;
 
 		pPhysObject = info.GetInflictor()->VPhysicsGetObject();
 
@@ -1132,9 +1159,18 @@ int	CNPC_CombineGuard::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 		{
 			DevMsg(" HIT by DMG: %f\n", info.GetDamage() );
 
+			*/
+
+			float donkdamage = sk_combineguard_donkdamage.GetFloat();
+
+			if ( info.GetDamageType() & DMG_BUCKSHOT ) //normal shotgun shots shouldn't donk us over - epicplayer
+			{
+				donkdamage *= 2.0f;
+			}
+
 			// Smacked by a physics object
 //			if( info.GetDamage() >= 50.0 && gpGlobals->curtime > m_flNextClobberTime )
-			if ( info.GetDamage() >= sk_combineguard_donkdamage.GetFloat() && gpGlobals->curtime > m_flNextClobberTime )
+			if ( info.GetDamage() >= donkdamage && gpGlobals->curtime > m_flNextClobberTime )
 			{
 				// Hit hard enough to knock me
 				DevMsg(" DONK \n" );
@@ -1155,26 +1191,16 @@ int	CNPC_CombineGuard::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 			NDebugOverlay::Line( vecOrigin, vecOrigin + vecVelocity * 255, 0, 0, 255, false, 1.0 );			
 */
 
-//			newInfo.ScaleDamage(0.7f);
+//			info.ScaleDamage(0.7f);
 //			return nDamageTaken;
 			return 0;
 
-		}
+		//}
 
 
 	}
 
-	if ( ((info.GetDamageType() & DMG_BLAST) || UTIL_IsCombineBall( info.GetInflictor() ) ) && ( info.GetDamage() >= sk_combineguard_blastdamage.GetFloat() && gpGlobals->curtime > m_flNextClobberTime ) && !AllArmorDestroyed() ) //React to explosive damage - epicplayer
-	{
-		SetCondition( COND_COMBINEGUARD_CLOBBERED );
-		m_flNextClobberTime = gpGlobals->curtime + 0.5;
-		newInfo.ScaleDamage( 0.5f );
-		return nDamageTaken;
-	}
-
-	if ( info.GetInflictor() && info.GetInflictor()->GetOwnerEntity() == this )
-		return 0;
-
+	/*
 	if ( info.GetDamageType() & DMG_BUCKSHOT )
 	{
 		newInfo.ScaleDamage( 0.5f );
@@ -1186,9 +1212,10 @@ int	CNPC_CombineGuard::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 		return nDamageTaken;
 	}
 
-	newInfo.ScaleDamage(0.2f);
-	return nDamageTaken;
-//	return 0;
+	newInfo.ScaleDamage(0.2f); */
+
+//	return nDamageTaken;
+	return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -1529,7 +1556,7 @@ AI_BEGIN_CUSTOM_NPC( npc_combineguard, CNPC_CombineGuard )
 		"	"
 		"	Interrupts"
 //		"		COND_NEW_ENEMY"
-		"		COND_ENEMY_DEAD"
+//		"		COND_ENEMY_DEAD"
 		"		COND_NO_PRIMARY_AMMO"
 	)
 
