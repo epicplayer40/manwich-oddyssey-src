@@ -199,7 +199,7 @@ void CNPC_CrematorManod::Spawn( void )
 	Precache();
 
 	SetModel( CREMATOR_MODEL );
-	SetHullType(HULL_MEDIUM);
+	SetHullType( HULL_MEDIUM );
 	SetHullSizeNormal();
 
 	SetSolid( SOLID_BBOX );
@@ -217,6 +217,12 @@ void CNPC_CrematorManod::Spawn( void )
 	CapabilitiesAdd( bits_CAP_TURN_HEAD | bits_CAP_MOVE_GROUND | bits_CAP_USE_WEAPONS | bits_CAP_AIM_GUN | bits_CAP_WEAPON_RANGE_ATTACK1 | bits_CAP_MOVE_SHOOT );
 
 	NPCInit();
+
+	// We need to bloat the absbox to encompass all the hitboxes
+	Vector absMin = -Vector(100,100,0);
+	Vector absMax = Vector(100,100,128);
+
+	CollisionProp()->SetSurroundingBoundsType( USE_SPECIFIED_BOUNDS, &absMin, &absMax );
 }
 
 //-----------------------------------------------------------------------------
