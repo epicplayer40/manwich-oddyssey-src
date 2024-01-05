@@ -103,6 +103,7 @@ void CTripmineGrenade::Precache( void )
 	PrecacheScriptSound( "TripmineGrenade.Activate" );
 	PrecacheScriptSound( "TripmineGrenade.ShootRope" );
 	PrecacheScriptSound( "TripmineGrenade.Hook" );
+	PrecacheScriptSound( "TripmineGrenade.PreDetonate" );
 }
 
 
@@ -260,6 +261,7 @@ void CTripmineGrenade::Event_Killed( const CTakeDamageInfo &info )
 	SetNextThink( gpGlobals->curtime + 0.5 );
 
 	EmitSound( "TripmineGrenade.StopSound" );
+	EmitSound( "TripmineGrenade.PreDetonate" );
 }
 
 
