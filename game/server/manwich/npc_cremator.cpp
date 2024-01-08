@@ -578,7 +578,7 @@ void CNPC_CrematorManod::BridgeStopImmolating()
 void CNPC_CrematorManod::CreateBreatheSound()
 {
 	CPASAttenuationFilter filter(this);
-	m_pBreatheSound = ENVELOPE_CONTROLLER.SoundCreate(filter, entindex(), CHAN_STATIC, "NPC_Cremator.Breathe", ATTN_NORM);
+	m_pBreatheSound = ENVELOPE_CONTROLLER.SoundCreate(filter, entindex(), "NPC_Cremator.Breathe");
 	ENVELOPE_CONTROLLER.Play(m_pBreatheSound, 1.0, PITCH_NORM);
 }
 
@@ -589,7 +589,7 @@ void CNPC_CrematorManod::StartMadBreathe()
 		m_bMadBreathing = true;
 		CPASAttenuationFilter filter(this);
 		ENVELOPE_CONTROLLER.SoundDestroy(m_pBreatheSound);
-		m_pBreatheSound = ENVELOPE_CONTROLLER.SoundCreate(filter, entindex(), CHAN_STATIC, "NPC_Cremator.Breathe_Mad", ATTN_NORM);
+		m_pBreatheSound = ENVELOPE_CONTROLLER.SoundCreate(filter, entindex(), "NPC_Cremator.Breathe_Mad");
 		ENVELOPE_CONTROLLER.Play(m_pBreatheSound, 1.0, PITCH_NORM);
 	}
 }
