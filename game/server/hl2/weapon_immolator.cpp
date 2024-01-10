@@ -175,13 +175,13 @@ bool CImmolatorBeam::CreateSprites( void )
 	}
 
 	// Start up the eye trail
-	m_pGlowTrail	= CSpriteTrail::SpriteTrailCreate( "sprites/bluelaser1.vmt", GetLocalOrigin(), false );
+	m_pGlowTrail	= CSpriteTrail::SpriteTrailCreate( "sprites/plasmabeam.vmt", GetLocalOrigin(), false );
 
 	if ( m_pGlowTrail != NULL )
 	{
 		m_pGlowTrail->FollowEntity( this );
 //		m_pGlowTrail->SetAttachment( this, nAttachment );
-		m_pGlowTrail->SetTransparency( kRenderTransAdd, 0, 255, 0, 255, kRenderFxNone );
+		m_pGlowTrail->SetTransparency( kRenderTransAdd, 255, 255, 255, 64, kRenderFxNone );
 		m_pGlowTrail->SetStartWidth( 5.2f );
 		m_pGlowTrail->SetEndWidth( 1.0f );
 		m_pGlowTrail->SetLifeTime( 0.9f );
@@ -207,7 +207,7 @@ void CImmolatorBeam::Spawn( void )
 	//epicplayer
 	SetCollisionGroup( COLLISION_GROUP_PROJECTILE );
 
-	m_immobeamIndex = engine->PrecacheModel("sprites/bluelaser1.vmt");
+	m_immobeamIndex = engine->PrecacheModel("sprites/plasmabeam.vmt");
 
 
 	// Make sure we're updated if we're underwater
@@ -263,14 +263,14 @@ void CImmolatorBeam::ImmolationDamage( const CTakeDamageInfo &info, const Vector
 			0,		//frame start
 			2.0f,	//framerate
 			0.15f,	//life
-			20,		// width
-			1.75,	// endwidth
+			10,		// width
+			0.05,	// endwidth
 			0.75,	// fadelength,
 			15,		// noise
 
-			0,		// red
+			255,		// red
 			255,	// green
-			0,	// blue,
+			255,	// blue,
 
 			128, // bright
 			100  // speed
@@ -571,7 +571,7 @@ void CWeaponImmolator::StopImmolating()
 //-----------------------------------------------------------------------------
 void CWeaponImmolator::Precache( void )
 {
-	m_beamIndex = engine->PrecacheModel( "sprites/bluelaser1.vmt" );
+	m_beamIndex = engine->PrecacheModel( "sprites/plasmabeam.vmt" );
 
 	BaseClass::Precache();
 
