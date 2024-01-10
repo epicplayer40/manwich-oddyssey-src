@@ -145,6 +145,8 @@ private:
 	float m_fPrevHitOffsetDistance;
 	bool m_bDontHose;
 
+	float m_fNextPainSoundingTime;
+
 	HitFeedback_t m_eHitFeedback;
 };
 
@@ -382,7 +384,11 @@ void CNPC_CrematorManod::TraceAttack( const CTakeDamageInfo &info, const Vector 
 void CNPC_CrematorManod::PainSound( const CTakeDamageInfo &info )
 {
 	DampenBreathing();
-	EmitSound( "NPC_Cremator.Pain" );
+	if (gpGlobals->curtime >= m_fNextPainSoundingTime)
+	{
+		EmitSound("NPC_Cremator.Pain");
+		m_fNextPainSoundingTime = gpGlobals->curtime + random->RandomFloat(0.5, 1.2);
+	}
 }
 
 //=========================================================
