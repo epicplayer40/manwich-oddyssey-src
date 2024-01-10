@@ -20,11 +20,12 @@
 #define NPC_HL2BULLSQUID_H
 
 #include "ai_basenpc.h"
+#include "ai_blended_movement.h"
 
 
-class CNPC_HL2Bullsquid : public CAI_BaseNPC
+class CNPC_HL2Bullsquid : public CAI_BlendedNPC
 {
-	DECLARE_CLASS( CNPC_HL2Bullsquid, CAI_BaseNPC );
+	DECLARE_CLASS( CNPC_HL2Bullsquid, CAI_BlendedNPC );
 	DECLARE_DATADESC();
 
 public:
@@ -62,6 +63,9 @@ public:
 
 	void StartTask ( const Task_t *pTask );
 	void RunTask ( const Task_t *pTask );
+
+	bool OverrideMoveFacing( const AILocalMoveGoal_t &move, float flInterval );
+	int TranslateSchedule( int type );
 
 	NPC_STATE SelectIdealState ( void );
 

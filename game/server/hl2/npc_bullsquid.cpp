@@ -54,6 +54,9 @@ enum
 	SCHED_SQUID_EAT,
 	SCHED_SQUID_SNIFF_AND_EAT,
 	SCHED_SQUID_WALLOW,
+	SCHED_SQUID_MELEE_ATTACK1,
+	SCHED_SQUID_MELEE_ATTACK2,
+	SCHED_SQUID_RANGE_ATTACK1,
 };
 
 //=========================================================
@@ -774,6 +777,31 @@ int CNPC_HL2Bullsquid::SelectSchedule(void)
 	return BaseClass::SelectSchedule();
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: override/translate a schedule by type
+// Input  : Type - schedule type
+// Output : int - translated type
+//-----------------------------------------------------------------------------
+int CNPC_HL2Bullsquid::TranslateSchedule( int type ) 
+{
+	switch( type )
+	{
+	case SCHED_RANGE_ATTACK1:
+		return SCHED_SQUID_RANGE_ATTACK1;
+		break;
+
+	case SCHED_MELEE_ATTACK1:
+		return SCHED_SQUID_MELEE_ATTACK1;
+		break;
+
+	case SCHED_MELEE_ATTACK2:
+		return SCHED_SQUID_MELEE_ATTACK2;
+		break;
+	}
+
+	return BaseClass::TranslateSchedule( type );
+}
+
 //=========================================================
 // FInViewCone - returns true is the passed vector is in
 // the caller's forward view cone. The dot product is performed
@@ -927,6 +955,22 @@ NPC_STATE CNPC_HL2Bullsquid::SelectIdealState(void)
 }
 
 
+//-----------------------------------------------------------------------------
+// Purpose: turn in the direction of movement
+// Output :
+//-----------------------------------------------------------------------------
+bool CNPC_HL2Bullsquid::OverrideMoveFacing( const AILocalMoveGoal_t &move, float flInterval )
+{
+
+	if ( GetEnemy() )
+	{
+		AddFacingTarget( GetEnemy(), GetEnemy()->WorldSpaceCenter(), 1.0f, 0.2f );
+		return BaseClass::OverrideMoveFacing( move, flInterval );
+	}
+
+	return BaseClass::OverrideMoveFacing( move, flInterval );
+}
+
 //------------------------------------------------------------------------------
 //
 // Schedules
@@ -1068,5 +1112,72 @@ DEFINE_SCHEDULE
 	"		COND_HEAVY_DAMAGE"
 	"		COND_NEW_ENEMY"
 )
+
+//===============================================
+//	> RangeAttack1
+//===============================================
+DEFINE_SCHEDULE
+(
+	SCHED_SQUID_RANGE_ATTACK1,
+
+	"	Tasks"
+	"		TASK_STOP_MOVING		0"
+	"		TASK_FACE_ENEMY			0"
+	"		TASK_ANNOUNCE_ATTACK	1"	// 1 = primary attack
+	"		TASK_RANGE_ATTACK1		0"
+	""
+	"	Interrupts"
+//	"		COND_NEW_ENEMY"
+	"		COND_ENEMY_DEAD"
+//	"		COND_LIGHT_DAMAGE"
+	"		COND_HEAVY_DAMAGE"
+//	"		COND_ENEMY_OCCLUDED"
+	"		COND_NO_PRIMARY_AMMO"
+	"		COND_HEAR_DANGER"
+	"		COND_WEAPON_BLOCKED_BY_FRIEND"
+	"		COND_WEAPON_SIGHT_OCCLUDED"
+);
+
+//=========================================================
+// > Melee_Attack1
+//=========================================================
+DEFINE_SCHEDULE
+(
+	SCHED_SQUID_MELEE_ATTACK1,
+
+	"	Tasks"
+	"		TASK_STOP_MOVING		0"
+	"		TASK_FACE_ENEMY			0"
+	"		TASK_ANNOUNCE_ATTACK	1"	// 1 = primary attack
+	"		TASK_MELEE_ATTACK1		0"
+	""
+	"	Interrupts"
+//	"		COND_NEW_ENEMY"
+//	"		COND_ENEMY_DEAD"
+//	"		COND_LIGHT_DAMAGE"
+	"		COND_HEAVY_DAMAGE"
+//	"		COND_ENEMY_OCCLUDED"
+);
+
+//=========================================================
+// > Melee_Attack2
+//=========================================================
+DEFINE_SCHEDULE
+(
+	SCHED_SQUID_MELEE_ATTACK2,
+
+	"	Tasks"
+	"		TASK_STOP_MOVING		0"
+	"		TASK_FACE_ENEMY			0"
+	"		TASK_ANNOUNCE_ATTACK	2"	// 2 = secondary attack
+	"		TASK_MELEE_ATTACK2		0"
+	""
+	"	Interrupts"
+//	"		COND_NEW_ENEMY"
+//	"		COND_ENEMY_DEAD"
+//	"		COND_LIGHT_DAMAGE"
+	"		COND_HEAVY_DAMAGE"
+//	"		COND_ENEMY_OCCLUDED"
+);
 
 AI_END_CUSTOM_NPC()
