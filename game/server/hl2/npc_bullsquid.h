@@ -79,6 +79,8 @@ private:
 	int   m_nSquidSpitSprite;
 	float m_flHungryTime;// set this is a future time to stop the monster from eating for a while. 
 
+	float m_fNextPainSoundingTime;
+
 	float m_nextSquidSoundTime;
 
 	//virtual bool GetSpitVector( const Vector &vecStartPos, const Vector &vecTarget, Vector *vecOut );

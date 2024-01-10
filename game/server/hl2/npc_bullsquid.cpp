@@ -196,7 +196,11 @@ void CNPC_HL2Bullsquid::IdleSound(void)
 //=========================================================
 void CNPC_HL2Bullsquid::PainSound(const CTakeDamageInfo& info)
 {
-	EmitSound("NPC_Bullsquid.Pain");
+	if (gpGlobals->curtime >= m_fNextPainSoundingTime)
+	{
+		EmitSound("NPC_Bullsquid.Pain");
+		m_fNextPainSoundingTime = gpGlobals->curtime + random->RandomFloat(4.0, 7.0);
+	}
 }
 
 //=========================================================
