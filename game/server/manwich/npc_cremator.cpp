@@ -117,6 +117,7 @@ public:
 	void SetAim(const Vector& aimDir);
 	void SetTurnActivity(void);
 	void StartTask(const Task_t* pTask);
+	virtual bool OverrideMoveFacing( const AILocalMoveGoal_t &move, float flInterval );
 
 private:
 
@@ -847,6 +848,45 @@ void CNPC_CrematorManod::StartTask(const Task_t* pTask)
 void CNPC_CrematorManod::SetTurnActivity(void)
 {
 	//TODO: Turning gesture?
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Override how we face our target as we move
+// Output :
+//-----------------------------------------------------------------------------
+bool CNPC_CrematorManod::OverrideMoveFacing( const AILocalMoveGoal_t &move, float flInterval )
+{
+  	Vector		vecFacePosition = vec3_origin;
+	CBaseEntity	*pFaceTarget = NULL;
+	bool		bFaceTarget = false;
+
+	if ( GetEnemy() && (IsCurSchedule( SCHED_CREMATOR_ESTABLISH_LINE_OF_FIRE ) || IsCurSchedule( SCHED_CHASE_ENEMY ) ) )
+	{
+		// Always face our enemy when trying to attack
+		vecFacePosition = GetEnemy()->EyePosition();
+		pFaceTarget = GetEnemy();
+		bFaceTarget = true;
+	}
+	else if ( GetEnemy() && GetNavigator()->GetMovementActivity() == ACT_RUN )
+  	{
+		Vector vecEnemyLKP = GetEnemyLKP();
+		
+		// Only start facing when we're close enough
+		if ( ( UTIL_DistApprox( vecEnemyLKP, GetAbsOrigin() ) < 512 ) || IsCurSchedule( SCHED_COMBAT_FACE ) )
+		{
+			vecFacePosition = vecEnemyLKP;
+			pFaceTarget = GetEnemy();
+			bFaceTarget = true;
+		}
+	}
+
+	// Face
+	if ( bFaceTarget )
+	{
+		AddFacingTarget( pFaceTarget, vecFacePosition, 1.0, 0.2 );
+	}
+
+	return BaseClass::OverrideMoveFacing( move, flInterval );
 }
 
 AI_BEGIN_CUSTOM_NPC(npc_cremator, CNPC_CrematorManod)
