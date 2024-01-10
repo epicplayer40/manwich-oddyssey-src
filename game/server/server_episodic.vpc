@@ -44,6 +44,7 @@ $Project "Server (Mambridge)"
 			$File "hl2/weapon_slam.cpp"
 			$File "hl2/grenade_satchel.cpp"
 			$File "hl2/grenade_tripmine.cpp"
+			$File "hl2/npc_vortigaunt.cpp"
 			
 		}
 
@@ -175,8 +176,6 @@ $Project "Server (Mambridge)"
 			$File	"hl1/hl1_npc_Thresh.cpp"
 			$File	"hl1/hl1_npc_Thresh.h"
 			$File	"hl1/hl1_npc_turret.cpp"
-			$File	"hl1/hl1_npc_vortigaunt.cpp"
-			$File	"hl1/hl1_npc_vortigaunt.h"
 			$File	"hl1/hl1_npc_vortigaunt_ally.cpp"
 			$File	"hl1/hl1_npc_vortigaunt_ally.h"
 			$File	"hl1/hl1_npc_zombie.cpp"
