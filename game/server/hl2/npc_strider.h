@@ -227,6 +227,8 @@ public:
 	void			StopSmoking( float flDelay = 0.1 );
 	bool			IsSmoking() { return m_hSmoke != NULL; }
 	void			Explode();
+
+	bool			IsImmolatable(void) OVERRIDE { return false; } 
 	
 	//---------------------------------
 	// Posture

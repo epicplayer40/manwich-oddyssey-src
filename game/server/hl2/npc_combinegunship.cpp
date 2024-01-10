@@ -325,6 +325,8 @@ public:
 	void	UpdateFacingDirection( void );
 	void	CreateBellyBlastEnergyCore( void );
 
+	bool	IsImmolatable(void) OVERRIDE { return false; } 
+
 protected:
 	// Because the combine gunship is a leaf class, we can use
 	// static variables to store this information, and save some memory.

@@ -276,6 +276,8 @@ public:
 	// Sounds
 	virtual void UpdateRotorWashVolume();
 
+	bool	IsImmolatable(void) OVERRIDE { return false; } 
+
 private:
 	void SetLandingState( LandingState_t landingState );
 	LandingState_t GetLandingState() const { return (LandingState_t)m_iLandState; }

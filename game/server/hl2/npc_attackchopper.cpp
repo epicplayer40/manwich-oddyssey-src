@@ -415,6 +415,8 @@ public:
 	// FIXME: Work this back into the base class
 	virtual bool ShouldUseFixedPatrolLogic() { return true; }
 
+	bool	IsImmolatable(void) OVERRIDE { return false; } 
+
 protected:
 
 	int m_poseWeapon_Pitch, m_poseWeapon_Yaw, m_poseRudder;

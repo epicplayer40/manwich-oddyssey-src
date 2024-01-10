@@ -125,6 +125,7 @@ public:
 
 	bool			AllArmorDestroyed( void );
 	bool			IsArmorPiece( int iArmorPiece );
+	bool			IsImmolatable(void) OVERRIDE { return false; } 
 
 	float			MaxYawSpeed( void );
 
