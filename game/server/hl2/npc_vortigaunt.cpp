@@ -73,47 +73,47 @@
 // Target must be within this range to heal
 #define	HEAL_RANGE			256
 
-extern ConVar	sk_vortigaunt_health;
-extern ConVar	sk_vortigaunt_armor_charge;
-extern ConVar	sk_vortigaunt_dmg_claw;
-extern ConVar	sk_vortigaunt_dmg_rake;
-//extern ConVar	sk_vortigaunt_dmg_zap;
 
+extern ConVar	sk_vortigaunt_armor_charge;
+
+ConVar	sk_islave_health("sk_islave_health", "75");
+ConVar	sk_islave_dmg_claw("sk_islave_dmg_claw", "10");
+ConVar	sk_islave_dmg_clawrake("sk_islave_dmg_clawrake", "25");
 ConVar	sk_islave_dmg_zap( "sk_islave_dmg_zap","5.3");
 
-namespace
-{
-	//=========================================================
-	// Vortigaunt activities
-	//=========================================================
-	int	ACT_VORTIGAUNT_AIM;
-	int ACT_VORTIGAUNT_START_HEAL;
-	int ACT_VORTIGAUNT_HEAL_LOOP;
-	int ACT_VORTIGAUNT_END_HEAL;
-	int ACT_VORTIGAUNT_TO_ACTION;
-	int ACT_VORTIGAUNT_TO_IDLE;
-	int ACT_VORTIGAUNT_STOMP;
-	int ACT_VORTIGAUNT_DEFEND;
-	int ACT_VORTIGAUNT_TO_DEFEND;
-	int ACT_VORTIGAUNT_FROM_DEFEND;
 
-	//=========================================================
-	// Monster's Anim Events Go Here
-	//=========================================================
-	int AE_VORTIGAUNT_CLAW_LEFT;
-	int AE_VORTIGAUNT_CLAW_RIGHT;
-	int AE_VORTIGAUNT_ZAP_POWERUP;
-	int AE_VORTIGAUNT_ZAP_SHOOT;
-	int AE_VORTIGAUNT_ZAP_DONE;
-	int AE_VORTIGAUNT_HEAL_STARTGLOW;
-	int AE_VORTIGAUNT_HEAL_STARTBEAMS;
-	int AE_VORTIGAUNT_KICK;
-	int AE_VORTIGAUNT_STOMP;
-	int AE_VORTIGAUNT_HEAL_STARTSOUND;
-	int AE_VORTIGAUNT_SWING_SOUND;
-	int AE_VORTIGAUNT_SHOOT_SOUNDSTART;
-	int AE_VORTIGAUNT_DEFEND_BEAMS;
-}
+
+//=========================================================
+// Vortigaunt activities
+//=========================================================
+static int	ACT_VORTIGAUNT_AIM;
+static int ACT_VORTIGAUNT_START_HEAL;
+static int ACT_VORTIGAUNT_HEAL_LOOP;
+static int ACT_VORTIGAUNT_END_HEAL;
+static int ACT_VORTIGAUNT_TO_ACTION;
+static int ACT_VORTIGAUNT_TO_IDLE;
+static int ACT_VORTIGAUNT_STOMP;
+static int ACT_VORTIGAUNT_DEFEND;
+static int ACT_VORTIGAUNT_TO_DEFEND;
+static int ACT_VORTIGAUNT_FROM_DEFEND;
+
+//=========================================================
+// Monster's Anim Events Go Here
+//=========================================================
+static int AE_VORTIGAUNT_CLAW_LEFT;
+static int AE_VORTIGAUNT_CLAW_RIGHT;
+static int AE_VORTIGAUNT_ZAP_POWERUP;
+static int AE_VORTIGAUNT_ZAP_SHOOT;
+static int AE_VORTIGAUNT_ZAP_DONE;
+static int AE_VORTIGAUNT_HEAL_STARTGLOW;
+static int AE_VORTIGAUNT_HEAL_STARTBEAMS;
+static int AE_VORTIGAUNT_KICK;
+static int AE_VORTIGAUNT_STOMP;
+static int AE_VORTIGAUNT_HEAL_STARTSOUND;
+static int AE_VORTIGAUNT_SWING_SOUND;
+static int AE_VORTIGAUNT_SHOOT_SOUNDSTART;
+static int AE_VORTIGAUNT_DEFEND_BEAMS;
+
 //---------------------------------------------------------
 // Save/Restore
 //---------------------------------------------------------
@@ -858,7 +858,7 @@ CBaseEntity*	CNPC_Vortigaunt06::Kick( void )
 //------------------------------------------------------------------------------
 void CNPC_Vortigaunt06::Claw( int iAttachment)
 {
-	CBaseEntity *pHurt = CheckTraceHullAttack( 40, Vector(-10,-10,-10), Vector(10,10,10),sk_vortigaunt_dmg_claw.GetFloat(), DMG_SLASH );
+	CBaseEntity *pHurt = CheckTraceHullAttack( 40, Vector(-10,-10,-10), Vector(10,10,10),sk_islave_dmg_claw.GetFloat(), DMG_SLASH );
 	if ( pHurt )
 	{
 		pHurt->ViewPunch( QAngle(5,0,-18) );
@@ -1050,7 +1050,7 @@ void CNPC_Vortigaunt06::HandleAnimEvent( animevent_t *pEvent )
 			{
 				pBCC->ViewPunch( QAngle(15,0,0) );
 
-				CTakeDamageInfo info( this, this, sk_vortigaunt_dmg_claw.GetFloat(), DMG_CLUB );
+				CTakeDamageInfo info( this, this, sk_islave_dmg_claw.GetFloat(), DMG_CLUB );
 				CalculateMeleeDamageForce( &info, forward, pHurt->GetAbsOrigin() );
 				pBCC->TakeDamage( info );
 			}
@@ -1265,7 +1265,7 @@ void CNPC_Vortigaunt06::Spawn()
 	AddSolidFlags( FSOLID_NOT_STANDABLE );
 	SetMoveType( MOVETYPE_STEP );
 	m_bloodColor		= BLOOD_COLOR_GREEN;
-	m_iHealth			= sk_vortigaunt_health.GetFloat();
+	m_iHealth			= sk_islave_health.GetFloat();
 	SetViewOffset( Vector ( 0, 0, 64 ) );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_NPCState			= NPC_STATE_NONE;
