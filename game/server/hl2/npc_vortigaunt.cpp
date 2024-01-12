@@ -266,7 +266,7 @@ void CNPC_Vortigaunt06::StartTask( const Task_t *pTask )
 	switch ( pTask->iTask)
 	{
 
-	case TASK_VORTIGAUNT_GET_HEAL_TARGET:
+	case TASK_VORTSLAVE_GET_HEAL_TARGET:
 	{
 		// Sets our target to the entity that we cached earlier.
 		if ( !m_hHealTarget )
@@ -282,25 +282,25 @@ void CNPC_Vortigaunt06::StartTask( const Task_t *pTask )
 		break;
 	}
 	
-	case TASK_VORTIGAUNT_EXTRACT_WARMUP:
+	case TASK_VORTSLAVE_EXTRACT_WARMUP:
 	{
 		ResetIdealActivity( (Activity) ACT_VORTIGAUNT_TO_ACTION );
 		break;
 	}
 
-	case TASK_VORTIGAUNT_EXTRACT:
+	case TASK_VORTSLAVE_EXTRACT:
 	{
 		SetActivity( (Activity) ACT_RANGE_ATTACK1 );
 		break;
 	}
 
-	case TASK_VORTIGAUNT_EXTRACT_COOLDOWN:
+	case TASK_VORTSLAVE_EXTRACT_COOLDOWN:
 	{
 		ResetIdealActivity( (Activity)ACT_VORTIGAUNT_TO_IDLE );
 		break;
 	}
 
-	case TASK_VORTIGAUNT_FIRE_EXTRACT_OUTPUT:
+	case TASK_VORTSLAVE_FIRE_EXTRACT_OUTPUT:
 		{
 			// Cheat, and fire both outputs
 			m_OnFinishedExtractingBugbait.FireOutput( this, this );
@@ -308,17 +308,17 @@ void CNPC_Vortigaunt06::StartTask( const Task_t *pTask )
 			break;
 		}
 
-	case TASK_VORTIGAUNT_HEAL_WARMUP:
+	case TASK_VORTSLAVE_HEAL_WARMUP:
 		{
 			ResetIdealActivity( (Activity)ACT_VORTIGAUNT_START_HEAL );
 			break;
 		}
-	case TASK_VORTIGAUNT_HEAL:
+	case TASK_VORTSLAVE_HEAL:
 		{
 			ResetIdealActivity( (Activity)ACT_VORTIGAUNT_HEAL_LOOP );
 			break;
 		}
-	case TASK_VORTIGAUNT_FACE_STOMP:
+	case TASK_VORTSLAVE_FACE_STOMP:
 		{
 			if (GetEnemy()!=NULL)
 			{
@@ -331,13 +331,13 @@ void CNPC_Vortigaunt06::StartTask( const Task_t *pTask )
 			}
 			break;
 		}
-	case TASK_VORTIGAUNT_STOMP_ATTACK:
+	case TASK_VORTSLAVE_STOMP_ATTACK:
 		{
 			m_flLastAttackTime = gpGlobals->curtime;
 			ResetIdealActivity( (Activity)ACT_VORTIGAUNT_STOMP );
 			break;
 		}
-	case TASK_VORTIGAUNT_GRENADE_KILL:
+	case TASK_VORTSLAVE_GRENADE_KILL:
 		{
 			if (GetTarget() == NULL)
 			{
@@ -348,7 +348,7 @@ void CNPC_Vortigaunt06::StartTask( const Task_t *pTask )
 
 			break;
 		}
-	case TASK_VORTIGAUNT_ZAP_GRENADE_OWNER:
+	case TASK_VORTSLAVE_ZAP_GRENADE_OWNER:
 		{
 			if (GetEnemy() == NULL)
 			{
@@ -359,7 +359,7 @@ void CNPC_Vortigaunt06::StartTask( const Task_t *pTask )
 
 			break;
 		}
-	case TASK_VORTIGAUNT_WAIT_FOR_PLAYER:
+	case TASK_VORTSLAVE_WAIT_FOR_PLAYER:
 		{
 			// Wait for the player to get near (before starting the bugbait sequence)
 			break;
@@ -435,7 +435,7 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 			}
 			break;
 		}
-	case TASK_VORTIGAUNT_STOMP_ATTACK:
+	case TASK_VORTSLAVE_STOMP_ATTACK:
 		{
 			// Face enemy slightly off center 
 			if (GetEnemy() != NULL)
@@ -449,7 +449,7 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 			}
 			break;
 		}
-	case TASK_VORTIGAUNT_FACE_STOMP:
+	case TASK_VORTSLAVE_FACE_STOMP:
 		{
 			if (GetEnemy()!=NULL)
 			{
@@ -467,7 +467,7 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 			break;
 		}
 
-	case TASK_VORTIGAUNT_EXTRACT_WARMUP:
+	case TASK_VORTSLAVE_EXTRACT_WARMUP:
 	{
 		if ( IsActivityFinished() )
 		{
@@ -476,7 +476,7 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 		break;
 	}
 	
-	case TASK_VORTIGAUNT_EXTRACT:
+	case TASK_VORTSLAVE_EXTRACT:
 	{
 		if ( IsActivityFinished() )
 		{
@@ -485,7 +485,7 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 		break;
 	}
 
-	case TASK_VORTIGAUNT_EXTRACT_COOLDOWN:
+	case TASK_VORTSLAVE_EXTRACT_COOLDOWN:
 	{
 		if ( IsActivityFinished() )
 		{
@@ -495,7 +495,7 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 		break;
 	}
 
-	case TASK_VORTIGAUNT_HEAL_WARMUP:
+	case TASK_VORTSLAVE_HEAL_WARMUP:
 		{
 			if ( IsActivityFinished() )
 			{
@@ -506,7 +506,7 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 				return;
 			break;
 		}
-	case TASK_VORTIGAUNT_GRENADE_KILL:
+	case TASK_VORTSLAVE_GRENADE_KILL:
 		{
 			if (GetTarget() == NULL)
 			{
@@ -537,7 +537,7 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 			}
 			break;
 		}
-	case TASK_VORTIGAUNT_ZAP_GRENADE_OWNER:
+	case TASK_VORTSLAVE_ZAP_GRENADE_OWNER:
 		{
 			if (GetEnemy() == NULL)
 			{
@@ -584,7 +584,7 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 			}
 			break;
 		}
-	case TASK_VORTIGAUNT_HEAL:
+	case TASK_VORTSLAVE_HEAL:
 		{
 			CBasePlayer *pPlayer = AI_GetSinglePlayer();
 			if (pPlayer)
@@ -633,7 +633,7 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 			break;
 		}
 
-	case TASK_VORTIGAUNT_WAIT_FOR_PLAYER:
+	case TASK_VORTSLAVE_WAIT_FOR_PLAYER:
 		{
 			// Wait for the player to get near (before starting the bugbait sequence)
 			// Get edict for one player
@@ -1527,13 +1527,13 @@ int CNPC_Vortigaunt06::TranslateSchedule( int scheduleType )
 	switch( scheduleType )
 	{
 	case SCHED_RANGE_ATTACK1:
-		return SCHED_VORTIGAUNT_RANGE_ATTACK;
+		return SCHED_VORTSLAVE_RANGE_ATTACK;
 		break;
 
 	case SCHED_MELEE_ATTACK1:
 		if (IsStompable(GetEnemy()))
 		{
-			return SCHED_VORTIGAUNT_STOMP_ATTACK;
+			return SCHED_VORTSLAVE_STOMP_ATTACK;
 		}
 		else
 		{
@@ -1545,7 +1545,7 @@ int CNPC_Vortigaunt06::TranslateSchedule( int scheduleType )
 				Vector vClawPos = EyePosition() + vFacingDir*30;
 				GetEnemy()->MyNPCPointer()->DispatchInteraction( g_interactionVortigauntClaw, &vClawPos, this );
 			}
-			return SCHED_VORTIGAUNT_MELEE_ATTACK;
+			return SCHED_VORTSLAVE_MELEE_ATTACK;
 		}
 		break;
 
@@ -1558,7 +1558,7 @@ int CNPC_Vortigaunt06::TranslateSchedule( int scheduleType )
 			if (baseType == SCHED_IDLE_STAND)
 			{
 				// just look straight ahead
-				return SCHED_VORTIGAUNT_STAND;
+				return SCHED_VORTSLAVE_STAND;
 			}
 			else
 				return baseType;	
@@ -1591,7 +1591,7 @@ int CNPC_Vortigaunt06::TranslateSchedule( int scheduleType )
 				}
 				else
 				{
-					return SCHED_VORTIGAUNT_STAND;
+					return SCHED_VORTSLAVE_STAND;
 				}
 			}
 			break;
@@ -1635,7 +1635,7 @@ bool CNPC_Vortigaunt06::ShouldHealTarget( void )
 	if ( GetEnemy() )
 		return false;
 
-	if ( IsCurSchedule( SCHED_VORTIGAUNT_EXTRACT_BUGBAIT ) )
+	if ( IsCurSchedule( SCHED_VORTSLAVE_EXTRACT_BUGBAIT ) )
 		return false;
 
 	// Can't heal if we're leading the player
@@ -1691,7 +1691,7 @@ int CNPC_Vortigaunt06::SelectHealSchedule( void )
 
 	// See if we should heal the player
 	if ( ShouldHealTarget() )
-		return SCHED_VORTIGAUNT_HEAL;
+		return SCHED_VORTSLAVE_HEAL;
 
 	return SCHED_NONE;
 }
@@ -1708,12 +1708,12 @@ int CNPC_Vortigaunt06::SelectSchedule( void )
 
 	// If we're currently supposed to be doing something scripted, do it immediately.
 	if ( m_bExtractingBugbait )
-		return SCHED_VORTIGAUNT_EXTRACT_BUGBAIT;
+		return SCHED_VORTSLAVE_EXTRACT_BUGBAIT;
 
 	if ( m_bForceArmorRecharge )
 	{
 		m_flNextHealTime = 0;
-		return SCHED_VORTIGAUNT_HEAL;
+		return SCHED_VORTSLAVE_HEAL;
 	}
 
 	int schedule = SelectHealSchedule();
@@ -1734,11 +1734,11 @@ int CNPC_Vortigaunt06::SelectSchedule( void )
 		{
 			if (m_bInBarnacleMouth)
 			{
-				return SCHED_VORTIGAUNT_BARNACLE_CHOMP;
+				return SCHED_VORTSLAVE_BARNACLE_CHOMP;
 			}
 			else
 			{
-				return SCHED_VORTIGAUNT_BARNACLE_HIT;
+				return SCHED_VORTSLAVE_BARNACLE_HIT;
 			}
 		}
 	case NPC_STATE_COMBAT:
@@ -1863,9 +1863,9 @@ void CNPC_Vortigaunt06::DeclineFollowing( void )
 bool CNPC_Vortigaunt06::CanBeUsedAsAFriend( void )
 {
 	// We don't want to be used if we're busy
-	if ( IsCurSchedule( SCHED_VORTIGAUNT_HEAL ) )
+	if ( IsCurSchedule( SCHED_VORTSLAVE_HEAL ) )
 		return false;
-	if ( IsCurSchedule( SCHED_VORTIGAUNT_EXTRACT_BUGBAIT ) )
+	if ( IsCurSchedule( SCHED_VORTSLAVE_EXTRACT_BUGBAIT ) )
 		return false;
 
 	return BaseClass::CanBeUsedAsAFriend();
@@ -1896,11 +1896,11 @@ void CNPC_Vortigaunt06::PrescheduleThink( void )
 	// See if we're able to heal now
 	if ( ShouldHealTarget() )
 	{
-		SetCondition( COND_VORTIGAUNT_CAN_HEAL );
+		SetCondition( COND_VORTSLAVE_CAN_HEAL );
 	}
 	else
 	{
-		ClearCondition( COND_VORTIGAUNT_CAN_HEAL );
+		ClearCondition( COND_VORTSLAVE_CAN_HEAL );
 	}
 }
 
@@ -1913,7 +1913,7 @@ void CNPC_Vortigaunt06::BuildScheduleTestBits( void )
 
 	if ( IsCurSchedule( SCHED_IDLE_STAND ) || IsCurSchedule( SCHED_ALERT_STAND ) )
 	{
-		SetCustomInterruptCondition( COND_VORTIGAUNT_CAN_HEAL );
+		SetCustomInterruptCondition( COND_VORTSLAVE_CAN_HEAL );
 	}
 
 	if ( ( ConditionInterruptsCurSchedule( COND_GIVE_WAY ) || 
@@ -2437,7 +2437,7 @@ void CNPC_Vortigaunt06::InputExtractBugbait( inputdata_t &data )
 
 	// Start to extract
 	m_bExtractingBugbait = true;
-	SetSchedule( SCHED_VORTIGAUNT_EXTRACT_BUGBAIT );
+	SetSchedule( SCHED_VORTSLAVE_EXTRACT_BUGBAIT );
 }
 
 
@@ -2477,19 +2477,19 @@ AI_BEGIN_CUSTOM_NPC( npc_alien_slave, CNPC_Vortigaunt06 )
 
 	DECLARE_USES_SCHEDULE_PROVIDER( CAI_LeadBehavior )
 
-	DECLARE_TASK(TASK_VORTIGAUNT_HEAL_WARMUP)
-	DECLARE_TASK(TASK_VORTIGAUNT_HEAL)
-	DECLARE_TASK(TASK_VORTIGAUNT_FACE_STOMP)
-	DECLARE_TASK(TASK_VORTIGAUNT_STOMP_ATTACK)
-	DECLARE_TASK(TASK_VORTIGAUNT_GRENADE_KILL)
-	DECLARE_TASK(TASK_VORTIGAUNT_ZAP_GRENADE_OWNER)
-	DECLARE_TASK(TASK_VORTIGAUNT_EXTRACT)
-	DECLARE_TASK(TASK_VORTIGAUNT_FIRE_EXTRACT_OUTPUT)
-	DECLARE_TASK(TASK_VORTIGAUNT_WAIT_FOR_PLAYER)
+	DECLARE_TASK(TASK_VORTSLAVE_HEAL_WARMUP)
+	DECLARE_TASK(TASK_VORTSLAVE_HEAL)
+	DECLARE_TASK(TASK_VORTSLAVE_FACE_STOMP)
+	DECLARE_TASK(TASK_VORTSLAVE_STOMP_ATTACK)
+	DECLARE_TASK(TASK_VORTSLAVE_GRENADE_KILL)
+	DECLARE_TASK(TASK_VORTSLAVE_ZAP_GRENADE_OWNER)
+	DECLARE_TASK(TASK_VORTSLAVE_EXTRACT)
+	DECLARE_TASK(TASK_VORTSLAVE_FIRE_EXTRACT_OUTPUT)
+	DECLARE_TASK(TASK_VORTSLAVE_WAIT_FOR_PLAYER)
 
-	DECLARE_TASK( TASK_VORTIGAUNT_EXTRACT_WARMUP )
-	DECLARE_TASK( TASK_VORTIGAUNT_EXTRACT_COOLDOWN )
-	DECLARE_TASK( TASK_VORTIGAUNT_GET_HEAL_TARGET )
+	DECLARE_TASK( TASK_VORTSLAVE_EXTRACT_WARMUP )
+	DECLARE_TASK( TASK_VORTSLAVE_EXTRACT_COOLDOWN )
+	DECLARE_TASK( TASK_VORTSLAVE_GET_HEAL_TARGET )
 
 	DECLARE_ACTIVITY(ACT_VORTIGAUNT_AIM)
 	DECLARE_ACTIVITY(ACT_VORTIGAUNT_START_HEAL)
@@ -2502,7 +2502,7 @@ AI_BEGIN_CUSTOM_NPC( npc_alien_slave, CNPC_Vortigaunt06 )
 	DECLARE_ACTIVITY(ACT_VORTIGAUNT_TO_DEFEND)
 	DECLARE_ACTIVITY(ACT_VORTIGAUNT_FROM_DEFEND)
 
-	DECLARE_CONDITION(COND_VORTIGAUNT_CAN_HEAL)
+	DECLARE_CONDITION(COND_VORTSLAVE_CAN_HEAL)
 
 	DECLARE_INTERACTION( g_interactionVortigauntStomp )
 	DECLARE_INTERACTION( g_interactionVortigauntStompFail )
@@ -2525,11 +2525,11 @@ AI_BEGIN_CUSTOM_NPC( npc_alien_slave, CNPC_Vortigaunt06 )
 	DECLARE_ANIMEVENT( AE_VORTIGAUNT_DEFEND_BEAMS )
 
 	//=========================================================
-	// > SCHED_VORTIGAUNT_RANGE_ATTACK
+	// > SCHED_VORTSLAVE_RANGE_ATTACK
 	//=========================================================
 	DEFINE_SCHEDULE
 	(
-		SCHED_VORTIGAUNT_RANGE_ATTACK,
+		SCHED_VORTSLAVE_RANGE_ATTACK,
 
 		"	Tasks"
 		"		TASK_STOP_MOVING				0"
@@ -2541,11 +2541,11 @@ AI_BEGIN_CUSTOM_NPC( npc_alien_slave, CNPC_Vortigaunt06 )
 	);
 
 	//=========================================================
-	// > SCHED_VORTIGAUNT_MELEE_ATTACK
+	// > SCHED_VORTSLAVE_MELEE_ATTACK
 	//=========================================================
 	DEFINE_SCHEDULE
 	(
-		SCHED_VORTIGAUNT_MELEE_ATTACK,
+		SCHED_VORTSLAVE_MELEE_ATTACK,
 
 		"	Tasks"
 		"		TASK_STOP_MOVING					0"
@@ -2560,17 +2560,17 @@ AI_BEGIN_CUSTOM_NPC( npc_alien_slave, CNPC_Vortigaunt06 )
 	);
 
 	//=========================================================
-	// > SCHED_VORTIGAUNT_STOMP_ATTACK
+	// > SCHED_VORTSLAVE_STOMP_ATTACK
 	//=========================================================
 	DEFINE_SCHEDULE
 	(
-		SCHED_VORTIGAUNT_STOMP_ATTACK,
+		SCHED_VORTSLAVE_STOMP_ATTACK,
 
 		"	Tasks"
 		"		TASK_STOP_MOVING					0"
 		"		TASK_SET_ACTIVITY					ACTIVITY:ACT_IDLE"
-		"		TASK_VORTIGAUNT_FACE_STOMP			0"
-		"		TASK_VORTIGAUNT_STOMP_ATTACK		0"
+		"		TASK_VORTSLAVE_FACE_STOMP			0"
+		"		TASK_VORTSLAVE_STOMP_ATTACK		0"
 		""
 		"	Interrupts"
 				// New_Enemy	Don't interrupt, finish current attack first
@@ -2580,40 +2580,40 @@ AI_BEGIN_CUSTOM_NPC( npc_alien_slave, CNPC_Vortigaunt06 )
 	);
 
 	//=========================================================
-	// > SCHED_VORTIGAUNT_GRENADE_KILL
+	// > SCHED_VORTSLAVE_GRENADE_KILL
 	//
 	// Zap an incoming grenade (GetTarget())
 	//=========================================================
 	DEFINE_SCHEDULE
 	(
-		SCHED_VORTIGAUNT_GRENADE_KILL,
+		SCHED_VORTSLAVE_GRENADE_KILL,
 
 		"	Tasks"
-		"		TASK_VORTIGAUNT_GRENADE_KILL		0"
+		"		TASK_VORTSLAVE_GRENADE_KILL		0"
 		"		TASK_WAIT							0.3"
-		"		TASK_VORTIGAUNT_ZAP_GRENADE_OWNER	0"
+		"		TASK_VORTSLAVE_ZAP_GRENADE_OWNER	0"
 		""
 		"	Interrupts"
 		"		COND_LIGHT_DAMAGE"
 	);
 	//=========================================================
-	// > SCHED_VORTIGAUNT_HEAL
+	// > SCHED_VORTSLAVE_HEAL
 	//=========================================================
 	DEFINE_SCHEDULE
 	(
-		SCHED_VORTIGAUNT_HEAL,
+		SCHED_VORTSLAVE_HEAL,
 
 		"	Tasks"
-		"		TASK_VORTIGAUNT_GET_HEAL_TARGET	0"
+		"		TASK_VORTSLAVE_GET_HEAL_TARGET	0"
 		"		TASK_STOP_MOVING				0"
-		"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_VORTIGAUNT_STAND"
+		"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_VORTSLAVE_STAND"
 		"		TASK_GET_PATH_TO_TARGET			0"
 		"		TASK_MOVE_TO_TARGET_RANGE		128"				// Move within 128 of target ent (client)
 		"		TASK_STOP_MOVING				0"
 		"		TASK_FACE_PLAYER				0"
 		"		TASK_SPEAK_SENTENCE				0"					// VORT_HEAL_SENTENCE
-		"		TASK_VORTIGAUNT_HEAL_WARMUP		0"
-		"		TASK_VORTIGAUNT_HEAL			0"
+		"		TASK_VORTSLAVE_HEAL_WARMUP		0"
+		"		TASK_VORTSLAVE_HEAL			0"
 		"		TASK_SPEAK_SENTENCE				1"					// VORT_DONE_HEAL_SENTENCE
 		""
 		"	Interrupts"
@@ -2622,11 +2622,11 @@ AI_BEGIN_CUSTOM_NPC( npc_alien_slave, CNPC_Vortigaunt06 )
 	);
 
 	//=========================================================
-	// > SCHED_VORTIGAUNT_STAND
+	// > SCHED_VORTSLAVE_STAND
 	//=========================================================
 	DEFINE_SCHEDULE
 	(
-		SCHED_VORTIGAUNT_STAND,
+		SCHED_VORTSLAVE_STAND,
 
 		"	Tasks"
 		"		TASK_STOP_MOVING					0"
@@ -2645,26 +2645,26 @@ AI_BEGIN_CUSTOM_NPC( npc_alien_slave, CNPC_Vortigaunt06 )
 	);
 
 	//=========================================================
-	// > SCHED_VORTIGAUNT_BARNACLE_HIT
+	// > SCHED_VORTSLAVE_BARNACLE_HIT
 	//=========================================================
 	DEFINE_SCHEDULE
 	(
-		SCHED_VORTIGAUNT_BARNACLE_HIT,
+		SCHED_VORTSLAVE_BARNACLE_HIT,
 
 		"	Tasks"
 		"		TASK_STOP_MOVING			0"
 		"		TASK_PLAY_SEQUENCE			ACTIVITY:ACT_BARNACLE_HIT"
-		"		TASK_SET_SCHEDULE			SCHEDULE:SCHED_VORTIGAUNT_BARNACLE_PULL"
+		"		TASK_SET_SCHEDULE			SCHEDULE:SCHED_VORTSLAVE_BARNACLE_PULL"
 		""
 		"	Interrupts"
 	);
 
 	//=========================================================
-	// > SCHED_VORTIGAUNT_BARNACLE_PULL
+	// > SCHED_VORTSLAVE_BARNACLE_PULL
 	//=========================================================
 	DEFINE_SCHEDULE
 	(
-		SCHED_VORTIGAUNT_BARNACLE_PULL,
+		SCHED_VORTSLAVE_BARNACLE_PULL,
 
 		"	Tasks"
 		"		 TASK_PLAY_SEQUENCE			ACTIVITY:ACT_BARNACLE_PULL"
@@ -2673,52 +2673,52 @@ AI_BEGIN_CUSTOM_NPC( npc_alien_slave, CNPC_Vortigaunt06 )
 	);
 
 	//=========================================================
-	// > SCHED_VORTIGAUNT_BARNACLE_CHOMP
+	// > SCHED_VORTSLAVE_BARNACLE_CHOMP
 	//=========================================================
 	DEFINE_SCHEDULE
 	(
-		SCHED_VORTIGAUNT_BARNACLE_CHOMP,
+		SCHED_VORTSLAVE_BARNACLE_CHOMP,
 
 		"	Tasks"
 		"		TASK_PLAY_SEQUENCE			ACTIVITY:ACT_BARNACLE_CHOMP"
-		"		TASK_SET_SCHEDULE			SCHEDULE:SCHED_VORTIGAUNT_BARNACLE_CHEW"
+		"		TASK_SET_SCHEDULE			SCHEDULE:SCHED_VORTSLAVE_BARNACLE_CHEW"
 		""
 		"	Interrupts"
 	);
 
 	//=========================================================
-	// > SCHED_VORTIGAUNT_BARNACLE_CHEW
+	// > SCHED_VORTSLAVE_BARNACLE_CHEW
 	//=========================================================
 	DEFINE_SCHEDULE
 	(
-		SCHED_VORTIGAUNT_BARNACLE_CHEW,
+		SCHED_VORTSLAVE_BARNACLE_CHEW,
 
 		"	Tasks"
 		"		TASK_PLAY_SEQUENCE			ACTIVITY:ACT_BARNACLE_CHEW"
 	)
 
 	//=========================================================
-	// > SCHED_VORTIGAUNT_EXTRACT_BUGBAIT
+	// > SCHED_VORTSLAVE_EXTRACT_BUGBAIT
 	//=========================================================
 	DEFINE_SCHEDULE
 	(
-		SCHED_VORTIGAUNT_EXTRACT_BUGBAIT,
+		SCHED_VORTSLAVE_EXTRACT_BUGBAIT,
 
 		"	Tasks"
-		"		TASK_SET_FAIL_SCHEDULE				SCHEDULE:SCHED_VORTIGAUNT_STAND"
+		"		TASK_SET_FAIL_SCHEDULE				SCHEDULE:SCHED_VORTSLAVE_STAND"
 		"		TASK_STOP_MOVING					0"
 		"		TASK_GET_PATH_TO_TARGET				0"
 		"		TASK_MOVE_TO_TARGET_RANGE			128"				// Move within 128 of target ent (client)
 		"		TASK_STOP_MOVING					0"
-		"		TASK_VORTIGAUNT_WAIT_FOR_PLAYER		0"
+		"		TASK_VORTSLAVE_WAIT_FOR_PLAYER		0"
 		"		TASK_SPEAK_SENTENCE					2"					// Start extracting sentence
 		"		TASK_WAIT_FOR_SPEAK_FINISH			1"
 		"		TASK_FACE_TARGET					0"
 		"		TASK_WAIT_FOR_SPEAK_FINISH			1"
-		"		TASK_VORTIGAUNT_EXTRACT_WARMUP		0"
-		"		TASK_VORTIGAUNT_EXTRACT				0"
-		"		TASK_VORTIGAUNT_EXTRACT_COOLDOWN	0"
-		"		TASK_VORTIGAUNT_FIRE_EXTRACT_OUTPUT	0"
+		"		TASK_VORTSLAVE_EXTRACT_WARMUP		0"
+		"		TASK_VORTSLAVE_EXTRACT				0"
+		"		TASK_VORTSLAVE_EXTRACT_COOLDOWN	0"
+		"		TASK_VORTSLAVE_FIRE_EXTRACT_OUTPUT	0"
 		"		TASK_SPEAK_SENTENCE					3"					// Finish extracting sentence
 		"		TASK_WAIT_FOR_SPEAK_FINISH			1"
 		"		TASK_WAIT							2"
