@@ -35,6 +35,7 @@
 #include "SoundEmitterSystem/isoundemittersystembase.h"
 #include "physics_prop_ragdoll.h"
 #include "RagdollBoogie.h"
+#include "ai_squad.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -76,7 +77,9 @@ extern ConVar	sk_vortigaunt_health;
 extern ConVar	sk_vortigaunt_armor_charge;
 extern ConVar	sk_vortigaunt_dmg_claw;
 extern ConVar	sk_vortigaunt_dmg_rake;
-extern ConVar	sk_vortigaunt_dmg_zap;
+//extern ConVar	sk_vortigaunt_dmg_zap;
+
+ConVar	sk_islave_dmg_zap( "sk_islave_dmg_zap","5.3");
 
 namespace
 {
@@ -382,10 +385,14 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 		{
 			if (GetEnemy() != NULL)
 			{
-				if (GetEnemy()->IsPlayer())
-				{
-					m_flPlaybackRate = 1.5;
-				}
+				// slow down attack when not on hard
+				if ( g_iSkillLevel != SKILL_HARD )
+				 m_flPlaybackRate = 0.5;
+
+				//if (GetEnemy()->IsPlayer())
+				//{
+					//m_flPlaybackRate = 1.5;
+				//}
 				if (!GetEnemy()->IsAlive())
 				{
 					if( IsActivityFinished() )
@@ -396,11 +403,11 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 				}
 				// This is along attack sequence so if the enemy
 				// becomes occluded bail
-				if (HasCondition( COND_ENEMY_OCCLUDED ))
+/*				if (HasCondition( COND_ENEMY_OCCLUDED ))
 				{
 					TaskComplete();
 					break;
-				}
+				} */
 			}
 			BaseClass::RunTask( pTask );
 			break;
@@ -689,6 +696,30 @@ Class_T	CNPC_Vortigaunt06::Classify ( void )
 }
 
 //=========================================================
+// Copied from HLS Slave
+//=========================================================
+void CNPC_Vortigaunt06::CallForHelp( char *szClassname, float flDist, CBaseEntity * pEnemy, Vector &vecLocation )
+{
+	// ALERT( at_aiconsole, "help " );
+
+	// skip ones not on my netname
+	if ( !m_pSquad )
+		 return;
+
+	AISquadIter_t iter;
+	for (CAI_BaseNPC *pSquadMember = m_pSquad->GetFirstMember( &iter ); pSquadMember; pSquadMember = m_pSquad->GetNextMember( &iter ) )
+	{
+		float d = ( GetAbsOrigin() - pSquadMember->GetAbsOrigin() ).Length();
+
+		if ( d < flDist )
+		{
+			pSquadMember->Remember( bits_MEMORY_PROVOKED );
+			pSquadMember->UpdateEnemyMemory( pEnemy, vecLocation );
+		}
+	}
+}
+
+//=========================================================
 // ALertSound - barney says "Freeze!"
 //=========================================================
 void CNPC_Vortigaunt06::AlertSound( void )
@@ -697,8 +728,12 @@ void CNPC_Vortigaunt06::AlertSound( void )
 	{
 		if ( IsOkToCombatSpeak() )
 		{
-			Speak( VORT_ATTACK );
+			//Speak( VORT_ATTACK );
+			SENTENCEG_PlayRndSz( edict(), "SLV_ALERT", 0.85, SNDLVL_NORM, 0, 100 );
 		}
+
+		Vector vecTmp = GetEnemy()->GetAbsOrigin();
+		CallForHelp( "npc_alien_slave", 512, GetEnemy(), vecTmp );
 	}
 
 }
@@ -833,7 +868,7 @@ void CNPC_Vortigaunt06::Claw( int iAttachment)
 			ClawBeam( pHurt, 16, iAttachment );
 		}
 		// Play a random attack hit sound
-		EmitSound( "NPC_Vortigaunt.Claw" );
+		EmitSound( "Vortigaunt.AttackHit" );
 	}
 }
 
@@ -876,11 +911,11 @@ void CNPC_Vortigaunt06::HandleAnimEvent( animevent_t *pEvent )
 		CPASAttenuationFilter filter( this );
 		
 		CSoundParameters params;
-		if ( GetParametersForSound( "NPC_Vortigaunt.ZapPowerup", params, NULL ) )
+		if ( GetParametersForSound( "Vortigaunt.ZapPowerup", params, NULL ) )
 		{
 			EmitSound_t ep( params );
-			ep.m_nPitch = 100 + m_iBeams * 10;
-	
+			//ep.m_nPitch = 100 + m_iBeams * 10;
+			ep.m_nPitch = 100;
 			EmitSound( filter, entindex(), ep );
 
 			m_bStopLoopingSounds = true;
@@ -899,8 +934,11 @@ void CNPC_Vortigaunt06::HandleAnimEvent( animevent_t *pEvent )
 		ZapBeam( 1 );
 		EndHandGlow();
 
-		EmitSound( "NPC_Vortigaunt.Shoot" );
-		m_bStopLoopingSounds = true;
+		//EmitSound( "Vortigaunt.ZapShoot" );
+		CPASAttenuationFilter filter4( this );
+		EmitSound( filter4, entindex(), "Vortigaunt.ZapShoot" );
+
+		//m_bStopLoopingSounds = true;
 		ApplyMultiDamage();
 
 		if ( m_bExtractingBugbait == true )
@@ -1063,7 +1101,7 @@ void CNPC_Vortigaunt06::HandleAnimEvent( animevent_t *pEvent )
 
 	if ( pEvent->event == AE_VORTIGAUNT_SWING_SOUND )
 	{
-		EmitSound( "NPC_Vortigaunt.Swing" );	
+		EmitSound( "Vortigaunt.AttackMiss" );	
 		return;
 	}
 
@@ -1071,7 +1109,7 @@ void CNPC_Vortigaunt06::HandleAnimEvent( animevent_t *pEvent )
 	{
 		CPASAttenuationFilter filter( this );
 		CSoundParameters params;
-		if ( GetParametersForSound( "NPC_Vortigaunt.StartShootLoop", params, NULL ) )
+		if ( GetParametersForSound( "Vortigaunt.ZapPowerup", params, NULL ) )
 		{
 			EmitSound_t ep( params );
 			ep.m_nPitch = 100 + m_iBeams * 10;
@@ -1288,6 +1326,15 @@ void CNPC_Vortigaunt06::Precache()
 	PrecacheScriptSound( "NPC_Vortigaunt.FootstepRight" );
 	PrecacheScriptSound( "NPC_Vortigaunt.ClawBeam" );
 
+	//HLS slave sounds
+	PrecacheScriptSound( "Vortigaunt.Cower" );
+	PrecacheScriptSound( "Vortigaunt.Pain" );
+	PrecacheScriptSound( "Vortigaunt.Die" );
+	PrecacheScriptSound( "Vortigaunt.AttackHit" );
+	PrecacheScriptSound( "Vortigaunt.AttackMiss" );
+	PrecacheScriptSound( "Vortigaunt.ZapPowerup" );
+	PrecacheScriptSound( "Vortigaunt.ZapShoot" );
+
 	BaseClass::Precache();
 }	
 
@@ -1396,9 +1443,18 @@ void CNPC_Vortigaunt06::PainSound( const CTakeDamageInfo &info )
 	if (gpGlobals->curtime < m_painTime)
 		return;
 	
-	m_painTime = gpGlobals->curtime + random->RandomFloat(0.5, 0.75);
+	m_painTime = gpGlobals->curtime + random->RandomFloat(0.5, 5.75);
 
-	Speak( VORT_PAIN );
+//	Speak( VORT_PAIN );
+	CPASAttenuationFilter filter( this );
+
+	CSoundParameters params;
+	if ( GetParametersForSound( "Vortigaunt.Pain", params, NULL ) )
+	{
+		EmitSound_t ep( params );
+
+		EmitSound( filter, entindex(), ep );
+	}
 }
 
 //=========================================================
@@ -1406,7 +1462,15 @@ void CNPC_Vortigaunt06::PainSound( const CTakeDamageInfo &info )
 //=========================================================
 void CNPC_Vortigaunt06::DeathSound( const CTakeDamageInfo &info )
 {
-	Speak( VORT_DIE );
+//	Speak( VORT_DIE );
+	CPASAttenuationFilter filter( this );
+	CSoundParameters params;
+	if ( GetParametersForSound( "Vortigaunt.Die", params, NULL ) )
+	{
+		EmitSound_t ep( params );
+
+		EmitSound( filter, entindex(), ep );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1698,7 +1762,8 @@ int CNPC_Vortigaunt06::SelectSchedule( void )
 
 			if ( HasCondition( COND_ENEMY_DEAD ) && IsOkToCombatSpeak() )
 			{
-				Speak( VORT_KILL );
+				//Speak( VORT_KILL );
+				SENTENCEG_PlayRndSz( edict(), "SLV_KILL", 1.0, SNDLVL_NORM, 0, 100 );
 			}
 
 			// If I might hit the player shooting...
@@ -1733,7 +1798,8 @@ int CNPC_Vortigaunt06::SelectSchedule( void )
 
 		if ( HasCondition( COND_ENEMY_DEAD ) && IsOkToCombatSpeak() )
 		{
-			Speak( VORT_KILL );
+			//Speak( VORT_KILL );
+			SENTENCEG_PlayRndSz( edict(), "SLV_KILL", 1.0, SNDLVL_NORM, 0, 100 );
 		}
 
 		break;
@@ -2207,7 +2273,7 @@ void CNPC_Vortigaunt06::ZapBeam( int side )
 	pEntity = tr.m_pEnt;
 	if (pEntity != NULL && m_takedamage)
 	{
-		CTakeDamageInfo dmgInfo( this, this, sk_vortigaunt_dmg_zap.GetFloat(), DMG_SHOCK );
+		CTakeDamageInfo dmgInfo( this, this, sk_islave_dmg_zap.GetFloat(), DMG_SHOCK );
 		dmgInfo.SetDamagePosition( tr.endpos );
 		VectorNormalize( vecAim );// not a unit vec yet
 		// hit like a 5kg object flying 400 ft/s
@@ -2294,7 +2360,7 @@ void CNPC_Vortigaunt06::ClearBeams( )
 		StopSound( "NPC_Vortigaunt.StartHealLoop" );
 		StopSound( "NPC_Vortigaunt.StartShootLoop" );
 		StopSound( "NPC_Vortigaunt.SuitCharge" );
-		StopSound( "NPC_Vortigaunt.Shoot" );
+		//StopSound( "NPC_Vortigaunt.Shoot" );
 		StopSound( "NPC_Vortigaunt.ZapPowerup" );
 		m_bStopLoopingSounds = false;
 	}

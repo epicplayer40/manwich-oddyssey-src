@@ -92,6 +92,8 @@ public:
 	void			InputExtractBugbait( inputdata_t &data );
 	void			InputChargeTarget( inputdata_t &data );
 
+	void CallForHelp( char *szClassname, float flDist, CBaseEntity * pEnemy, Vector &vecLocation );
+
 private:
 	//=========================================================
 	// Vortigaunt schedules
