@@ -16,6 +16,7 @@
 #include "ai_behavior_lead.h"
 #include "ai_behavior_standoff.h"
 #include "ai_behavior_assault.h"
+#include "ai_interactions.h"
 
 #define		VORTIGAUNT_MAX_BEAMS				8
 
@@ -214,6 +215,8 @@ private:
 	int m_iLeftHandAttachment;
 	int m_iRightHandAttachment;
 	bool				m_bStopLoopingSounds;
+
+	virtual bool CanRunAScriptedNPCInteraction( bool bForced = false );
 
 public:
 	DECLARE_DATADESC();

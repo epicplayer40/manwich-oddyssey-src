@@ -36,6 +36,7 @@
 #include "physics_prop_ragdoll.h"
 #include "RagdollBoogie.h"
 #include "ai_squad.h"
+#include "ai_interactions.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -779,10 +780,10 @@ int CNPC_Vortigaunt06::RangeAttack1Conditions( float flDot, float flDist )
 
 	// Range attack is ineffective on manhack so never use it
 	// Melee attack looks a lot better anyway
-	if (GetEnemy()->Classify() == CLASS_MANHACK)
-	{
-		return( COND_NONE );
-	}
+//	if (GetEnemy()->Classify() == CLASS_MANHACK)
+//	{
+//		return( COND_NONE );
+//	}
 
 	// dvs: Allow up-close range attacks for episodic as the vort's melee
 	// attack is rather ineffective.
@@ -2466,6 +2467,18 @@ bool CNPC_Vortigaunt06::OnObstructionPreSteer( AILocalMoveGoal_t *pMoveGoal, flo
 	return BaseClass::OnObstructionPreSteer( pMoveGoal, distClear, pResult );
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Decide when we're allowed to interact with other NPCs
+//-----------------------------------------------------------------------------
+bool CNPC_Vortigaunt06::CanRunAScriptedNPCInteraction( bool bForced /*= false*/ )
+{
+	// Never interrupt a range attack!
+	if ( IsCurSchedule( SCHED_RANGE_ATTACK1 ) )
+		return false;
+
+	return BaseClass::CanRunAScriptedNPCInteraction( bForced );
+}
+
 
 //------------------------------------------------------------------------------
 //
@@ -2554,7 +2567,7 @@ AI_BEGIN_CUSTOM_NPC( npc_alien_slave, CNPC_Vortigaunt06 )
 		"		TASK_MELEE_ATTACK1					0"
 		""
 		"	Interrupts"
-		"		COND_ENEMY_DEAD"
+//		"		COND_ENEMY_DEAD"
 		"		COND_HEAVY_DAMAGE"
 		"		COND_ENEMY_OCCLUDED"
 	);
@@ -2574,7 +2587,7 @@ AI_BEGIN_CUSTOM_NPC( npc_alien_slave, CNPC_Vortigaunt06 )
 		""
 		"	Interrupts"
 				// New_Enemy	Don't interrupt, finish current attack first
-		"		COND_ENEMY_DEAD"
+//		"		COND_ENEMY_DEAD"
 		"		COND_HEAVY_DAMAGE"
 		"		COND_ENEMY_OCCLUDED"
 	);
