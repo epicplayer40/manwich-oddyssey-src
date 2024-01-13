@@ -66,7 +66,6 @@ public:
 	DECLARE_DATADESC();
 
 private:
-	int	m_beamIndex;
 
 	float m_flBurnRadius;
 	float m_flTimeLastUpdatedRadius;

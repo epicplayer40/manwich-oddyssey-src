@@ -42,6 +42,14 @@ ConVar	sk_npc_burn_duration_immolator("sk_npc_burn_duration_immolator", "0");
 ConVar	sk_immolator_gravity("sk_immolator_gravity", "0");
 ConVar	sk_immolator_speed("sk_immolator_speed", "0");
 
+//Taken from old cremator
+ConVar	sk_immolator_color_r("sk_immolator_beamcolor_r", "255");
+ConVar	sk_immolator_color_g("sk_immolator_beamcolor_g", "255");
+ConVar	sk_immolator_color_b("sk_immolator_beamcolor_b", "255");
+ConVar	sk_immolator_color_a("sk_immolator_beamcolor_a", "64");
+ConVar	sk_immolator_beamsprite("sk_immolator_beamsprite", "sprites/plasmabeam.vmt");
+ConVar	sk_immolator_beamwidth("sk_immolator_beamwidth", "5.2");
+
 extern ConVar sk_cremator_maxrange;
 extern ConVar sk_cremator_minrange;
 
@@ -89,6 +97,8 @@ protected:
 	CHandle<CSprite>		m_pGlowSprite;
 	CHandle<CSpriteTrail>	m_pGlowTrail;
 
+	Color m_clrBeam;
+
 	DECLARE_DATADESC();
 	DECLARE_SERVERCLASS();
 };
@@ -103,6 +113,7 @@ BEGIN_DATADESC( CImmolatorBeam )
 	DEFINE_FIELD( m_pGlowSprite, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_pGlowTrail, FIELD_EHANDLE ),
 	DEFINE_FIELD(m_immobeamIndex, FIELD_INTEGER),
+	DEFINE_FIELD(m_clrBeam, FIELD_COLOR32),
 
 END_DATADESC()
 
@@ -175,14 +186,14 @@ bool CImmolatorBeam::CreateSprites( void )
 	}
 
 	// Start up the eye trail
-	m_pGlowTrail	= CSpriteTrail::SpriteTrailCreate( "sprites/plasmabeam.vmt", GetLocalOrigin(), false );
+	m_pGlowTrail	= CSpriteTrail::SpriteTrailCreate(sk_immolator_beamsprite.GetString(), GetLocalOrigin(), false);
 
 	if ( m_pGlowTrail != NULL )
 	{
 		m_pGlowTrail->FollowEntity( this );
 //		m_pGlowTrail->SetAttachment( this, nAttachment );
-		m_pGlowTrail->SetTransparency( kRenderTransAdd, 255, 255, 255, 64, kRenderFxNone );
-		m_pGlowTrail->SetStartWidth( 5.2f );
+		m_pGlowTrail->SetTransparency( kRenderTransAdd, m_clrBeam.r(), m_clrBeam.g(), m_clrBeam.b(), m_clrBeam.a(), kRenderFxNone);
+		m_pGlowTrail->SetStartWidth(sk_immolator_beamwidth.GetFloat());
 		m_pGlowTrail->SetEndWidth( 1.0f );
 		m_pGlowTrail->SetLifeTime( 0.9f );
 	}
@@ -197,6 +208,14 @@ void CImmolatorBeam::Spawn( void )
 {
 	Precache( );
 
+	m_clrBeam.SetColor
+	(
+		sk_immolator_color_r.GetInt(),
+		sk_immolator_color_g.GetInt(),
+		sk_immolator_color_b.GetInt(),
+		sk_immolator_color_a.GetInt()
+	);
+
 	SetModel( "models/crossbow_bolt.mdl" );
 	SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_CUSTOM );
 	UTIL_SetSize( this, -Vector(0.3f,0.3f,0.3f), Vector(0.3f,0.3f,0.3f) );
@@ -207,7 +226,7 @@ void CImmolatorBeam::Spawn( void )
 	//epicplayer
 	SetCollisionGroup( COLLISION_GROUP_PROJECTILE );
 
-	m_immobeamIndex = engine->PrecacheModel("sprites/plasmabeam.vmt");
+	m_immobeamIndex = engine->PrecacheModel(sk_immolator_beamsprite.GetString());
 
 
 	// Make sure we're updated if we're underwater
@@ -268,11 +287,11 @@ void CImmolatorBeam::ImmolationDamage( const CTakeDamageInfo &info, const Vector
 			0.75,	// fadelength,
 			15,		// noise
 
-			255,		// red
-			255,	// green
-			255,	// blue,
+			m_clrBeam.r(),		// red
+			m_clrBeam.g(),	// green
+			m_clrBeam.b(),	// blue,
 
-			128, // bright
+			m_clrBeam.a() * 2, // bright
 			100  // speed
 			);
 	}
@@ -385,7 +404,6 @@ PRECACHE_WEAPON_REGISTER( weapon_immolator );
 
 BEGIN_DATADESC( CWeaponImmolator )
 
-	DEFINE_FIELD( m_beamIndex, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flBurnRadius, FIELD_FLOAT ),
 	DEFINE_FIELD( m_flTimeLastUpdatedRadius, FIELD_TIME ),
 	DEFINE_FIELD( m_vecImmolatorTarget, FIELD_VECTOR ),
@@ -571,8 +589,6 @@ void CWeaponImmolator::StopImmolating()
 //-----------------------------------------------------------------------------
 void CWeaponImmolator::Precache( void )
 {
-	m_beamIndex = engine->PrecacheModel( "sprites/plasmabeam.vmt" );
-
 	BaseClass::Precache();
 
 	PrecacheScriptSound( "Weapon_Immolator.Start" );
