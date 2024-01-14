@@ -102,6 +102,11 @@ protected:
 		int		m_Collided;
 		int		m_CollisionPlane;
 		float	m_CollisionDist;
+
+		Particle_t()
+		{
+			m_CollisionPlane = -1;
+		}
 	};
 
 	struct Spring_t
