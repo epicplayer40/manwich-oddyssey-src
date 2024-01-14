@@ -19,7 +19,6 @@
 #include "game.h"
 #include "activitylist.h"
 #include "hl2_shareddefs.h"
-#include "grenade_energy.h"
 #include "energy_wave.h"
 #include "ai_interactions.h"
 #include "ndebugoverlay.h"
@@ -129,6 +128,7 @@ void CNPC_Houndeye::InitCustomSchedules(void)
 	
 	ADD_CUSTOM_CONDITION(CNPC_Houndeye,	COND_HOUND_GROUP_ATTACK);
 	ADD_CUSTOM_CONDITION(CNPC_Houndeye,	COND_HOUND_GROUP_RETREAT);
+	ADD_CUSTOM_CONDITION(CNPC_Houndeye,	COND_HOUND_GROUP_RALLEY);
 
 	ADD_CUSTOM_SCHEDULE(CNPC_Houndeye,	SCHED_HOUND_HOP_RETREAT);
 	ADD_CUSTOM_SCHEDULE(CNPC_Houndeye,	SCHED_HOUND_RANGE_ATTACK1);
@@ -158,6 +158,7 @@ void CNPC_Houndeye::InitCustomSchedules(void)
 }
 
 LINK_ENTITY_TO_CLASS( npc_houndeye, CNPC_Houndeye );
+LINK_ENTITY_TO_CLASS( monster_houndeye, CNPC_Houndeye );
 IMPLEMENT_CUSTOM_AI( npc_houndeye, CNPC_Houndeye );
 
 BEGIN_DATADESC( CNPC_Houndeye )
@@ -457,7 +458,6 @@ void CNPC_Houndeye::Precache()
 	PrecacheScriptSound( "NPC_Houndeye.GroupFollow" );
 
 
-	UTIL_PrecacheOther("grenade_energy");
 	BaseClass::Precache();
 }	
 
@@ -521,7 +521,7 @@ void CNPC_Houndeye::AlertSound ( void )
 //=========================================================
 // DeathSound 
 //=========================================================
-void CNPC_Houndeye::DeathSound ( void )
+void CNPC_Houndeye::DeathSound(const CTakeDamageInfo& info)
 {
 	EmitSound( "NPC_Houndeye.Die" );
 }
@@ -529,7 +529,7 @@ void CNPC_Houndeye::DeathSound ( void )
 //=========================================================
 // PainSound 
 //=========================================================
-void CNPC_Houndeye::PainSound ( void )
+void CNPC_Houndeye::PainSound(const CTakeDamageInfo& info)
 {
 	EmitSound( "NPC_Houndeye.Pain" );
 }
@@ -691,7 +691,7 @@ void CNPC_Houndeye::SonicAttack ( void )
 
 	CBaseEntity *pEntity = NULL;
 	// iterate on all entities in the vicinity.
-	for ( CEntitySphereQuery sphere( GetAbsOrigin(), HOUNDEYE_MAX_ATTACK_RADIUS ); pEntity = sphere.GetCurrentEntity(); sphere.NextEntity() )
+	for ( CEntitySphereQuery sphere( GetAbsOrigin(), HOUNDEYE_MAX_ATTACK_RADIUS ); (pEntity = sphere.GetCurrentEntity()) != 0; sphere.NextEntity() )
 	{
 		if (pEntity->Classify()	== CLASS_HOUNDEYE)
 		{

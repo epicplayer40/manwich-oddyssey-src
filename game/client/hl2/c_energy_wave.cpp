@@ -41,6 +41,7 @@ public:
 	int	DrawModel( int flags );
 	void ComputePoint( float s, float t, Vector& pt, Vector& normal, float& opacity );
 	void DrawWireframeModel( );
+	bool ShouldDraw(void) OVERRIDE;
 
 	CEnergyWaveEffect m_EWaveEffect;
 
@@ -248,7 +249,8 @@ void C_EnergyWave::ComputePoint( float s, float t, Vector& pt, Vector& normal, f
 
 void C_EnergyWave::DrawWireframeModel( )
 {
-	IMesh* pMesh = materials->GetDynamicMesh( true, NULL, NULL, m_pWireframe );
+	CMatRenderContextPtr matContext(materials);
+	IMesh* pMesh = matContext->GetDynamicMesh( true, NULL, NULL, m_pWireframe );
 
 	int numLines = (EWAVE_NUM_VERTICAL_POINTS - 1) * EWAVE_NUM_HORIZONTAL_POINTS +
 		EWAVE_NUM_VERTICAL_POINTS * (EWAVE_NUM_HORIZONTAL_POINTS - 1);
@@ -317,7 +319,8 @@ void C_EnergyWave::ComputeEWavePoints( Vector* pt, Vector* normal, float* opacit
 
 void C_EnergyWave::DrawEWavePoints(Vector* pt, Vector* normal, float* opacity)
 {
-	IMesh* pMesh = materials->GetDynamicMesh( true, NULL, NULL, m_pEWaveMat );
+	CMatRenderContextPtr matContext(materials);
+	IMesh* pMesh = matContext->GetDynamicMesh( true, NULL, NULL, m_pEWaveMat );
 
 	int numTriangles = (NUM_SUBDIVISIONS - 1) * (NUM_SUBDIVISIONS - 1) * 2;
 
@@ -410,6 +413,13 @@ int	C_EnergyWave::DrawModel( int flags )
 	return 1;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Returns whether object should render.
+//-----------------------------------------------------------------------------
+bool C_EnergyWave::ShouldDraw()
+{
+	return true;
+}
 
 
 

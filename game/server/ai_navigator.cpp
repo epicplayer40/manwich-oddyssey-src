@@ -557,6 +557,17 @@ bool CAI_Navigator::SetRadialGoal( const Vector &destination, const Vector &cent
 
 //-----------------------------------------------------------------------------
 
+bool CAI_Navigator::SetRadialGoal(const Vector& center, float radius, float arc, float stepDist, bool bClockwise, bool bAirRoute)
+{
+	OnNewGoal();
+	GetPath()->SetGoalType(GOALTYPE_LOCATION);
+
+	GetPath()->SetWaypoints(GetPathfinder()->BuildRadialRoute(GetLocalOrigin(), center, radius, arc, stepDist, bClockwise, GetPath()->GetGoalTolerance(), bAirRoute), true);
+	return IsGoalActive();
+}
+
+//-----------------------------------------------------------------------------
+
 bool CAI_Navigator::SetRandomGoal( const Vector &from, float minPathLength, const Vector &dir )
 {
 	DbgNavMsg( GetOuter(), "Set random goal\n" );

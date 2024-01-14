@@ -45,6 +45,8 @@ $Project "Server (Mambridge)"
 			$File "hl2/grenade_satchel.cpp"
 			$File "hl2/grenade_tripmine.cpp"
 			$File "hl2/npc_vortigaunt.cpp"
+			$File "hl2/npc_houndeye.cpp"
+			$File "hl2/energy_wave.cpp"
 			
 		}
 
@@ -144,8 +146,7 @@ $Project "Server (Mambridge)"
 			$File	"hl1/hl1_npc_hgrunt_combine.h"
 			$File	"hl1/hl1_npc_hornet.cpp"
 			$File	"hl1/hl1_npc_hornet.h"
-			$File	"hl1/hl1_npc_houndeye.cpp"
-			$File	"hl1/hl1_npc_houndeye.h"
+//			$File	"hl1/hl1_npc_houndeye.h"
 			$File	"hl1/hl1_npc_ichthyosaur.cpp"
 			$File	"hl1/hl1_npc_ichthyosaur.h"
 			$File	"hl1/hl1_npc_lazarus.cpp"

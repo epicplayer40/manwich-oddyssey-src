@@ -1562,6 +1562,98 @@ AI_Waypoint_t *CAI_Pathfinder::BuildRadialRoute( const Vector &vStartPos, const 
 	return pHeadRoute;
 }
 
+//-----------------------------------------------------------------------------
+// Purpose: Attempts to build a radial route around the given center position
+//			over a given arc size
+//			If a full route isn't possible, will return whatever portion is
+//			possible
+//
+// Input  : vStartPos	- where route should start from
+//			vCenterPos	- the center of the arc
+//			flRadius	- radius of the arc
+//			flArc		- how long should the path be in degrees
+//			bClockwise	- the direction we are heading
+// Output : The route
+//-----------------------------------------------------------------------------
+AI_Waypoint_t* CAI_Pathfinder::BuildRadialRoute(const Vector& vStartPos, const Vector& vCenterPos, float flRadius, float flArc, float flStepDist, bool bClockwise, float goalTolerance, bool bAirRoute /*= false*/)
+{
+	// ------------------------------------------------------------------------------
+	// Make sure we have a minimum distance between nodes.  For the given 
+	// radius, calculate the angular step necesary for this distance.
+	// IMPORTANT: flStepDist must be large enough that given the 
+	//			  NPC's movment speed that it can come to a stop
+	// ------------------------------------------------------------------------------
+	float flAngleStep = 2 * atan((0.5 * flStepDist) / flRadius);
+
+	// Flip direction if clockwise
+	if (bClockwise)
+	{
+		flArc *= -1;
+		flAngleStep *= -1;
+	}
+
+	// -----------------------------------------------------------------	
+	//  Calculate the start angle on the arc in world coordinates
+	// -----------------------------------------------------------------	
+	Vector vStartDir = (vStartPos - vCenterPos);
+	VectorNormalize(vStartDir);
+	float flStartAngle = DEG2RAD(UTIL_VecToYaw(vStartDir));
+	float flEndAngle = flStartAngle + DEG2RAD(flArc);
+
+	// -----------------------------------------------------------------	
+	//  Offset set our first node by one arc step so NPC doesn't run
+	//  perpendicular to the arc when starting a different radius
+	// -----------------------------------------------------------------	
+	flStartAngle += flAngleStep;
+
+	AI_Waypoint_t* pPrevRoute = NULL;
+	AI_Waypoint_t* pNextRoute = NULL;
+	AI_Waypoint_t* pLastNode = NULL;
+	Vector			vLastPos = vStartPos;
+	Vector			vNextPos;
+	for (float flCurAngle = flStartAngle;
+		((bClockwise == true) ? (flCurAngle >= flEndAngle) : (flCurAngle <= flEndAngle));
+		flCurAngle += flAngleStep)
+	{
+		vNextPos = vCenterPos;
+		float	fSin = sin(flCurAngle);
+		float	fCos = cos(flCurAngle);
+		vNextPos.x += flRadius * fCos;
+		vNextPos.y += flRadius * fSin;
+
+		pNextRoute = BuildLocalRoute(vLastPos, vNextPos, NULL, NULL, NO_NODE, bAirRoute ? bits_BUILD_FLY : bits_BUILD_GROUND, goalTolerance);
+		if (!pNextRoute)
+		{
+			// Mark last node as the goal
+			if (pPrevRoute)
+			{
+				pLastNode->ModifyFlags(bits_WP_TO_GOAL, true);
+			}
+			return pPrevRoute;
+		}
+		else
+		{
+			pNextRoute->ModifyFlags(bits_WP_DONT_SIMPLIFY, true);
+			pLastNode = pNextRoute;
+			if (pPrevRoute)
+			{
+				AddWaypointLists(pPrevRoute, pNextRoute);
+			}
+			else
+			{
+				pPrevRoute = pNextRoute;
+			}
+		}
+		vLastPos = vNextPos;
+	}
+
+	if (pLastNode)
+	{
+		pLastNode->ModifyFlags(bits_WP_TO_GOAL, true);
+	}
+	return pPrevRoute;
+}
+
 
 //-----------------------------------------------------------------------------
 // Checks a stale navtype route 
