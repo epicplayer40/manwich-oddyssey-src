@@ -34,6 +34,17 @@ $Project "Client (Mambridge)"
 			$File	"hl2/c_energy_wave.cpp"
 			$File	"hl2/energy_wave_effect.cpp"
 			$File	"hl2/energy_wave_effect.h"
+			$File	"manwich/fadingdecalfix.cpp"
+			{
+				$Configuration
+				{
+					$Compiler
+					{
+						$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+					}
+				}
+			}
+			$File	"manwich/fadingdecalfix.h"
 		}
 
 		// help me please god

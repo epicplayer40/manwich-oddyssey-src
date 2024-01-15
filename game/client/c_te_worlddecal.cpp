@@ -12,6 +12,7 @@
 #include "fx.h"
 #include "decals.h"
 #include "tier0/vprof.h"
+#include "fadingdecalfix.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -121,7 +122,7 @@ void C_TEWorldDecal::PostDataUpdate( DataUpdateType_t updateType )
 
 			if ( !( bNoBlood && bIsBlood ) )
 			{
-				effects->DecalShoot( m_nIndex, 0, ent->GetModel(), ent->GetAbsOrigin(), ent->GetAbsAngles(), m_vecOrigin, 0, 0 );
+				DecalShootFixed(m_nIndex, 0, ent->GetModel(), ent->GetAbsOrigin(), ent->GetAbsAngles(), m_vecOrigin, 0, 0);
 			}
 		}
 	}
