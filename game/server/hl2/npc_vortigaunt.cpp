@@ -1963,7 +1963,7 @@ void CNPC_Vortigaunt06::ArmBeam( int side, int beamType )
 	if ( flDist == 1.0 )
 		return;
 
-	UTIL_ImpactTrace( &tr, DMG_CLUB );
+	UTIL_DecalTrace(&tr, "FadingScorch");
 
 	m_pBeam[m_iBeams] = CBeam::BeamCreate( "sprites/lgtning.vmt", 3.0 );
 	if (!m_pBeam[m_iBeams])
