@@ -107,9 +107,8 @@ void DecalShootFixed(int textureIndex, int entity,
 
 		if (FStrEq(pDecalName, pMaterialFound) && pDecal->position == position)
 		{
-			bool found;
 			IMaterial* pMaterial = pDecal->material;
-			IMaterialVar* pFadeVar = pMaterial->FindVar("$decalFadeDuration", &found);
+			IMaterialVar* pFadeVar = pMaterial->FindVarFast("$decalFadeDuration", &s_DecalFadeVarCache);
 			if (pFadeVar)
 			{
 				pDecal->flags |= FDECAL_DYNAMIC;
