@@ -55,6 +55,8 @@ extern ConVar sk_cremator_minrange;
 
 ConVar immolator_debug("immolator_debug", "0");
 
+ConVar sk_immolator_decal("sk_immolator_decal", "PlasmaGlowFade");
+
 #define MAX_BURN_RADIUS		256
 #define RADIUS_GROW_RATE	50.0	// units/sec 
 
@@ -363,7 +365,7 @@ void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 	Vector end;
 	VectorMA(GetAbsOrigin(), 500, vecDir, end);
 	UTIL_TraceLine(GetAbsOrigin(), end, MASK_ALL, this, COLLISION_GROUP_NONE, &tr);
-	UTIL_DecalTrace(&tr, "PlasmaGlowFade");
+	UTIL_DecalTrace(&tr, sk_immolator_decal.GetString());
 
 	//Lychy: Decided to remove DMG_BURN since it created a red fade that didnt work well with the blu one
 	RadiusDamage( CTakeDamageInfo( this, GetOwnerEntity(), damage, DMG_DISSOLVE | DMG_PLASMA /* | DMG_BURN*/), GetAbsOrigin(), 100, CLASS_PLAYER_ALLY_VITAL, NULL); //changed from 256 to 128 to correspond with noisebeams
