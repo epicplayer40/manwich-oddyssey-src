@@ -387,7 +387,7 @@ void CNPC_CrematorManod::PainSound( const CTakeDamageInfo &info )
 	if (gpGlobals->curtime >= m_fNextPainSoundingTime)
 	{
 		EmitSound("NPC_Cremator.Pain");
-		m_fNextPainSoundingTime = gpGlobals->curtime + random->RandomFloat(0.5, 1.2);
+		m_fNextPainSoundingTime = gpGlobals->curtime + random->RandomFloat(0.2, 0.7);
 	}
 }
 
