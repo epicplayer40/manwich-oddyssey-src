@@ -248,16 +248,30 @@ void CZombie::Precache(void)
 	const char* pModelName = STRING(GetModelName());
 	//	const char *pModelName = sk_zombie_model.GetString();
 
-	if (Q_stricmp(pModelName, "random"))
-	{
-		PrecacheModel(pModelName);
-	}
+	if (!Q_stricmp(pModelName, "random"))
+		{
 
-	//	PrecacheModel( STRING( GetModelName() ) );
+			switch (random_zombie_model)
+			{
+
+			case 1:
+				pModelName = ("models/zombie/classic.mdl");
+				break;
+
+			case 2:
+				pModelName = ("models/zombie/classic_2002.mdl");
+				break;
+
+			case 3:
+				pModelName = ("models/zombie/classic_2003.mdl");
+				break;
+			}
+			SetModelName(MAKE_STRING(pModelName));
+		}
+
+	PrecacheModel( STRING( GetModelName() ) );
 
 	BaseClass::Precache();
-
-	PrecacheModel("random"); //Very evil hack
 
 	PrecacheModel("models/zombie/classic.mdl");
 	PrecacheModel("models/zombie/classic_2002.mdl");
@@ -533,27 +547,6 @@ void CZombie::SetZombieModel(void)
 			pModelName = sk_zombie_model.GetString();
 		}
 
-		if (!Q_stricmp(pModelName, "random"))
-		{
-
-			switch (random_zombie_model)
-			{
-
-			case 1:
-				pModelName = ("models/zombie/classic.mdl");
-				break;
-
-			case 2:
-				pModelName = ("models/zombie/classic_2002.mdl");
-				break;
-
-			case 3:
-				pModelName = ("models/zombie/classic_2003.mdl");
-				break;
-			}
-			SetModel(pModelName);
-
-		}
 
 		if (!GetModelName()) //revert to user-defined model (or the new models if set to "random") if no model is given
 		{
