@@ -6190,6 +6190,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_ml" );
 		GiveNamedItem( "weapon_hopwire" );
 		GiveNamedItem( "weapon_slam" );
+		GiveNamedItem( "weapon_m14" );
 
 #ifdef HL2_EPISODIC
 		// GiveNamedItem( "weapon_magnade" );

@@ -37,32 +37,32 @@ STUB_WEAPON_CLASS( weapon_ml, WeaponMissileLauncher, C_BaseHLCombatWeapon );
 
 //Beta weapons
 //STUB_WEAPON_CLASS(weapon_binoculars, WeaponBinoculars, C_BaseHLCombatWeapon);
-STUB_WEAPON_CLASS(weapon_flaregun, Flaregun, C_BaseHLCombatWeapon);
+STUB_WEAPON_CLASS( weapon_flaregun, Flaregun, C_BaseHLCombatWeapon );
 //STUB_WEAPON_CLASS(weapon_gauss, WeaponGaussGun, C_BaseHLCombatWeapon);
-STUB_WEAPON_CLASS(weapon_alyxgun, WeaponAlyxGun, C_HLSelectFireMachineGun);
+STUB_WEAPON_CLASS( weapon_alyxgun, WeaponAlyxGun, C_HLSelectFireMachineGun );
 //STUB_WEAPON_CLASS(weapon_hopwire, WeaponHopwire, C_BaseHLCombatWeapon);
 //STUB_WEAPON_CLASS(weapon_proto1, WeaponProto1, C_BaseHLCombatWeapon );
 //STUB_WEAPON_CLASS(weapon_physcannon, WeaponPhysCannon, C_BaseHLCombatWeapon);
-STUB_WEAPON_CLASS(weapon_ar1, WeaponAR1, C_HLMachineGun);
-STUB_WEAPON_CLASS(weapon_brickbat, WeaponBrickbat, C_BaseHLCombatWeapon);
-STUB_WEAPON_CLASS(weapon_cguard, WeaponCGuard, C_BaseHLCombatWeapon);
-STUB_WEAPON_CLASS(weapon_immolator, WeaponImmolator, C_BaseHLCombatWeapon);
+STUB_WEAPON_CLASS( weapon_ar1, WeaponAR1, C_HLMachineGun );
+STUB_WEAPON_CLASS( weapon_brickbat, WeaponBrickbat, C_BaseHLCombatWeapon );
+STUB_WEAPON_CLASS( weapon_cguard, WeaponCGuard, C_BaseHLCombatWeapon );
+STUB_WEAPON_CLASS( weapon_immolator, WeaponImmolator, C_BaseHLCombatWeapon );
 //STUB_WEAPON_CLASS(weapon_extinguisher, WeaponExtinguisher, C_HLSelectFireMachineGun);
-STUB_WEAPON_CLASS(weapon_hmg1, WeaponHMG1, C_HLMachineGun);
+STUB_WEAPON_CLASS( weapon_hmg1, WeaponHMG1, C_HLMachineGun );
 //STUB_WEAPON_CLASS(weapon_iceaxe, WeaponIceAxe, C_BaseHLBludgeonWeapon);
 //STUB_WEAPON_CLASS(weapon_rollerwand, WeaponRollerWand, C_BaseHLCombatWeapon);
-STUB_WEAPON_CLASS(weapon_smg2, WeaponSMG2, C_HLMachineGun);
-STUB_WEAPON_CLASS(weapon_sniperrifle, WeaponSniperRifle, C_BaseHLCombatWeapon);
+STUB_WEAPON_CLASS( weapon_smg2, WeaponSMG2, C_HLMachineGun );
+STUB_WEAPON_CLASS( weapon_sniperrifle, WeaponSniperRifle, C_BaseHLCombatWeapon );
 //STUB_WEAPON_CLASS(weapon_stunstick, WeaponStunStick, C_BaseHLBludgeonWeapon);
 //STUB_WEAPON_CLASS(weapon_thumper, WeaponThumper, C_BaseHLCombatWeapon);
 //STUB_WEAPON_CLASS(weapon_tripwire, Weapon_Tripwire, C_BaseHLCombatWeapon);
 //STUB_WEAPON_CLASS(weapon_irifle, WeaponIRifle, C_BaseHLCombatWeapon);
 //STUB_WEAPON_CLASS(weapon_manhack, Weapon_Manhack, C_BaseHLCombatWeapon);
-STUB_WEAPON_CLASS(weapon_OICW, WeaponOICW, C_HLMachineGun);
+STUB_WEAPON_CLASS( weapon_OICW, WeaponOICW, C_HLMachineGun );
 //STUB_WEAPON_CLASS(weapon_molotov, WeaponMolotov, C_BaseHLCombatWeapon);
 STUB_WEAPON_CLASS( weapon_hopwire, WeaponHopwire, C_BaseHLCombatWeapon );
-STUB_WEAPON_CLASS(weapon_slam, Weapon_SLAM, C_BaseHLCombatWeapon);
-
+STUB_WEAPON_CLASS( weapon_slam, Weapon_SLAM, C_BaseHLCombatWeapon );
+STUB_WEAPON_CLASS( weapon_m14, WeaponM14, C_BaseHLCombatWeapon );
 
 
 
