@@ -555,7 +555,7 @@ void CWeaponM14::AddViewKick( void )
 	if ( pPlayer == NULL )
 		return;
 
-	QAngle	viewPunch;
+	QAngle	viewPunch = vec3_angle;
 
 	viewPunch.x = random->RandomFloat( -0.5f, -1.5f );
 	//viewPunch.y = random->RandomFloat( -1.6f, 1.6f );
