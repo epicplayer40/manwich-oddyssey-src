@@ -33,7 +33,7 @@ public:
 	void			AddViewKick( void );
 	void			Operator_HandleAnimEvent( animevent_t *pEvent, CBaseCombatCharacter *pOperator );
 	float			GetFireRate( void );
-
+	float			GetBurstCycleRate(void) { return 0.25f; }
 	int				CapabilitiesGet( void ) { return bits_CAP_WEAPON_RANGE_ATTACK1; }
 
 	int		GetMinBurst() { return 10; }
