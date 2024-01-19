@@ -41,6 +41,7 @@
 #include "physics_collisionevent.h"
 #include "gamestats.h"
 #include "vehicle_base.h"
+#include "physics_saverestore.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -6069,6 +6070,7 @@ bool UTIL_CreateScaledPhysObject( CBaseAnimating *pInstance, float flScale )
 	pInstance->VPhysicsDestroyObject();
 	pInstance->VPhysicsSetObject( pNewObject );
 
+
 	// Increase our model bounds
 	const model_t *pModel = modelinfo->GetModel( pInstance->GetModelIndex() );
 	if ( pModel )
@@ -6087,6 +6089,7 @@ bool UTIL_CreateScaledPhysObject( CBaseAnimating *pInstance, float flScale )
 		pNewObject->UpdateShadow( pInstance->GetAbsOrigin(), pInstance->GetAbsAngles(), false, 0 );
 	}
 
+	g_pPhysSaveRestoreManager->AssociateModel(pNewObject, pInstance->GetModelIndex());
 	if ( bWasMotionDisabled )
 	{
 		pNewObject->EnableMotion( false );
