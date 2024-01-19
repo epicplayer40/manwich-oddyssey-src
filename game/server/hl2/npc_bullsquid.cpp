@@ -107,7 +107,7 @@ int ACT_SQUID_INSPECT_FLOOR;
 //---------------------------------------------------------
 BEGIN_DATADESC(CNPC_HL2Bullsquid)
 
-DEFINE_FIELD( m_fCanThreatDisplay, FIELD_INTEGER),
+DEFINE_FIELD( m_fCanThreatDisplay, FIELD_BOOLEAN),
 DEFINE_FIELD( m_flLastHurtTime, FIELD_TIME),
 DEFINE_FIELD( m_flNextSpitTime, FIELD_TIME),
 //	DEFINE_FIELD(  m_nSquidSpitSprite,	FIELD_INTEGER ),
