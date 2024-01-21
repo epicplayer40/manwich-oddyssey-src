@@ -55,6 +55,15 @@ enum InvalidatePhysicsBits_t
 	ANIMATION_CHANGED	= 0x8,
 };
 
+//==================================================
+// CFire
+//==================================================
+
+enum fireType_e
+{
+	FIRE_NATURAL = 0,
+	FIRE_PLASMA,
+};
 
 #if defined( CLIENT_DLL )
 #include "c_baseentity.h"

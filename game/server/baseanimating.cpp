@@ -3353,7 +3353,7 @@ void CBaseAnimating::RefreshCollisionBounds( void )
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void CBaseAnimating::Ignite( float flFlameLifetime, bool bNPCOnly, float flSize, bool bCalledByLevelDesigner )
+void CBaseAnimating::Ignite( float flFlameLifetime, bool bNPCOnly, float flSize, bool bCalledByLevelDesigner, fireType_e fireType )
 {
 	if( IsOnFire() )
 		return;
@@ -3374,7 +3374,7 @@ void CBaseAnimating::Ignite( float flFlameLifetime, bool bNPCOnly, float flSize,
 			 return;
 	}
 
-	CEntityFlame *pFlame = CEntityFlame::Create( this );
+	CEntityFlame *pFlame = CEntityFlame::Create( this, true, fireType );
 	if (pFlame)
 	{
 		pFlame->SetLifetime( flFlameLifetime );

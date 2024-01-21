@@ -323,7 +323,7 @@ void CImmolatorBeam::ImmolationDamage( const CTakeDamageInfo &info, const Vector
 				lifetime = sk_plr_burn_duration_immolator.GetFloat();
 			}
 
-			CEntityFlame* pFlame = CEntityFlame::Create(pBCC, true, true);
+			CEntityFlame* pFlame = CEntityFlame::Create(pBCC, true, FIRE_PLASMA);
 			if (pFlame)
 			{
 				pFlame->SetLifetime( lifetime );

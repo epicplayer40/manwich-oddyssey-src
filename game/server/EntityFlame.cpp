@@ -26,6 +26,7 @@ BEGIN_DATADESC( CEntityFlame )
 	DEFINE_FIELD( m_hEntAttached, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_bUseHitboxes, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_iNumHitboxFires, FIELD_INTEGER ),
+	DEFINE_FIELD( m_eFireType, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flHitboxFireScale, FIELD_FLOAT ),
 	// DEFINE_FIELD( m_bPlayingSound, FIELD_BOOLEAN ),
 	
@@ -38,7 +39,7 @@ END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST( CEntityFlame, DT_EntityFlame )
 	SendPropEHandle( SENDINFO( m_hEntAttached ) ),
-	SendPropBool(SENDINFO(m_bIsPlasma)),
+	SendPropInt(SENDINFO(m_eFireType)),
 END_SEND_TABLE()
 
 LINK_ENTITY_TO_CLASS( entityflame, CEntityFlame );
@@ -116,7 +117,7 @@ void CEntityFlame::InputIgnite( inputdata_t &inputdata )
 // Purpose: Creates a flame and attaches it to a target entity.
 // Input  : pTarget - 
 //-----------------------------------------------------------------------------
-CEntityFlame *CEntityFlame::Create( CBaseEntity *pTarget, bool useHitboxes, bool isPlasma  )
+CEntityFlame *CEntityFlame::Create( CBaseEntity *pTarget, bool useHitboxes, fireType_e fireType  )
 {
 	CEntityFlame *pFlame = (CEntityFlame *) CreateEntityByName( "entityflame" );
 
@@ -137,7 +138,7 @@ CEntityFlame *CEntityFlame::Create( CBaseEntity *pTarget, bool useHitboxes, bool
 
 
 	//Lychy: will this be a plasma flame?
-	pFlame->m_bIsPlasma = isPlasma;
+	pFlame->m_eFireType = fireType;
 
 	pFlame->m_flSize = size;
 	pFlame->SetThink( &CEntityFlame::FlameThink );
@@ -166,7 +167,7 @@ void CEntityFlame::AttachToEntity( CBaseEntity *pTarget )
 
 	if( pTarget->IsNPC() || pTarget->IsPlayer() )
 	{
-		if(m_bIsPlasma)
+		if(m_eFireType == FIRE_PLASMA)
 			EmitSound("Player.PlasmaDamage");
 		else
 			EmitSound( "General.BurningFlesh" );
@@ -309,7 +310,7 @@ void CEntityFlame::FlameThink( void )
 
 	if ( m_hEntAttached )
 	{
-		if (m_bIsPlasma)
+		if (m_eFireType == FIRE_PLASMA)
 		{
 			// Do radius damage ignoring the entity I'm attached to. This will harm things around me.
 			RadiusDamage(CTakeDamageInfo(this, this, 4.0f, DMG_PLASMA), GetAbsOrigin(), m_flSize / 2, CLASS_NONE, m_hEntAttached);

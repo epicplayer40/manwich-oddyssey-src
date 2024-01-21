@@ -1745,7 +1745,7 @@ public:
 
 	//---------------------------------
 
-	virtual void		Ignite( float flFlameLifetime, bool bNPCOnly = true, float flSize = 0.0f, bool bCalledByLevelDesigner = false );
+	virtual void		Ignite( float flFlameLifetime, bool bNPCOnly = true, float flSize = 0.0f, bool bCalledByLevelDesigner = false, fireType_e fireType = FIRE_NATURAL );
 	virtual bool		PassesDamageFilter( const CTakeDamageInfo &info );
 
 	//---------------------------------

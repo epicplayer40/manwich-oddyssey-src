@@ -269,7 +269,7 @@ void C_FireSmoke::SpawnSmoke( void )
 
 IMPLEMENT_CLIENTCLASS_DT( C_EntityFlame, DT_EntityFlame, CEntityFlame )
 	RecvPropEHandle(RECVINFO(m_hEntAttached)),
-	RecvPropBool(RECVINFO(m_bIsPlasma)), //Lychy: client needs to know whether to use normal or plasma particle
+	RecvPropInt(RECVINFO(m_eFireType)), //Lychy: client needs to know whether to use normal or plasma particle
 END_RECV_TABLE()
 
 //-----------------------------------------------------------------------------
@@ -333,7 +333,7 @@ void C_EntityFlame::CreateEffect( void )
 		m_hEffect->SetControlPointEntity( 1, NULL );
 		m_hEffect = NULL;
 	}
-	const char* szEffectName = m_bIsPlasma ? "burning_character_plasma" : "burning_character";
+	const char* szEffectName = m_eFireType == FIRE_PLASMA ? "burning_character_plasma" : "burning_character";
 #ifdef TF_CLIENT_DLL
 	m_hEffect = ParticleProp()->Create( "burningplayer_red", PATTACH_ABSORIGIN_FOLLOW );
 #else
@@ -391,7 +391,7 @@ void C_EntityFlame::Simulate( void )
 		dl->origin = GetAbsOrigin();
  		dl->origin[2] += 16;
 		
-		if (m_bIsPlasma)
+		if (m_eFireType == FIRE_PLASMA)
 		{ 
 			dl->color.r = 60;
 			dl->color.g = 200;

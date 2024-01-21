@@ -18,7 +18,7 @@
 #include "player_pickup.h"
 #include "Sprite.h"
 
-extern CBaseEntity *CreateRagGib( const char *szModel, const Vector &vecOrigin, const QAngle &vecAngles, const Vector &vecForce, float flFadeTime = 0.0, bool bShouldIgnite = false );
+extern CBaseEntity *CreateRagGib( const char *szModel, const Vector &vecOrigin, const QAngle &vecAngles, const Vector &vecForce, float flFadeTime = 0.0, bool bShouldIgnite = false, fireType_e fireType = FIRE_NATURAL );
 
 #define GERMAN_GIB_COUNT		4
 #define	HUMAN_GIB_COUNT			6

@@ -27,7 +27,7 @@ public:
 
 	CEntityFlame( void );
 
-	static CEntityFlame	*Create( CBaseEntity *pTarget, bool useHitboxes = true, bool isPlasma = false );
+	static CEntityFlame	*Create( CBaseEntity *pTarget, bool useHitboxes = true, fireType_e isPlasma = FIRE_NATURAL );
 
 	void	AttachToEntity( CBaseEntity *pTarget );
 	void	SetLifetime( float lifetime );
@@ -38,6 +38,8 @@ public:
 	float	GetRemainingLife( void );
 	int		GetNumHitboxFires( void );
 	float	GetHitboxFireScale( void );
+
+	fireType_e GetFireType(void) { return m_eFireType; }
 
 	virtual void Precache();
 	virtual void UpdateOnRemove();
@@ -60,7 +62,7 @@ protected:
 	CNetworkVar( float, m_flHitboxFireScale );
 
 	CNetworkVar( float, m_flLifetime );
-	CNetworkVar(bool, m_bIsPlasma); //Lychy
+	CNetworkVar(fireType_e, m_eFireType); //Lychy
 	bool	m_bPlayingSound;
 };
 

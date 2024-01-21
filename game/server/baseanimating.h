@@ -286,7 +286,7 @@ public:
 	void DoMuzzleFlash();
 
 	// Fire
-	virtual void Ignite( float flFlameLifetime, bool bNPCOnly = true, float flSize = 0.0f, bool bCalledByLevelDesigner = false );
+	virtual void Ignite( float flFlameLifetime, bool bNPCOnly = true, float flSize = 0.0f, bool bCalledByLevelDesigner = false, fireType_e fireType = FIRE_NATURAL );
 	virtual void IgniteLifetime( float flFlameLifetime );
 	virtual void IgniteNumHitboxFires( int iNumHitBoxFires );
 	virtual void IgniteHitboxFireScale( float flHitboxFireScale );

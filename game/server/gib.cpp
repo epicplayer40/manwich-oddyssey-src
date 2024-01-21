@@ -636,7 +636,7 @@ void CGib::Spawn( const char *szGibModel, float flLifetime )
 
 LINK_ENTITY_TO_CLASS( gib, CGib );
 
-CBaseEntity *CreateRagGib( const char *szModel, const Vector &vecOrigin, const QAngle &vecAngles, const Vector &vecForce, float flFadeTime, bool bShouldIgnite )
+CBaseEntity *CreateRagGib( const char *szModel, const Vector &vecOrigin, const QAngle &vecAngles, const Vector &vecForce, float flFadeTime, bool bShouldIgnite, fireType_e fireType )
 {
 	CRagGib *pGib;
 
@@ -655,7 +655,7 @@ CBaseEntity *CreateRagGib( const char *szModel, const Vector &vecOrigin, const Q
 		CBaseAnimating *pAnimating = pGib->GetBaseAnimating();
 		if (pAnimating != NULL )
 		{
-			pAnimating->Ignite( random->RandomFloat( 8.0, 12.0 ), false );
+			pAnimating->Ignite( random->RandomFloat( 8.0, 12.0 ), false, 0.0f , false, FIRE_PLASMA );
 		}
 	}
 

@@ -1140,10 +1140,13 @@ C_EntityFlame *FireEffect( C_BaseAnimating *pTarget, C_BaseEntity *pServerFire, 
 		pFire->SetParent( pTarget );
 		pFire->m_hEntAttached = (C_BaseEntity *) pTarget;
 
-		if (pOldFire && pOldFire->m_bIsPlasma)
+		if (pOldFire)
 		{
-			pFire->m_bIsPlasma = true;
-			szSoundEffect = "Player.PlasmaDamage";
+			pFire->m_eFireType = pOldFire->m_eFireType;
+			if (pFire->m_eFireType == FIRE_PLASMA)
+			{
+				szSoundEffect = "Player.PlasmaDamage";
+			}
 		}
 
 		pFire->OnDataChanged( DATA_UPDATE_CREATED );

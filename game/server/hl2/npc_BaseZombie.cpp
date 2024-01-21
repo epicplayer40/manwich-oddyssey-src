@@ -2386,6 +2386,12 @@ void CNPC_BaseZombie::ReleaseHeadcrab( const Vector &vecOrigin, const Vector &ve
 	CAI_BaseNPC		*pCrab;
 	Vector vecSpot = vecOrigin;
 
+	CEntityFlame* pFlame = dynamic_cast<CEntityFlame*>(GetEffectEntity());
+	fireType_e fireType = FIRE_NATURAL;
+	if (pFlame)
+	{
+		fireType = pFlame->GetFireType();
+	}
 	// Until the headcrab is a bodygroup, we have to approximate the
 	// location of the head with magic numbers.
 	if( !m_fIsTorso )
@@ -2396,7 +2402,7 @@ void CNPC_BaseZombie::ReleaseHeadcrab( const Vector &vecOrigin, const Vector &ve
 	if( fRagdollCrab )
 	{
 		//Vector vecForce = Vector( 0, 0, random->RandomFloat( 700, 1100 ) );
-		CBaseEntity *pGib = CreateRagGib( GetHeadcrabModel(), vecOrigin, GetLocalAngles(), vecVelocity, 15, ShouldIgniteZombieGib() );
+		CBaseEntity *pGib = CreateRagGib( GetHeadcrabModel(), vecOrigin, GetLocalAngles(), vecVelocity, 15, ShouldIgniteZombieGib(), fireType);
 
 		if ( pGib )
 		{
@@ -2501,7 +2507,7 @@ void CNPC_BaseZombie::ReleaseHeadcrab( const Vector &vecOrigin, const Vector &ve
 		}
 		if( ShouldIgniteZombieGib() )
 		{
-			pCrab->Ignite( 30 );
+			pCrab->Ignite( 30, true, 0.0f, false, fireType );
 		}
 
 		CopyRenderColorTo( pCrab );

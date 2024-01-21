@@ -293,7 +293,7 @@ public:
 	EHANDLE				m_hEntAttached;		// The entity that we are burning (attached to).
 	EHANDLE				m_hOldAttached;
 
-	bool m_bIsPlasma; //Lychy: da plasma
+	fireType_e m_eFireType; //Lychy: da plasma
 
 protected:
 
