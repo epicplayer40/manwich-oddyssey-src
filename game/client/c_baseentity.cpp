@@ -40,6 +40,7 @@
 #include "cdll_bounded_cvars.h"
 #include "inetchannelinfo.h"
 #include "proto_version.h"
+#include "fadingdecalfix.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -3667,7 +3668,7 @@ void C_BaseEntity::AddBrushModelDecal( const Ray_t& ray, const Vector& decalCent
 			return;
 	}
 
-	effects->DecalShoot( decalIndex, index, 
+	DecalShootFixed( decalIndex, index, 
 		model, GetAbsOrigin(), GetAbsAngles(), decalCenter, 0, 0 );
 }
 

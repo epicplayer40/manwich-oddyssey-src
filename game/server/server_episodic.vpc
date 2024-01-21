@@ -17,6 +17,10 @@ $Configuration
 		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\shared\hl2;$SRCDIR\game\shared\episodic;$SRCDIR\game\shared\manwich;.\hl2;.\episodic;.\manwich"
 		$PreprocessorDefinitions		"$BASE;HL2_DLL;HL2_EPISODIC;USES_SAVERESTORE"
 	}
+	$Linker
+	{
+			$AdditionalDependencies			"$BASE psapi.lib"	[$WIN32]
+	}
 }
 
 $Project "Server (Mambridge)"
@@ -48,6 +52,17 @@ $Project "Server (Mambridge)"
 			$File "hl2/npc_vortigaunt.cpp"
 			$File "hl2/npc_houndeye.cpp"
 			$File "hl2/energy_wave.cpp"
+			$File "$SRCDIR/game/shared/manwich/engine_hooks.cpp"
+			{
+				$Configuration
+				{
+					$Compiler
+					{
+						$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+					}
+				}
+			}
+			$File "$SRCDIR/game/shared/manwich/engine_hooks.h"
 			
 		}
 

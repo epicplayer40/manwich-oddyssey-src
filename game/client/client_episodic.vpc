@@ -17,6 +17,11 @@ $Configuration
 		$AdditionalIncludeDirectories	".\hl2;.\manwich;.\hl2\elements;$SRCDIR\game\shared\hl2;$SRCDIR\game\shared\episodic;$SRCDIR\game\shared\manwich;..\..\public;$BASE"
 		$PreprocessorDefinitions		"$BASE;HL2_CLIENT_DLL;HL2_EPISODIC"
 	}
+	
+	$Linker
+	{
+			$AdditionalDependencies			"$BASE psapi.lib"	[$WIN32]
+	}
 }
 
 $Project "Client (Mambridge)"
@@ -35,6 +40,8 @@ $Project "Client (Mambridge)"
 			$File	"hl2/energy_wave_effect.cpp"
 			$File	"hl2/energy_wave_effect.h"
 			$File	"manwich/fadingdecalfix.cpp"
+			$File	"manwich/fadingdecalfix.h"
+			$File	"$SRCDIR/game/shared/manwich/engine_hooks.cpp"
 			{
 				$Configuration
 				{
@@ -44,7 +51,7 @@ $Project "Client (Mambridge)"
 					}
 				}
 			}
-			$File	"manwich/fadingdecalfix.h"
+			$File	"$SRCDIR/game/shared/manwich/engine_hooks.h"
 		}
 
 		// help me please god

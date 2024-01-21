@@ -53,6 +53,7 @@
 #include "clientmode_shared.h"
 #include "sourcevr/isourcevirtualreality.h"
 #include "client_virtualreality.h"
+#include "fadingdecalfix.h"
 
 #ifdef PORTAL
 //#include "C_Portal_Player.h"
@@ -3529,6 +3530,7 @@ void CRendering3dView::DrawWorld( float waterZAdjust )
 	unsigned long engineFlags = BuildEngineDrawWorldListFlags( m_DrawFlags );
 
 	render->DrawWorldLists( m_pWorldRenderList, engineFlags, waterZAdjust );
+	UpdateDispDecals();
 }
 
 
