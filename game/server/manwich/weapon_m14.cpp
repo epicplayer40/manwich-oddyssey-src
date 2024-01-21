@@ -69,7 +69,7 @@ public:
 		static Vector cone;
 
 
-			cone = VECTOR_CONE_1DEGREES;
+			cone = VECTOR_CONE_PRECALCULATED;
 		
 
 		return cone;
