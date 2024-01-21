@@ -71,6 +71,10 @@ float CGravityVortexController::GetConsumedMass( void ) const
 //-----------------------------------------------------------------------------
 void CGravityVortexController::ConsumeEntity( CBaseEntity *pEnt )
 {
+	if (pEnt->IsPlayer())
+	{
+		return;
+	}
 	// Get our base physics object
 	IPhysicsObject *pPhysObject = pEnt->VPhysicsGetObject();
 	if ( pPhysObject == NULL )
