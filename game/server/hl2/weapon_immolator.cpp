@@ -223,7 +223,6 @@ void CImmolatorBeam::Spawn( void )
 	SetMoveType( MOVETYPE_FLYGRAVITY, MOVECOLLIDE_FLY_CUSTOM );
 	UTIL_SetSize( this, -Vector(0.3f,0.3f,0.3f), Vector(0.3f,0.3f,0.3f) );
 	SetSolid( SOLID_BBOX );
-	SetSolidFlags(FSOLID_NOT_SOLID | FSOLID_TRIGGER);
 	SetGravity(sk_immolator_gravity.GetFloat());
 	AddEffects( EF_NODRAW );
 	//epicplayer
