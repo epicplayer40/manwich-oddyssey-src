@@ -1248,16 +1248,8 @@ bool CNPC_Vortigaunt06::CreateBehaviors()
 //=========================================================
 void CNPC_Vortigaunt06::Spawn()
 {
-	// Allow multiple models (for slaves), but default to vortigaunt.mdl
-	char *szModel = (char *)STRING( GetModelName() );
-	if (!szModel || !*szModel)
-	{
-		szModel = "models/islave.mdl";
-		SetModelName( AllocPooledString(szModel) );
-	}
-
 	Precache();
-	SetModel( szModel );
+	SetModel( STRING(GetModelName()) );
 
 	SetHullType(HULL_WIDE_HUMAN);
 	SetHullSizeNormal();
@@ -1303,6 +1295,14 @@ void CNPC_Vortigaunt06::Spawn()
 //=========================================================
 void CNPC_Vortigaunt06::Precache()
 {
+	// Allow multiple models (for slaves), but default to vortigaunt.mdl
+	char* szModel = (char*)STRING(GetModelName());
+	if (!szModel || !*szModel)
+	{
+		szModel = "models/islave.mdl";
+		SetModelName(AllocPooledString(szModel));
+	}
+
 	PrecacheModel( STRING( GetModelName() ) );
 
 	m_nLightningSprite = PrecacheModel("sprites/lgtning.vmt");
