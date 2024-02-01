@@ -83,12 +83,12 @@ public:
 	void Spawn( void )
 	{ 
 		Precache( );
-		SetModel( "models/items/boxsrounds.mdl" );
+		SetModel( "models/items/boxsrounds_large.mdl" );
 		BaseClass::Spawn( );
 	}
 	void Precache( void )
 	{
-		PrecacheModel ("models/items/boxsrounds.mdl");
+		PrecacheModel ("models/items/boxsrounds_large.mdl");
 	}
 	bool MyTouch( CBasePlayer *pPlayer )
 	{
@@ -151,12 +151,12 @@ public:
 	void Spawn( void )
 	{ 
 		Precache( );
-		SetModel( "models/items/boxmrounds.mdl");
+		SetModel( "models/items/boxmrounds_large.mdl");
 		BaseClass::Spawn( );
 	}
 	void Precache( void )
 	{
-		PrecacheModel ("models/items/boxmrounds.mdl");
+		PrecacheModel ("models/items/boxmrounds_large.mdl");
 	}
 	bool MyTouch( CBasePlayer *pPlayer )
 	{
