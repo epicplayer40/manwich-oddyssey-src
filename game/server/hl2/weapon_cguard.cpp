@@ -498,7 +498,7 @@ void CWeaponCGuard::DelayedFire( void )
 	// Make sure we don't fire more than the amount in the clip, if this weapon uses clips
 	if ( UsesClipsForAmmo1() )
 	{
-		m_iClip1 = m_iClip1 - 1;
+		DecrementClip1();
 	}
 
 	// Fire the bullets

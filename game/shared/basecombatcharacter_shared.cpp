@@ -117,7 +117,7 @@ void CBaseCombatCharacter::RemoveAmmo( int iCount, int iAmmoIndex )
 		return;
 
 	// Infinite ammo?
-	if ( GetAmmoDef()->MaxCarry( iAmmoIndex ) == INFINITE_AMMO )
+	if ( GetAmmoDef()->MaxCarry( iAmmoIndex ) == INFINITE_AMMO || sv_infinite_ammo.GetBool() == true)
 		return;
 
 	// Ammo pickup sound

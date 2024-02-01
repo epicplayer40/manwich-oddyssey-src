@@ -700,7 +700,7 @@ void CFlaregun::PrimaryAttack( void )
 		return;
 	}
 
-	m_iClip1 = m_iClip1 - 1;
+	DecrementClip1();
 
 	SendWeaponAnim( ACT_VM_PRIMARYATTACK );
 	pOwner->m_flNextAttack = gpGlobals->curtime + 1;
@@ -735,7 +735,7 @@ void CFlaregun::SecondaryAttack( void )
 		return;
 	}
 
-	m_iClip1 = m_iClip1 - 1;
+	DecrementClip1();
 
 	SendWeaponAnim( ACT_VM_PRIMARYATTACK );
 	pOwner->m_flNextAttack = gpGlobals->curtime + 1;

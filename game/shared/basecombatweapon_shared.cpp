@@ -60,6 +60,8 @@ ConVar tf_weapon_criticals_bucket_bottom( "tf_weapon_criticals_bucket_bottom", "
 ConVar tf_weapon_criticals_bucket_default( "tf_weapon_criticals_bucket_default", "300.0", FCVAR_REPLICATED | FCVAR_CHEAT );
 #endif // TF
 
+ConVar sv_infinite_ammo("sv_infinite_ammo", "0", FCVAR_CHEAT | FCVAR_REPLICATED);
+
 CBaseCombatWeapon::CBaseCombatWeapon()
 {
 	// Constructor must call this
@@ -2285,7 +2287,7 @@ void CBaseCombatWeapon::PrimaryAttack( void )
 	if ( UsesClipsForAmmo1() )
 	{
 		info.m_iShots = MIN( info.m_iShots, m_iClip1 );
-		m_iClip1 -= info.m_iShots;
+		TakeAwayClip1(info.m_iShots);
 	}
 	else
 	{
@@ -2436,6 +2438,19 @@ Activity CBaseCombatWeapon::ActivityOverride( Activity baseAct, bool *pRequired 
 		}
 	}
 	return baseAct;
+}
+
+void CBaseCombatWeapon::TakeAwayClip1(int shots)
+{
+	if (UsesClipsForAmmo1() && !sv_infinite_ammo.GetBool())
+	{
+		m_iClip1 -= shots;
+	}
+}
+
+void CBaseCombatWeapon::DecrementClip1(void)
+{
+	TakeAwayClip1(1);
 }
 
 //-----------------------------------------------------------------------------

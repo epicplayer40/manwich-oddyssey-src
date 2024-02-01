@@ -296,7 +296,7 @@ void CWeaponM14::PrimaryAttack( void )
 	{
 		if ( iBulletsToFire > m_iClip1 )
 			iBulletsToFire = m_iClip1;
-		m_iClip1 -= iBulletsToFire;
+		TakeAwayClip1(iBulletsToFire);
 	}
 
 	m_iPrimaryAttacks++;

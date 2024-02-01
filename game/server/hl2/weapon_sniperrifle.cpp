@@ -411,7 +411,7 @@ void CWeaponSniperRifle::PrimaryAttack( void )
 
 		// Don't fire again until fire animation has completed
 		m_flNextPrimaryAttack = gpGlobals->curtime + SequenceDuration();
-		m_iClip1 = m_iClip1 - 1;
+		DecrementClip1();
 
 		Vector vecSrc	 = pPlayer->Weapon_ShootPosition();
 		Vector vecAiming = pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );	

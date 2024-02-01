@@ -35,6 +35,8 @@ extern void OnBaseCombatWeaponDestroyed( CBaseCombatWeapon * );
 void *SendProxy_SendLocalWeaponDataTable( const SendProp *pProp, const void *pStruct, const void *pVarData, CSendProxyRecipients *pRecipients, int objectID );
 #endif
 
+extern ConVar sv_infinite_ammo;
+
 class CBasePlayer;
 class CBaseCombatCharacter;
 class IPhysicsConstraint;
@@ -358,6 +360,9 @@ public:
 	virtual bool			UsesClipsForAmmo1( void ) const;
 	virtual bool			UsesClipsForAmmo2( void ) const;
 	bool					IsMeleeWeapon() const;
+
+	virtual void TakeAwayClip1(int shots);
+	virtual void DecrementClip1(void);
 
 	// derive this function if you mod uses encrypted weapon info files
 	virtual const unsigned char *GetEncryptionKey( void );
