@@ -39,7 +39,8 @@ ConVar tank_debug("tank_debug", "0");
 #define CANNON_MAX_RIGHT_YAW		180
 
 #define TANK_DEFAULTMODEL "models/vehicles/merkava.mdl"
-#define TANK_GAMESOUND_FIRE "Tank.Single"
+#define TANK_GAMESOUND_FIRE_FAR "Tank.Single_Far"
+#define TANK_GAMESOUND_FIRE_NEAR "Tank.Single_Near"
 #define TANK_GAMESOUND_READYFIRE "Tank.ReadyFire"
 #define TANK_GAMESOUND_EJECTCASING "Tank.EjectCasing"
 
@@ -369,7 +370,8 @@ void CVehicleTank::Precache()
 	}
 
 	PrecacheScriptSound(TANK_GAMESOUND_EJECTCASING);
-	PrecacheScriptSound(TANK_GAMESOUND_FIRE);
+	PrecacheScriptSound(TANK_GAMESOUND_FIRE_FAR);
+	PrecacheScriptSound(TANK_GAMESOUND_FIRE_NEAR);
 	PrecacheScriptSound(TANK_GAMESOUND_READYFIRE);
 
 	PrecacheScriptSound(TANK_GAMESOUND_TURRET_MOVE_START);
@@ -776,7 +778,8 @@ void CVehicleTank::ShootThink()
 		SetNextThink(gpGlobals->curtime + 1.5f, "EjectCasingThink");
 
 
-		EmitSound(TANK_GAMESOUND_FIRE);
+		EmitSound(TANK_GAMESOUND_FIRE_FAR);
+		EmitSound(TANK_GAMESOUND_FIRE_NEAR);
 
 #if 1
 		DispatchParticleEffect("Explosion_2", PATTACH_POINT_FOLLOW, this, muzzleAttachment );
