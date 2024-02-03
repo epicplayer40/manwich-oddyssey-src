@@ -428,9 +428,6 @@ void CVehicleTank::Spawn()
 	PrecacheBreakModels();
 
 	m_takedamage = DAMAGE_YES;
-	delete m_pServerVehicle;
-	m_pServerVehicle = new CTankFourWheelServerVehicle();
-	m_pServerVehicle->SetVehicle(this);
 	m_bIsGoodAimVector = false;
 
 	//IPhysicsObject* physObj = VPhysicsGetObject();
