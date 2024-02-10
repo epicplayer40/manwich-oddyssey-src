@@ -389,6 +389,7 @@ void CNPC_Vortigaunt06::RunTask( const Task_t *pTask )
 				// slow down attack when not on hard
 				if ( g_iSkillLevel != SKILL_HARD )
 				 m_flPlaybackRate = 0.5;
+				else m_flPlaybackRate = 0.7; //1.0 is still too fast for an enemy, even on hard - epicplayer
 
 				//if (GetEnemy()->IsPlayer())
 				//{
