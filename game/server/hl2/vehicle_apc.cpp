@@ -129,9 +129,8 @@ void CPropAPC::Precache( void )
 		PrecacheModel( s_pGibModelName[i] );
 	}
 
-	PrecacheScriptSound( "Weapon_AR2.Single" );
+	PrecacheScriptSound( "Weapon_AR2.NPC_Single" );
 	PrecacheScriptSound( "PropAPC.FireRocket" );
-	PrecacheScriptSound( "combine.door_lock" );
 }
 
 
@@ -726,11 +725,6 @@ void CPropAPC::DriveVehicle( float flFrameTime, CUserCmd *ucmd, int iButtonsDown
 void CPropAPC::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	BaseClass::Use( pActivator, pCaller, useType, value );
-
-	if ( pActivator->IsPlayer() )
-	{
-		 EmitSound ( "combine.door_lock" );
-	}
 }
 
 
@@ -842,11 +836,11 @@ void CPropAPC::FireMachineGun( void )
 	GetAttachment( m_nMachineGunMuzzleAttachment, vecMachineGunShootPos, &vecMachineGunDir );
 	
 	// Fire the round
-	int	bulletType = GetAmmoDef()->Index("AR2");
+	int	bulletType = GetAmmoDef()->Index(GetBulletType());
 	FireBullets( 1, vecMachineGunShootPos, vecMachineGunDir, VECTOR_CONE_8DEGREES, MAX_TRACE_LENGTH, bulletType, 1 );
 	DoMuzzleFlash();
 
-	EmitSound( "Weapon_AR2.Single" );
+	EmitSound( GetFireMachineGunSound() );
 }
 
 
@@ -1045,6 +1039,16 @@ void CPropAPC::OnRestore( void )
 		// Restore the passenger information we're holding on to
 		pServerVehicle->RestorePassengerInfo();
 	}
+}
+
+const char* CPropAPC::GetBulletType() const
+{
+	return "AR2";
+}
+
+const char* CPropAPC::GetFireMachineGunSound() const
+{
+	return "Weapon_AR2.NPC_Single";
 }
 
 //========================================================================================================================================

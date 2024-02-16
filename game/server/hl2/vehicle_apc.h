@@ -69,9 +69,9 @@ public:
 	bool			IsInPrimaryFiringCone() const { return m_bInFiringCone; }
 
 	// Muzzle flashes
-	const char		*GetTracerType( void ) ;
-	void			DoImpactEffect( trace_t &tr, int nDamageType );
-	void			DoMuzzleFlash( void );
+	virtual const char		*GetTracerType( void ) ;
+	virtual void			DoImpactEffect( trace_t &tr, int nDamageType );
+	virtual void			DoMuzzleFlash( void );
 
 	virtual Vector	EyePosition( );				// position of eyes
 	Vector			BodyTarget( const Vector &posSrc, bool bNoisy );
@@ -120,8 +120,11 @@ private:
 
 	virtual bool ShouldAttractAutoAim( CBaseEntity *pAimingEnt );
 
+	virtual const char* GetBulletType() const;
+	virtual const char* GetFireMachineGunSound() const;
 
-private:
+
+protected:
 	// Danger sounds made by the APC
 	float	m_flDangerSoundTime;
 

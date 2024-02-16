@@ -36,7 +36,7 @@ public:
 	
 	virtual bool FVisible( CBaseEntity *pTarget, int traceMask, CBaseEntity **ppBlocker );
 	virtual bool WeaponLOSCondition( const Vector &ownerPos, const Vector &targetPos, bool bSetConditions );
-	virtual Class_T Classify ( void ) { return CLASS_COMBINE; }
+	virtual Class_T Classify ( void ) { return V_strstr(GetClassname(), "ally") ? CLASS_PLAYER_ALLY : CLASS_COMBINE; }
 	virtual void PrescheduleThink( );
 	virtual Disposition_t IRelationType(CBaseEntity *pTarget);
 
@@ -70,6 +70,8 @@ BEGIN_DATADESC( CNPC_APCDriver )
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( npc_apcdriver, CNPC_APCDriver );
+LINK_ENTITY_TO_CLASS(npc_apcdriverally, CNPC_APCDriver);
+
 
 
 //------------------------------------------------------------------------------
