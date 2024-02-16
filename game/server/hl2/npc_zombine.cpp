@@ -256,6 +256,8 @@ void CNPC_Zombine::Precache( void )
 	PrecacheScriptSound( "Zombine.Idle" );
 	PrecacheScriptSound( "Zombine.ReadyGrenade" );
 
+	PrecacheScriptSound( "Weapon_Grenade.Spoon_Release" );
+
 	PrecacheScriptSound( "ATV_engine_null" );
 	PrecacheScriptSound( "Zombine.Charge" );
 	PrecacheScriptSound( "Zombie.Attack" );
@@ -580,6 +582,8 @@ void CNPC_Zombine::HandleAnimEvent( animevent_t *pEvent )
 
 				pGrenade->SetDamage( 200.0f );
 				m_hGrenade = pGrenade;
+
+				pGrenade->EmitSound("Weapon_Grenade.Spoon_Release");
 				
 				EmitSound( "Zombine.ReadyGrenade" );
 
