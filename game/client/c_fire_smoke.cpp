@@ -327,6 +327,10 @@ void C_EntityFlame::UpdateOnRemove( void )
 
 void C_EntityFlame::CreateEffect( void )
 {
+	if (m_hEntAttached && m_hEntAttached->IsPlayer())
+	{
+		return;
+	}
 	if ( m_hEffect )
 	{
 		ParticleProp()->StopEmission( m_hEffect, true );
