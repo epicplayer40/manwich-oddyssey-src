@@ -278,6 +278,7 @@ void CGrenadeFrag::Precache( void )
 	PrecacheModel( GRENADE_MODEL );
 
 	PrecacheScriptSound( "Grenade.Blip" );
+	PrecacheScriptSound( "Weapon_Grenade.Spoon_Release" );
 
 	PrecacheModel( "sprites/redglow1.vmt" );
 	PrecacheModel( "sprites/bluelaser1.vmt" );
@@ -291,6 +292,8 @@ void CGrenadeFrag::SetTimer( float detonateDelay, float warnDelay )
 	m_flWarnAITime = gpGlobals->curtime + warnDelay;
 	SetThink( &CGrenadeFrag::DelayThink );
 	SetNextThink( gpGlobals->curtime );
+
+	EmitSound("Weapon_Grenade.Spoon_Release");
 
 	CreateEffects();
 }
