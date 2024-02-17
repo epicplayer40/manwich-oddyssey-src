@@ -35,6 +35,7 @@ $Project "Client (Mambridge)"
 		// help me please god
 		$Folder "Manwich"
 		{
+			$File	"hl1/hl1_c_legacytempents.cpp"
 			$File	"hl2/c_weapon_gravitygun.cpp"
 			$File	"hl2/c_energy_wave.cpp"
 			$File	"hl2/energy_wave_effect.cpp"

@@ -300,6 +300,7 @@ void CViewRender::Init( void )
 
 	beams->InitBeams();
 	tempents->Init();
+	tempents_hl1->Init();
 
 	m_TranslucentSingleColor.Init( "debug/debugtranslucentsinglecolor", TEXTURE_GROUP_OTHER );
 	m_ModulateSingleColor.Init( "engine/modulatesinglecolor", TEXTURE_GROUP_OTHER );
@@ -329,6 +330,7 @@ void CViewRender::LevelInit( void )
 {
 	beams->ClearBeams();
 	tempents->Clear();
+	tempents_hl1->Clear();
 
 	m_BuildWorldListsNumber = 0;
 	m_BuildRenderableListsNumber = 0;
@@ -365,6 +367,7 @@ void CViewRender::Shutdown( void )
 	m_UnderWaterOverlayMaterial.Shutdown();
 	beams->ShutdownBeams();
 	tempents->Shutdown();
+	tempents_hl1->Shutdown();
 }
 
 

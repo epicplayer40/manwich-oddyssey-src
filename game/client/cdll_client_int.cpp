@@ -1594,6 +1594,7 @@ void CHLClient::LevelInitPreEntity( char const* pMapName )
 	clienteffects->Flush();
 	view->LevelInit();
 	tempents->LevelInit();
+	tempents_hl1->LevelInit();
 	ResetToneMapping(1.0);
 
 	IGameSystem::LevelInitPreEntityAllSystems(pMapName);
@@ -2181,6 +2182,7 @@ void OnRenderStart()
 
 		// Update temp entities
 		tempents->Update();
+		tempents_hl1->Update();
 
 		// Update temp ent beams...
 		beams->UpdateTempEntBeams();

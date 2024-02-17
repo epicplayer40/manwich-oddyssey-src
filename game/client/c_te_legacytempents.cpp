@@ -1791,7 +1791,7 @@ void CTempEnts::MuzzleFlash( int type, ClientEntityHandle_t hEntity, int attachm
 	default:
 		{
 			//NOTENOTE: This means you specified an invalid muzzleflash type, check your spelling?
-			Assert( 0 );
+			tempents_hl1->MuzzleFlash(type, hEntity, attachmentIndex, firstPerson);		//ManOd: HL1 Muzzle Flashes!!
 		}
 		break;
 	}
@@ -1884,7 +1884,7 @@ void CTempEnts::MuzzleFlash( const Vector& pos1, const QAngle& angles, int type,
 	
 	default:
 		// There's no supported muzzle flash for the type specified!
-		Assert(0);
+		tempents_hl1->MuzzleFlash(pos1, angles, type, hEntity, firstPerson);
 		break;
 	}
 

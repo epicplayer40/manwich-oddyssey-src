@@ -1,4 +1,4 @@
-//===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -36,24 +36,24 @@ private:
 // Temp entity interface
 static CHL1TempEnts g_TempEnts;
 // Expose to rest of the client .dll
-ITempEnts *tempents = ( ITempEnts * )&g_TempEnts;
+ITempEnts *tempents_hl1 = ( ITempEnts * )&g_TempEnts;
 
 void CHL1TempEnts::LevelInit()
 {
 	CTempEnts::LevelInit();
 
-	m_pSpriteMuzzleFlash[0] = (model_t *)engine->LoadModel( "sprites/muzzleflash1.vmt" );
-	m_pSpriteMuzzleFlash[1] = (model_t *)engine->LoadModel( "sprites/muzzleflash2.vmt" );
-	m_pSpriteMuzzleFlash[2] = (model_t *)engine->LoadModel( "sprites/muzzleflash3.vmt" );
+	m_pSpriteMuzzleFlash[0] = (model_t *)engine->LoadModel( "sprites/hl1/muzzleflash1.vmt" );
+	m_pSpriteMuzzleFlash[1] = (model_t *)engine->LoadModel( "sprites/hl1/muzzleflash2.vmt" );
+	m_pSpriteMuzzleFlash[2] = (model_t *)engine->LoadModel( "sprites/hl1/muzzleflash3.vmt" );
 }
 
 void CHL1TempEnts::Init( void )
 {
 	CTempEnts::Init();
 
-	m_pSpriteMuzzleFlash[0] = (model_t *)engine->LoadModel( "sprites/muzzleflash1.vmt" );
-	m_pSpriteMuzzleFlash[1] = (model_t *)engine->LoadModel( "sprites/muzzleflash2.vmt" );
-	m_pSpriteMuzzleFlash[2] = (model_t *)engine->LoadModel( "sprites/muzzleflash3.vmt" );
+	m_pSpriteMuzzleFlash[0] = (model_t *)engine->LoadModel( "sprites/hl1/muzzleflash1.vmt" );
+	m_pSpriteMuzzleFlash[1] = (model_t *)engine->LoadModel( "sprites/hl1/muzzleflash2.vmt" );
+	m_pSpriteMuzzleFlash[2] = (model_t *)engine->LoadModel( "sprites/hl1/muzzleflash3.vmt" );
 }
 
 
@@ -64,9 +64,6 @@ void CHL1TempEnts::MuzzleFlash( const Vector& pos1, const QAngle& angles, int ty
 	float				scale;
 	int					frameCount;
 	QAngle				ang;
-
-	//ADRIANHL1 No Muzzleflashes until I get the model source.
-	return;
 
 	index = type % 10;
 	index = index % NUM_MUZZLE_SPRITES;
@@ -87,7 +84,7 @@ void CHL1TempEnts::MuzzleFlash( const Vector& pos1, const QAngle& angles, int ty
 	pTemp->SetRenderColor( 255, 255, 255, 255 );
 	pTemp->m_flSpriteScale = scale;
 	pTemp->SetAbsOrigin( pos1 );
-	pTemp->die = gpGlobals->curtime + 0.01;
+	pTemp->die = gpGlobals->curtime + 0.02;
 	pTemp->m_flFrame = random->RandomInt( 0, frameCount-1 );
 	pTemp->m_flFrameMax = frameCount - 1;
 

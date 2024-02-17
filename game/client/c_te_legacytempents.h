@@ -216,6 +216,7 @@ private:
 
 
 extern ITempEnts *tempents;
+extern ITempEnts *tempents_hl1;
 
 
 #endif // C_TE_LEGACYTEMPENTS_H
