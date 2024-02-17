@@ -160,7 +160,7 @@ void CWeaponSMG2::SecondaryAttack(void)
 		break;
 
 	case FIREMODE_3RNDBURST:
-		m_iFireMode = FIREMODE_SEMI;
+		m_iFireMode = FIREMODE_FULLAUTO;
 		WeaponSound(SPECIAL1);
 		break;
 
