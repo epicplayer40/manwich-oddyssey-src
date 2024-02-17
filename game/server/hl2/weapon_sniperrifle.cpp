@@ -32,7 +32,7 @@
 #define SNIPER_BULLET_COUNT_NPC				1			// Fire n bullets per shot fired by NPCs.
 #define SNIPER_TRACER_FREQUENCY_PLAYER		0			// Draw a tracer every nth shot fired by the player.
 #define SNIPER_TRACER_FREQUENCY_NPC			0			// Draw a tracer every nth shot fired by NPCs.
-#define SNIPER_KICKBACK						45			// Range for punchangle when firing. 3 by default ~TheZealot
+#define SNIPER_KICKBACK						15			// Range for punchangle when firing. 3 by default ~TheZealot
 
 #define SNIPER_ZOOM_RATE					0.2			// Interval between zoom levels in seconds.
 
