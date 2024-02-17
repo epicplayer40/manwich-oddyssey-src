@@ -1145,7 +1145,7 @@ C_EntityFlame *FireEffect( C_BaseAnimating *pTarget, C_BaseEntity *pServerFire, 
 			pFire->m_eFireType = pOldFire->m_eFireType;
 			if (pFire->m_eFireType == FIRE_PLASMA)
 			{
-				szSoundEffect = "Player.PlasmaDamage";
+				szSoundEffect = "ManodGeneral.BurningPlasmaFlesh";
 			}
 		}
 

@@ -65,7 +65,8 @@ void CEntityFlame::UpdateOnRemove()
 	if ( m_bPlayingSound )
 	{
 		EmitSound( "General.StopBurning" );
-		StopSound("Player.PlasmaDamage");
+		m_hEntAttached->StopSound("ManodGeneral.BurningPlasmaObject");
+		m_hEntAttached->StopSound("ManodGeneral.BurningPlasmaFlesh");
 		m_bPlayingSound = false;
 	}
 
@@ -79,6 +80,10 @@ void CEntityFlame::Precache()
 	PrecacheScriptSound( "General.StopBurning" );
 	PrecacheScriptSound( "General.BurningFlesh" );
 	PrecacheScriptSound( "General.BurningObject" );
+
+	PrecacheScriptSound("ManodGeneral.BurningPlasmaFlesh");
+	PrecacheScriptSound("ManodGeneral.BurningPlasmaObject");
+
 }
 
 //-----------------------------------------------------------------------------
@@ -168,12 +173,14 @@ void CEntityFlame::AttachToEntity( CBaseEntity *pTarget )
 	if( pTarget->IsNPC() || pTarget->IsPlayer() )
 	{
 		if(m_eFireType == FIRE_PLASMA)
-			EmitSound("Player.PlasmaDamage");
+			EmitSound("ManodGeneral.BurningPlasmaFlesh");
 		else
 			EmitSound( "General.BurningFlesh" );
 	}
 	else
 	{
+		if (m_eFireType == FIRE_PLASMA)
+			EmitSound("ManodGeneral.BurningPlasmaObject");
 		EmitSound( "General.BurningObject" );
 	}
 
@@ -290,7 +297,8 @@ void CEntityFlame::FlameThink( void )
 	if ( m_flLifetime < gpGlobals->curtime || m_hEntAttached == NULL )
 	{
 		EmitSound( "General.StopBurning" );
-		StopSound("Player.PlasmaDamage");
+		m_hEntAttached->StopSound("ManodGeneral.BurningPlasmaObject");
+		m_hEntAttached->StopSound("ManodGeneral.BurningPlasmaFlesh");
 
 		m_bPlayingSound = false;
 		SetThink( &CEntityFlame::SUB_Remove );
