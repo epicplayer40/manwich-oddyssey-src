@@ -75,6 +75,8 @@ private:
 
 
 friend class CHL2GameMovement;
+
+void	UpdateBurning();
 };
 
 

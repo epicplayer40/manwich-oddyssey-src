@@ -474,6 +474,8 @@ BEGIN_RECV_TABLE_NOBASE(C_BaseEntity, DT_BaseEntity)
 	RecvPropInt		( RECVINFO( m_bAnimatedEveryTick ), 0, RecvProxy_InterpolationAmountChanged ),
 	RecvPropBool	( RECVINFO( m_bAlternateSorting ) ),
 
+	RecvPropInt( RECVINFO(m_eBurningType), -1),
+
 #ifdef TF_CLIENT_DLL
 	RecvPropArray3( RECVINFO_ARRAY(m_nModelIndexOverrides),	RecvPropInt( RECVINFO(m_nModelIndexOverrides[0]) ) ),
 #endif

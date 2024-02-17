@@ -80,6 +80,7 @@ void C_BaseHLPlayer::OnDataChanged( DataUpdateType_t updateType )
 		SetNextClientThink( CLIENT_THINK_ALWAYS );
 	}
 
+	UpdateBurning();
 	BaseClass::OnDataChanged( updateType );
 }
 
@@ -647,3 +648,14 @@ void C_BaseHLPlayer::BuildTransformations( CStudioHdr *hdr, Vector *pos, Quatern
 	BuildFirstPersonMeathookTransformations( hdr, pos, q, cameraTransform, boneMask, boneComputed, "ValveBiped.Bip01_Head1" );
 }
 
+void C_BaseHLPlayer::UpdateBurning()
+{
+	if (m_eBurningType != FIRE_NONE )
+	{
+		EnableBurning(m_eBurningType);
+	}
+	else
+	{
+		DisableBurning();
+	}
+}

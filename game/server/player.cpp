@@ -986,8 +986,8 @@ void CBasePlayer::DamageEffect(float flDamage, int fDamageType)
 	else if (fDamageType & DMG_PLASMA)
 	{
 		// Blue screen fade
-		color32 blue = {0,255,255,50};
-		UTIL_ScreenFade( this, blue, 0.2, 0.4, FFADE_IN );
+		//color32 blue = {0,255,255,50};
+		//UTIL_ScreenFade( this, blue, 0.2, 0.4, FFADE_IN );
 
 		// Very small screen shake
 		// Both -0.1 and 0.1 map to 0 when converted to integer, so all of these RandomInt
@@ -997,7 +997,7 @@ void CBasePlayer::DamageEffect(float flDamage, int fDamageType)
 		//ViewPunch(QAngle(random->RandomInt(-0.1,0.1), random->RandomInt(-0.1,0.1), random->RandomInt(-0.1,0.1)));
 
 		// Burn sound 
-		//EmitSound( "Player.PlasmaDamage" ); //Lychy: This sound effect loops forever and is stopped by footstep sounds, the sounds is now made by entityflame instead
+		EmitSound( "ManodPlayer.PlasmaPain" );
 	}
 	else if (fDamageType & DMG_SONIC)
 	{
@@ -1356,7 +1356,10 @@ int CBasePlayer::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 			flPunch = RandomFloat( -5, -7 );
 	}
 
-	m_Local.m_vecPunchAngle.SetX( flPunch );
+	if (!(info.GetDamageType() & DMG_DIRECT || info.GetDamageType() & DMG_PLASMA))
+	{
+		m_Local.m_vecPunchAngle.SetX(flPunch);
+	}
 
 	if (fTookDamage && !ftrivial && fmajor && flHealthPrev >= 75) 
 	{
@@ -5068,6 +5071,8 @@ void CBasePlayer::Precache( void )
 	PrecacheScriptSound( "Player.DrownContinue" );
 	PrecacheScriptSound( "Player.Wade" );
 	PrecacheScriptSound( "Player.AmbientUnderWater" );
+
+	PrecacheScriptSound("ManodPlayer.PlasmaPain");
 	enginesound->PrecacheSentenceGroup( "HEV" );
 
 	// These are always needed

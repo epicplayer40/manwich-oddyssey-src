@@ -1800,6 +1800,16 @@ public:
 	{
 		return s_bAbsQueriesValid;
 	}
+
+
+	// ManOd
+
+public:
+	inline fireType_e	GetBurningType(void) { return m_eBurningType; }
+	inline void SetBurningType(fireType_e val) { m_eBurningType = val; }
+
+private:
+	CNetworkVar(fireType_e, m_eBurningType);
 };
 
 // Send tables exposed in this module.

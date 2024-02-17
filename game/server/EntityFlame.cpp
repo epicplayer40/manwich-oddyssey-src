@@ -177,6 +177,8 @@ void CEntityFlame::AttachToEntity( CBaseEntity *pTarget )
 		EmitSound( "General.BurningObject" );
 	}
 
+	pTarget->SetBurningType(GetFireType());
+
 	m_bPlayingSound = true;
 
 	// So our heat emitter follows the entity around on the server.
@@ -289,6 +291,7 @@ void CEntityFlame::FlameThink( void )
 	{
 		EmitSound( "General.StopBurning" );
 		StopSound("Player.PlasmaDamage");
+
 		m_bPlayingSound = false;
 		SetThink( &CEntityFlame::SUB_Remove );
 		SetNextThink( gpGlobals->curtime + 0.5f );
@@ -296,6 +299,7 @@ void CEntityFlame::FlameThink( void )
 		// Notify anything we're attached to
 		if ( m_hEntAttached )
 		{
+			m_hEntAttached->SetBurningType(FIRE_NONE);
 			CBaseCombatCharacter *pAttachedCC = m_hEntAttached->MyCombatCharacterPointer();
 
 			if( pAttachedCC )

@@ -1687,6 +1687,9 @@ protected:
 	RenderMode_t m_PreviousRenderMode;
 	color32 m_PreviousRenderColor;
 #endif
+
+	// ManOd
+	fireType_e m_eBurningType;
 };
 
 EXTERN_RECV_TABLE(DT_BaseEntity);

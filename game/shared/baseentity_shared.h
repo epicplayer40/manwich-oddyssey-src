@@ -61,6 +61,7 @@ enum InvalidatePhysicsBits_t
 
 enum fireType_e
 {
+	FIRE_NONE	= -1,
 	FIRE_NATURAL = 0,
 	FIRE_PLASMA,
 };

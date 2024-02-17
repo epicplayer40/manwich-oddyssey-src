@@ -75,6 +75,9 @@ extern ConVar mp_forcecamera; // in gamevars_shared.h
 #define MAX_VGUI_INPUT_MODE_SPEED 30
 #define MAX_VGUI_INPUT_MODE_SPEED_SQ (MAX_VGUI_INPUT_MODE_SPEED*MAX_VGUI_INPUT_MODE_SPEED)
 
+#define SCREEN_OVERLAY_MATERIAL_BURNING		"effects/imcookin" 
+#define SCREEN_OVERLAY_MATERIAL_BURNING_PLASMA		"effects/imcookin_plasma" 
+
 static Vector WALL_MIN(-WALL_OFFSET,-WALL_OFFSET,-WALL_OFFSET);
 static Vector WALL_MAX(WALL_OFFSET,WALL_OFFSET,WALL_OFFSET);
 
@@ -2962,6 +2965,39 @@ void C_BasePlayer::BuildFirstPersonMeathookTransformations( CStudioHdr *hdr, Vec
 	}
 }
 
+void C_BasePlayer::EnableBurning(fireType_e type)
+{
+	IMaterial* pMaterial = NULL;
+
+	switch (type)
+	{
+	case FIRE_NATURAL:
+		pMaterial = materials->FindMaterial(SCREEN_OVERLAY_MATERIAL_BURNING, TEXTURE_GROUP_CLIENT_EFFECTS, false);
+		break;
+	case FIRE_PLASMA:
+		pMaterial = materials->FindMaterial(SCREEN_OVERLAY_MATERIAL_BURNING_PLASMA, TEXTURE_GROUP_CLIENT_EFFECTS, false);
+		break;
+	}
+	if (!IsErrorMaterial(pMaterial))
+	{
+		view->SetScreenOverlayMaterial(pMaterial);
+	}
+}
+
+void C_BasePlayer::DisableBurning()
+{
+	IMaterial* pMaterial = view->GetScreenOverlayMaterial();
+
+	if (pMaterial &&
+		(
+			FStrEq(pMaterial->GetName(), SCREEN_OVERLAY_MATERIAL_BURNING) ||
+			FStrEq(pMaterial->GetName(), SCREEN_OVERLAY_MATERIAL_BURNING_PLASMA)
+		)
+		)
+	{
+		view->SetScreenOverlayMaterial(NULL);
+	}
+}
 
 
 void CC_DumpClientSoundscapeData( const CCommand& args )

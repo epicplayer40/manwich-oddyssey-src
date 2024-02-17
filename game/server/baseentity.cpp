@@ -302,6 +302,8 @@ IMPLEMENT_SERVERCLASS_ST_NOBASE( CBaseEntity, DT_BaseEntity )
 	SendPropInt		(SENDINFO(m_bAnimatedEveryTick),		1, SPROP_UNSIGNED ),
 	SendPropBool( SENDINFO( m_bAlternateSorting )),
 
+	SendPropInt	(SENDINFO(m_eBurningType), -1),
+
 #ifdef TF_DLL
 	SendPropArray3( SENDINFO_ARRAY3(m_nModelIndexOverrides), SendPropInt( SENDINFO_ARRAY(m_nModelIndexOverrides), SP_MODEL_INDEX_BITS, 0 ) ),
 #endif
@@ -412,6 +414,8 @@ CBaseEntity::CBaseEntity( bool bServerOnly )
 #ifndef _XBOX
 	AddEFlags( EFL_USE_PARTITION_WHEN_NOT_SOLID );
 #endif
+
+	SetBurningType(FIRE_NONE);
 }
 
 //-----------------------------------------------------------------------------
