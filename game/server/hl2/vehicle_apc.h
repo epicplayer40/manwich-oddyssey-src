@@ -79,7 +79,7 @@ public:
 	
 	virtual void	Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
-private:
+protected:
 	enum
 	{
 		MAX_SMOKE_TRAILS = 4,
@@ -103,7 +103,7 @@ private:
 	// Purpose: 
 	void GetRocketShootPosition( Vector *pPosition );
 
-	void FireMachineGun( void );
+	void FireMachineGun( int iAttachment );
 	void FireRocket( void );
 
 	// Death volley 

@@ -1,8 +1,8 @@
 // Lychy!!! :D
 
 #include "cbase.h"
-#include "effect_dispatch_data.h"
 #include "te_effect_dispatch.h"
+#include "in_buttons.h"
 #include "vehicle_apc.h"
 
 ConVar	sk_apc_conscript_damagetype("sk_apc_conscript_damagetype", "Largeround");
@@ -20,6 +20,13 @@ class CPropAPCConscript : public CPropAPC
 
 	const char* GetBulletType() const;
 	const char* GetFireMachineGunSound() const;
+
+	virtual void	DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsDown, int iButtonsReleased);
+
+	virtual void Activate();
+
+private:
+	int		m_nMachineGunMuzzleRAttachment;
 };
 
 LINK_ENTITY_TO_CLASS(prop_vehicle_apc_conscript, CPropAPCConscript);
@@ -51,6 +58,9 @@ void CPropAPCConscript::DoMuzzleFlash(void)
 	data.m_nAttachmentIndex = m_nMachineGunMuzzleAttachment;
 	data.m_flScale = 1.0f;
 	DispatchEffect("MuzzleFlash", data);
+
+	data.m_nAttachmentIndex = m_nMachineGunMuzzleRAttachment;
+	DispatchEffect("MuzzleFlash", data);
 }
 
 const char* CPropAPCConscript::GetBulletType() const
@@ -61,4 +71,35 @@ const char* CPropAPCConscript::GetBulletType() const
 const char* CPropAPCConscript::GetFireMachineGunSound() const
 {
 	return "Weapon_AR2.NPC_Single";
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CPropAPCConscript::DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsDown, int iButtonsReleased)
+{
+	switch (m_lifeState)
+	{
+	case LIFE_ALIVE:
+	{
+		int iButtons = ucmd->buttons;
+		if (iButtons & IN_ATTACK)
+		{
+			FireMachineGun(m_nMachineGunMuzzleRAttachment);
+			m_flMachineGunTime = 0.0f; //Done this so it wont cancel out the other machine gun firing
+		}
+	}
+	BaseClass::DriveVehicle(flFrameTime, ucmd, iButtonsDown, iButtonsReleased);
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CPropAPCConscript::Activate()
+{
+	BaseClass::Activate();
+
+	m_nMachineGunMuzzleAttachment = LookupAttachment( "muzzle_L" );
+	m_nMachineGunMuzzleRAttachment = LookupAttachment( "muzzle_R" );
 }

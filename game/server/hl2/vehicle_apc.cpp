@@ -702,7 +702,7 @@ void CPropAPC::DriveVehicle( float flFrameTime, CUserCmd *ucmd, int iButtonsDown
 			int iButtons = ucmd->buttons;
 			if ( iButtons & IN_ATTACK )
 			{
-				FireMachineGun();
+				FireMachineGun(m_nMachineGunMuzzleAttachment);
 			}
 			else if ( iButtons & IN_ATTACK2 )
 			{
@@ -813,7 +813,7 @@ void CPropAPC::DoMuzzleFlash( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CPropAPC::FireMachineGun( void )
+void CPropAPC::FireMachineGun( int iAttachment)
 {
 	if ( m_flMachineGunTime > gpGlobals->curtime )
 		return;
@@ -833,7 +833,7 @@ void CPropAPC::FireMachineGun( void )
 
 	Vector vecMachineGunShootPos;
 	Vector vecMachineGunDir;
-	GetAttachment( m_nMachineGunMuzzleAttachment, vecMachineGunShootPos, &vecMachineGunDir );
+	GetAttachment(iAttachment, vecMachineGunShootPos, &vecMachineGunDir );
 	
 	// Fire the round
 	int	bulletType = GetAmmoDef()->Index(GetBulletType());
