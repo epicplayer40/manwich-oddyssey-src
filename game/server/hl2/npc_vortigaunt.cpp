@@ -1283,6 +1283,8 @@ void CNPC_Vortigaunt06::Spawn()
 
 	m_bStopLoopingSounds	= false;
 
+	m_iVoicePitch = random->RandomInt(85, 110);
+
 	m_iLeftHandAttachment = LookupAttachment( VORTIGAUNT_LEFT_CLAW );
 	m_iRightHandAttachment = LookupAttachment( VORTIGAUNT_RIGHT_CLAW );
 
@@ -2478,6 +2480,15 @@ bool CNPC_Vortigaunt06::CanRunAScriptedNPCInteraction( bool bForced /*= false*/ 
 		return false;
 
 	return BaseClass::CanRunAScriptedNPCInteraction( bForced );
+}
+
+//=========================================================
+// IdleSound
+//=========================================================
+void CNPC_Vortigaunt06::IdleSound(void)
+{
+	if (random->RandomInt(0, 2) == 0)
+		SENTENCEG_PlayRndSz(edict(), "SLV_IDLE", 0.85, SNDLVL_NORM, 0, m_iVoicePitch);
 }
 
 

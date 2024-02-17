@@ -77,6 +77,7 @@ public:
 
 	void			DeathSound( const CTakeDamageInfo &info );
 	void			PainSound( const CTakeDamageInfo &info );
+	void			IdleSound(void);
 	
 	void			TalkInit( void );
 
@@ -215,6 +216,8 @@ private:
 	int m_iLeftHandAttachment;
 	int m_iRightHandAttachment;
 	bool				m_bStopLoopingSounds;
+
+	int m_iVoicePitch;
 
 	virtual bool CanRunAScriptedNPCInteraction( bool bForced = false );
 
