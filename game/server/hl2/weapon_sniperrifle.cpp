@@ -354,6 +354,13 @@ bool CWeaponSniperRifle::Reload( void )
 		return false;
 	}
 		
+	m_nZoomLevel = 0;
+	CBasePlayer* pPlayer = ToBasePlayer(pOwner);
+	if (pPlayer)
+	{
+		pPlayer->SetFOV(this, 0);
+		pPlayer->ShowViewModel(true);
+	}
 	if (pOwner->GetAmmoCount(m_iPrimaryAmmoType) > 0)
 	{
 		int primary		= min(GetMaxClip1() - m_iClip1, pOwner->GetAmmoCount(m_iPrimaryAmmoType));
@@ -447,6 +454,10 @@ void CWeaponSniperRifle::Zoom( void )
 		return;
 	}
 
+	if (m_iClip1 < 1)
+	{
+		return;
+	}
 	if (m_nZoomLevel >= sizeof(g_nZoomFOV) / sizeof(g_nZoomFOV[0]))
 	{
 		if ( pPlayer->SetFOV( this, 0 ) )
