@@ -40,6 +40,9 @@ END_DATADESC()
 IMPLEMENT_SERVERCLASS_ST( CEntityFlame, DT_EntityFlame )
 	SendPropEHandle( SENDINFO( m_hEntAttached ) ),
 	SendPropInt(SENDINFO(m_eFireType)),
+	SendPropBool(SENDINFO(m_bUseHitboxes)),
+	SendPropTime(SENDINFO(m_flLifetime)),
+	SendPropFloat(SENDINFO(m_flSize), 16, SPROP_NOSCALE),
 END_SEND_TABLE()
 
 LINK_ENTITY_TO_CLASS( entityflame, CEntityFlame );
@@ -77,6 +80,7 @@ void CEntityFlame::Precache()
 {
 	BaseClass::Precache();
 
+	PrecacheModel("sprites/plasma1.vmt");
 	PrecacheScriptSound( "General.StopBurning" );
 	PrecacheScriptSound( "General.BurningFlesh" );
 	PrecacheScriptSound( "General.BurningObject" );

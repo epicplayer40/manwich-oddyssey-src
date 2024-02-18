@@ -16,6 +16,12 @@
 
 class CFireOverlay;
 
+enum FireStyles_e
+{
+	FIRE_2003 = 0,
+	FIRE_ORANGEBOX
+};
+
 class C_FireSprite : public C_Sprite
 {
 	DECLARE_CLASS( C_FireSprite, C_Sprite );
@@ -111,7 +117,6 @@ class C_FireFromAboveSprite : public C_Sprite
 
 #define	OVERLAY_MAX_VISIBLE_RANGE	512.0f
 
-
 class C_FireSmoke : public C_BaseEntity
 {
 public:
@@ -168,6 +173,8 @@ public:
 
 	bool	m_bFadingOut;
 
+	FireStyles_e m_eFireStyle;
+
 protected:
 
 	void	UpdateEffects( void );
@@ -187,6 +194,9 @@ protected:
 	CNewParticleEffect *m_hEffect;
 private:
 	C_FireSmoke( const C_FireSmoke & );
+
+public:
+	CSmartPtr<CEmberEffect> m_pEmberEmitter;
 };
 
 //Fire overlay
@@ -294,11 +304,41 @@ public:
 	EHANDLE				m_hOldAttached;
 
 	fireType_e m_eFireType; //Lychy: da plasma
+	FireStyles_e m_eFireStyle;
 
 protected:
 
 	void	CreateEffect( void );
 	void	StopEffect( void );
+
+	//Lychy from 2006:
+public:
+
+	RenderGroup_t GetRenderGroup();
+	void CleanUpRagdollOnRemove(void);
+	void AttachToHitBoxes(void);
+
+	void UpdateHitBoxFlames(void);
+	void DeleteHitBoxFlames(void);
+
+	CSmartPtr<CEmberEffect> m_pEmitter;
+	TimedEvent		m_ParticleSpawn;
+
+	float			m_flSize;
+	float			m_flLifetime;
+
+	const model_t* m_pCachedModel;				// Holds the model pointer to detect when it changes
+	bool			m_bCreatedClientside;
+	bool			m_bUseHitboxes;
+	bool			m_bAttachedToHitboxes;
+	bool			m_bStartedFading;
+
+	int m_nHitbox[NUM_HITBOX_FIRES];
+	C_FireSmoke* m_pFireSmoke[NUM_HITBOX_FIRES];
+	Vector m_vecFireOrigin[NUM_HITBOX_FIRES];
+	Vector			m_vecLastPosition;
+	PMaterialHandle	m_MaterialHandle[NUM_FLAMELETS];
+
 };
 
 #endif //C_FIRE_SMOKE_H

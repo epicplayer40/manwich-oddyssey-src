@@ -57,7 +57,9 @@ CPlasma::CPlasma( void )
 	m_nPlasmaModelIndex		= PrecacheModel( "sprites/plasma1.vmt" );
 	m_nPlasmaModelIndex2	= PrecacheModel( "sprites/plasma1.vmt" );//<<TEMP>>
 	m_nGlowModelIndex		= PrecacheModel( "sprites/fire_floor.vmt" );
+
 	//Server-side
+	AddEFlags(EFL_FORCE_CHECK_TRANSMIT);
 }
 
 //-----------------------------------------------------------------------------

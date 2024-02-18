@@ -138,6 +138,8 @@ CFireSmoke::~CFireSmoke( void )
 //-----------------------------------------------------------------------------
 void CFireSmoke::Precache()
 {
+	m_nFlameModelIndex = PrecacheModel("sprites/fire1.vmt");
+	m_nFlameFromAboveModelIndex = PrecacheModel("sprites/flamefromabove.vmt");
 	BaseClass::Precache();
 }
 

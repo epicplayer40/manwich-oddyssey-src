@@ -1139,7 +1139,8 @@ C_EntityFlame *FireEffect( C_BaseAnimating *pTarget, C_BaseEntity *pServerFire, 
 		pTarget->AddFlag( FL_ONFIRE );
 		pFire->SetParent( pTarget );
 		pFire->m_hEntAttached = (C_BaseEntity *) pTarget;
-
+		pFire->m_bUseHitboxes = true;
+		pFire->m_bCreatedClientside = true;
 		if (pOldFire)
 		{
 			pFire->m_eFireType = pOldFire->m_eFireType;
@@ -1172,6 +1173,7 @@ C_EntityFlame *FireEffect( C_BaseAnimating *pTarget, C_BaseEntity *pServerFire, 
 		CPASAttenuationFilter filter( pTarget );
 		pTarget->EmitSound( filter, pTarget->GetSoundSourceIndex(), szSoundEffect );
 
+		pFire->m_flLifetime = gpGlobals->curtime + 7.0f;
 		pFire->SetNextClientThink( gpGlobals->curtime + 7.0f );
 	}
 
