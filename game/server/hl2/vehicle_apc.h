@@ -103,7 +103,7 @@ protected:
 	// Purpose: 
 	void GetRocketShootPosition( Vector *pPosition );
 
-	void FireMachineGun( int iAttachment );
+	virtual void FireMachineGun( int iAttachment );
 	void FireRocket( void );
 
 	// Death volley 

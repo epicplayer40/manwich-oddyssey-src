@@ -131,6 +131,7 @@ void CPropAPC::Precache( void )
 
 	PrecacheScriptSound( "Weapon_AR2.NPC_Single" );
 	PrecacheScriptSound( "PropAPC.FireRocket" );
+	PrecacheScriptSound(GetFireMachineGunSound());
 }
 
 

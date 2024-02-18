@@ -4,15 +4,19 @@
 #include "te_effect_dispatch.h"
 #include "in_buttons.h"
 #include "vehicle_apc.h"
+#include "ammodef.h"
 
 ConVar	sk_apc_conscript_damagetype("sk_apc_conscript_damagetype", "Largeround");
+ConVar	sk_apc_conscript_burst_time("sk_apc_conscript_burst_time", "0.075f");
+ConVar	sk_apc_conscript_burst_pausetime("sk_apc_conscript_pause_time", "2.0f");
+ConVar	sk_apc_conscript_burst_size("sk_apc_conscript_burst_size", "10");
 // The conscript APC, inherits from normal APC, but with few stylistic changes
 
 
 class CPropAPCConscript : public CPropAPC
 {
 	DECLARE_CLASS(CPropAPCConscript, CPropAPC);
-
+	
 	// Muzzle flashes
 	const char* GetTracerType(void);
 	void			DoImpactEffect(trace_t& tr, int nDamageType);
@@ -20,13 +24,16 @@ class CPropAPCConscript : public CPropAPC
 
 	const char* GetBulletType() const;
 	const char* GetFireMachineGunSound() const;
+	void FireMachineGun(int iAttachment);
 
-	virtual void	DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsDown, int iButtonsReleased);
+	void	DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsDown, int iButtonsReleased);
 
-	virtual void Activate();
+	void	Activate();
+	void	Spawn();
 
 private:
 	int		m_nMachineGunMuzzleRAttachment;
+	bool	m_bShootRightBarrel;
 };
 
 LINK_ENTITY_TO_CLASS(prop_vehicle_apc_conscript, CPropAPCConscript);
@@ -57,9 +64,10 @@ void CPropAPCConscript::DoMuzzleFlash(void)
 	data.m_nEntIndex = entindex();
 	data.m_nAttachmentIndex = m_nMachineGunMuzzleAttachment;
 	data.m_flScale = 1.0f;
-	DispatchEffect("MuzzleFlash", data);
-
-	data.m_nAttachmentIndex = m_nMachineGunMuzzleRAttachment;
+	if (m_bShootRightBarrel)
+	{
+		data.m_nAttachmentIndex = m_nMachineGunMuzzleRAttachment;
+	}
 	DispatchEffect("MuzzleFlash", data);
 }
 
@@ -70,7 +78,7 @@ const char* CPropAPCConscript::GetBulletType() const
 
 const char* CPropAPCConscript::GetFireMachineGunSound() const
 {
-	return "Weapon_AR2.NPC_Single";
+	return "apc_conscript.shoot";
 }
 
 //-----------------------------------------------------------------------------
@@ -85,8 +93,15 @@ void CPropAPCConscript::DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iBut
 		int iButtons = ucmd->buttons;
 		if (iButtons & IN_ATTACK)
 		{
-			FireMachineGun(m_nMachineGunMuzzleRAttachment);
-			m_flMachineGunTime = 0.0f; //Done this so it wont cancel out the other machine gun firing
+			if (m_bShootRightBarrel)
+			{
+				FireMachineGun(m_nMachineGunMuzzleRAttachment);
+			}
+			else
+			{
+				FireMachineGun(m_nMachineGunMuzzleAttachment);	//Left
+			}
+			m_bShootRightBarrel = !m_bShootRightBarrel;
 		}
 	}
 	BaseClass::DriveVehicle(flFrameTime, ucmd, iButtonsDown, iButtonsReleased);
@@ -102,4 +117,46 @@ void CPropAPCConscript::Activate()
 
 	m_nMachineGunMuzzleAttachment = LookupAttachment( "muzzle_L" );
 	m_nMachineGunMuzzleRAttachment = LookupAttachment( "muzzle_R" );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CPropAPCConscript::FireMachineGun(int iAttachment)
+{
+	if (m_flMachineGunTime > gpGlobals->curtime)
+		return;
+
+	// If we're still firing the salvo, fire quickly
+	m_iMachineGunBurstLeft--;
+	if (m_iMachineGunBurstLeft > 0)
+	{
+		m_flMachineGunTime = gpGlobals->curtime + sk_apc_conscript_burst_time.GetFloat();
+	}
+	else
+	{
+		// Reload the salvo
+		m_iMachineGunBurstLeft = sk_apc_conscript_burst_size.GetInt();
+		m_flMachineGunTime = gpGlobals->curtime + sk_apc_conscript_burst_pausetime.GetFloat();
+	}
+
+	Vector vecMachineGunShootPos;
+	Vector vecMachineGunDir;
+	GetAttachment(iAttachment, vecMachineGunShootPos, &vecMachineGunDir);
+
+	// Fire the round
+	int	bulletType = GetAmmoDef()->Index(GetBulletType());
+	FireBullets(1, vecMachineGunShootPos, vecMachineGunDir, VECTOR_CONE_8DEGREES, MAX_TRACE_LENGTH, bulletType, 1);
+	DoMuzzleFlash();
+
+	EmitSound(GetFireMachineGunSound());
+}
+
+//------------------------------------------------
+// Spawn
+//------------------------------------------------
+void CPropAPCConscript::Spawn(void)
+{
+	m_iMachineGunBurstLeft = sk_apc_conscript_burst_size.GetInt();
+	BaseClass::Spawn();
 }
