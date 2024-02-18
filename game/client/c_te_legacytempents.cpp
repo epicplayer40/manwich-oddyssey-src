@@ -1787,11 +1787,27 @@ void CTempEnts::MuzzleFlash( int type, ClientEntityHandle_t hEntity, int attachm
 			MuzzleFlash_RPG_NPC( hEntity, attachmentIndex );
 		}
 		break;
-		break;
+	case MUZZLEFLASH_AR2:
+	{
+		Vector origin;
+		QAngle angles;
+		// Get our attachment's transformation matrix
+		FX_GetAttachmentTransform(hEntity, attachmentIndex, &origin, &angles);
+
+		if (firstPerson)
+		{
+			MuzzleFlash_AR2_Player(origin, angles, hEntity);
+		}
+		else
+		{
+			MuzzleFlash_AR2_NPC(origin, angles, hEntity);
+		}
+	}
+	break;
 	default:
 		{
 			//NOTENOTE: This means you specified an invalid muzzleflash type, check your spelling?
-			tempents_hl1->MuzzleFlash(type, hEntity, attachmentIndex, firstPerson);		//ManOd: HL1 Muzzle Flashes!!
+			Assert(0);
 		}
 		break;
 	}
