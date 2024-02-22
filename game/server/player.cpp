@@ -6138,73 +6138,20 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		// Cheat to create a airboat in front of the player
 		CreateAirboat( this );
 		break;
-
+	case 98:
+		GiveNecessities();
+		GiveNamedItem("weapon_crowbar"); // Just so you have a melee ;)
+		GiveNonStoryWeapons();
+		break;
+	case 99:
+		GiveNecessities();
+		GiveStoryWeapons();
+		break;
 	case 101:
 		gEvilImpulse101 = true;
 
-		EquipSuit();
-
-		// Give the player everything!
-		GiveAmmo( 255,	"Pistol" );
-		GiveAmmo( 250,	"AR2" );
-		GiveAmmo( 5,	"AR2AltFire" );
-		GiveAmmo( 255,	"SMG1" );
-		GiveAmmo( 255,	"Buckshot" );
-		GiveAmmo( 3,	"smg1_grenade" );
-		GiveAmmo( 3,	"rpg_round");
-		GiveAmmo( 5,	"grenade");
-		GiveAmmo( 150,	"357" );
-		GiveAmmo( 16,	"XBowBolt" );
-		GiveAmmo( 255,  "SniperRound" );
-		GiveAmmo( 150,  "GaussEnergy" );
-		GiveAmmo( 1,    "ML_Grenade" );
-		GiveAmmo( 200,  "Largeround" );
-		GiveAmmo( 24,  "Slug" );
-		GiveAmmo( 5,  "Slam" );
-#ifdef HL2_EPISODIC
-		GiveAmmo( 5,	"Hopwire" );
-#endif		
-		GiveNamedItem( "weapon_smg1" );
-		GiveNamedItem( "weapon_smg2" );
-		GiveNamedItem( "weapon_oicw" );
-		GiveNamedItem( "weapon_ar1" );
-		GiveNamedItem( "weapon_dbarrel" );
-		GiveNamedItem( "weapon_sniperrifle" );
-		GiveNamedItem( "weapon_hmg1" );
-		GiveNamedItem( "weapon_frag" );
-		GiveNamedItem( "weapon_crowbar" );
-		GiveNamedItem( "weapon_pistol" );
-		GiveNamedItem( "weapon_silenced_pistol" );
-		GiveNamedItem( "weapon_tommygun" );
-		GiveNamedItem( "weapon_ar2" );
-		GiveNamedItem( "weapon_shotgun" );
-		GiveNamedItem( "weapon_physcannon" );
-		GiveNamedItem( "weapon_bugbait" );
-		GiveNamedItem( "weapon_rpg" );
-		GiveNamedItem( "weapon_357" );
-		GiveNamedItem( "weapon_crossbow" );
-		GiveNamedItem( "weapon_physgun" );
-		GiveNamedItem( "weapon_katana" );
-		GiveNamedItem( "weapon_uzi" );
-		GiveNamedItem( "weapon_mp5" );
-		GiveNamedItem( "weapon_p90" );
-		GiveNamedItem( "weapon_garand" );
-		GiveNamedItem( "weapon_cguard" );
-		GiveNamedItem( "weapon_immolator" );
-		GiveNamedItem( "weapon_flaregun" );
-		GiveNamedItem( "weapon_ml" );
-		GiveNamedItem( "weapon_hopwire" );
-		GiveNamedItem( "weapon_slam" );
-		GiveNamedItem( "weapon_m14" );
-
-#ifdef HL2_EPISODIC
-		// GiveNamedItem( "weapon_magnade" );
-#endif
-		if ( GetHealth() < 100 )
-		{
-			TakeHealth( 25, DMG_GENERIC );
-		}
-		
+		GiveNecessities();
+		GiveAllWeapons();
 		gEvilImpulse101		= false;
 
 		break;
@@ -9397,3 +9344,85 @@ uint64 CBasePlayer::GetSteamIDAsUInt64( void )
 	return 0;
 }
 #endif // NO_STEAM
+
+
+void CBasePlayer::GiveAllWeapons()
+{
+	// Give the player everything!
+	GiveNonStoryWeapons();
+	GiveStoryWeapons();
+}
+
+void CBasePlayer::GiveNecessities()
+{
+	if (GetHealth() < 100)
+	{
+		TakeHealth(25, DMG_GENERIC);
+	}
+	EquipSuit();
+
+	GiveAllAmmo();
+}
+
+void CBasePlayer::GiveAllAmmo()
+{
+	GiveAmmo(255, "Pistol");
+	GiveAmmo(250, "AR2");
+	GiveAmmo(5, "AR2AltFire");
+	GiveAmmo(255, "SMG1");
+	GiveAmmo(255, "Buckshot");
+	GiveAmmo(3, "smg1_grenade");
+	GiveAmmo(3, "rpg_round");
+	GiveAmmo(5, "grenade");
+	GiveAmmo(150, "357");
+	GiveAmmo(16, "XBowBolt");
+	GiveAmmo(255, "SniperRound");
+	GiveAmmo(150, "GaussEnergy");
+	GiveAmmo(1, "ML_Grenade");
+	GiveAmmo(200, "Largeround");
+	GiveAmmo(24, "Slug");
+	GiveAmmo(5, "Slam");
+#ifdef HL2_EPISODIC
+	GiveAmmo(5, "Hopwire");
+#endif		
+}
+void CBasePlayer::GiveStoryWeapons()
+{
+	GiveNamedItem("weapon_crowbar");
+	GiveNamedItem("weapon_physcannon");
+	GiveNamedItem("weapon_katana");
+	GiveNamedItem("weapon_pistol");
+	GiveNamedItem("weapon_357");
+	GiveNamedItem("weapon_silenced_pistol");
+	GiveNamedItem("weapon_flaregun");
+	GiveNamedItem("weapon_uzi");
+	GiveNamedItem("weapon_smg1");
+	GiveNamedItem("weapon_ar2");
+	GiveNamedItem("weapon_ar1");
+	GiveNamedItem("weapon_shotgun");
+	GiveNamedItem("weapon_crossbow");
+	GiveNamedItem("weapon_dbarrel");
+	GiveNamedItem("weapon_m14");
+	GiveNamedItem("weapon_hmg1");
+	GiveNamedItem("weapon_frag");
+	GiveNamedItem("weapon_rpg");
+	GiveNamedItem("weapon_cguard");
+	GiveNamedItem("weapon_immolator");
+	GiveNamedItem("weapon_ml");
+	GiveNamedItem("weapon_smg2");
+	GiveNamedItem("weapon_oicw");
+	GiveNamedItem("weapon_sniperrifle");
+	GiveNamedItem("weapon_slam");
+}
+
+void CBasePlayer::GiveNonStoryWeapons()
+{
+	GiveNamedItem("weapon_tommygun");
+	GiveNamedItem("weapon_bugbait");
+	GiveNamedItem("weapon_physgun");
+	GiveNamedItem("weapon_mp5");
+	GiveNamedItem("weapon_p90");
+	GiveNamedItem("weapon_garand");
+	GiveNamedItem("weapon_hopwire");
+	GiveNamedItem("weapon_vp70");
+}
