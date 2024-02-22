@@ -73,8 +73,6 @@ ConVar func_break_max_pieces( "func_break_max_pieces", "15", FCVAR_ARCHIVE | FCV
 
 ConVar cl_fasttempentcollision( "cl_fasttempentcollision", "5" );
 
-ConVar cl_hl1_muzzleflash( "cl_hl1_muzzleflash", "0" );
-
 #if !defined( HL1_CLIENT_DLL )		// HL1 implements a derivative of CTempEnts
 // Temp entity interface
 static CTempEnts g_TempEnts;
@@ -1902,7 +1900,7 @@ void CTempEnts::MuzzleFlash( const Vector& pos1, const QAngle& angles, int type,
 	
 	default:
 		// There's no supported muzzle flash for the type specified!
-		if (cl_hl1_muzzleflash.GetBool() == true) tempents_hl1->MuzzleFlash(pos1, angles, type, hEntity, firstPerson); //Doesn't appear properly on third person NPCs, so disabling by default - epicplayer
+		tempents_hl1->MuzzleFlash(pos1, angles, type, hEntity, firstPerson);
 		break;
 	}
 
