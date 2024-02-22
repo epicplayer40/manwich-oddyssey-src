@@ -14,6 +14,7 @@
 #include "view.h"
 #include "particle_litsmokeemitter.h"
 
+extern float g_flGlowObstructionDecayPerSecond;
 class CFireOverlay;
 
 enum FireStyles_e
@@ -210,6 +211,11 @@ public:
 		m_pOwner	= owner;
 		m_flScale	= 0.0f;
 		m_nGUID		= random->RandomInt( -999999, 999999 );
+		//Init our sprites
+		for (int i = 0; i < MAX_SUN_LAYERS; i++)
+		{
+			m_Sprites[i].m_pMaterial = materials->FindMaterial("sun/overlay", TEXTURE_GROUP_CLIENT_EFFECTS);
+		}
 	}
 
 	//-----------------------------------------------------------------------------
@@ -269,6 +275,49 @@ public:
 		m_Sprites[0].m_vColor = ( newColor * 0.1f ) + ( m_Sprites[0].m_vColor * 0.9f ) * alpha;
 
 		return true;
+	}
+
+	void UpdateGlowObstruction(const Vector& vToGlow, bool bCacheFullSceneState) OVERRIDE
+	{
+		float flScale;
+
+		// Trace a ray at the object.
+		trace_t trace;
+		UTIL_TraceLine(CurrentViewOrigin(), CurrentViewOrigin() + vToGlow * 16000,
+			CONTENTS_SOLID, NULL, COLLISION_GROUP_NONE, &trace);
+
+		if (m_bInSky)
+		{
+			bool bHitSky = !(trace.fraction < 1 && !(trace.surface.flags & SURF_SKY));
+			flScale = (float)bHitSky;
+		}
+		else
+		{
+			// If it's not in the sky, then we need a valid position or else we don't
+			// know what's in front of it.
+			Assert(!m_bDirectional);
+
+			bool bVisible = (m_vPos - CurrentViewOrigin()).LengthSqr() < (trace.endpos - CurrentViewOrigin()).LengthSqr();
+			flScale = (float)bVisible;
+		}
+
+		if (m_flGlowObstructionScale == -1)
+		{
+			m_flGlowObstructionScale = flScale;
+		}
+		else
+		{
+			if (flScale > m_flGlowObstructionScale)
+			{
+				m_flGlowObstructionScale += gpGlobals->frametime / g_flGlowObstructionDecayPerSecond;
+				m_flGlowObstructionScale = min(m_flGlowObstructionScale, flScale);
+			}
+			else
+			{
+				m_flGlowObstructionScale -= gpGlobals->frametime / g_flGlowObstructionDecayPerSecond;
+				m_flGlowObstructionScale = max(m_flGlowObstructionScale, flScale);
+			}
+		}
 	}
 
 public:

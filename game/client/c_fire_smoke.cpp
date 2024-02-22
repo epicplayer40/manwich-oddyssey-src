@@ -32,6 +32,7 @@ CLIENTEFFECT_REGISTER_BEGIN( SmokeStackMaterials )
 	CLIENTEFFECT_MATERIAL("sprites/plasma1")
 CLIENTEFFECT_REGISTER_END()
 
+float g_flGlowObstructionDecayPerSecond = .2;
 //
 // Used for sorting hitboxes by volume.
 //
@@ -360,8 +361,14 @@ void C_FireSmoke::Start(void)
 			}
 		}
 
+		float rate = 2.0f;
+
+		if (m_eFireStyle == FIRE_2003)
+		{
+			rate = 10.0f;
+		}
 		//Various setup info
-		m_tParticleSpawn.Init(2.0f);
+		m_tParticleSpawn.Init(rate);
 
 		QAngle	offset;
 		model_t* pModel;
@@ -780,7 +787,14 @@ void C_FireSmoke::SpawnSmoke( void )
 	// Lit smoke
 	//
 
-	offset[2] += 100.0f;
+	if (m_eFireStyle == FIRE_2003)
+	{
+		offset[2] += 32.0f;
+	}
+	else
+	{
+		offset[2] += 100.0f;
+	}
 
 	m_pSmokeEmitter->SetDirectionalLight(GetAbsOrigin(), Vector(1.0f, 0.5f, 0.2f), 2500);
 
@@ -797,16 +811,33 @@ void C_FireSmoke::SpawnSmoke( void )
 		pParticle->m_flLifetime = 0;
 		pParticle->m_flDieTime = random->RandomFloat(lifeTime * 0.75, lifeTime);
 
-		pParticle->m_vecVelocity = Vector(random->RandomFloat(-16.0f, 16.0f), random->RandomFloat(-16.0f, 16.0f), random->RandomFloat(2.0f, SMOKE_RISE_RATE));
+		if (m_eFireStyle == FIRE_2003)
+		{
 
-		int	color = random->RandomInt(8, 64);
-		pParticle->m_uchColor[0] = color;
-		pParticle->m_uchColor[1] = color;
-		pParticle->m_uchColor[2] = color;
-		pParticle->m_uchColor[3] = random->RandomInt(128, 256);
+			pParticle->m_vecVelocity = Vector(random->RandomFloat(-16.0f, 16.0f), random->RandomFloat(-16.0f, 16.0f), random->RandomFloat(SMOKE_RISE_RATE - 16.0f, SMOKE_RISE_RATE));
 
-		pParticle->m_uchStartSize = random->RandomFloat(32.0f, 48.0f);
-		pParticle->m_uchEndSize = pParticle->m_uchStartSize * 3.0f;
+			int	color = random->RandomInt(8, 32);
+			pParticle->m_uchColor[0] = color;
+			pParticle->m_uchColor[1] = color;
+			pParticle->m_uchColor[2] = color;
+			pParticle->m_uchColor[3] = random->RandomInt(64, 200);
+
+			pParticle->m_uchStartSize = random->RandomFloat(12.0f, 16.0f);
+			pParticle->m_uchEndSize = pParticle->m_uchStartSize * 4.0f;
+		}
+		else
+		{
+			pParticle->m_vecVelocity = Vector(random->RandomFloat(-16.0f, 16.0f), random->RandomFloat(-16.0f, 16.0f), random->RandomFloat(2.0f, SMOKE_RISE_RATE));
+
+			int	color = random->RandomInt(8, 64);
+			pParticle->m_uchColor[0] = color;
+			pParticle->m_uchColor[1] = color;
+			pParticle->m_uchColor[2] = color;
+			pParticle->m_uchColor[3] = random->RandomInt(128, 256);
+
+			pParticle->m_uchStartSize = random->RandomFloat(32.0f, 48.0f);
+			pParticle->m_uchEndSize = pParticle->m_uchStartSize * 3.0f;
+		}
 	}
 }
 
@@ -1238,6 +1269,16 @@ void C_EntityFlame::AttachToHitBoxes(void)
 		// The first fire emits smoke, the rest do not.
 		//
 		m_pFireSmoke[i]->m_nFlags = bitsFIRESMOKE_ACTIVE;
+
+		if (m_eFireStyle == FIRE_2003)
+		{
+			m_pFireSmoke[i]->m_nFlags |= bitsFIRESMOKE_GLOW;
+			if (m_eFireType == FIRE_NATURAL && i < 2)
+			{
+				m_pFireSmoke[i]->m_nFlags |= bitsFIRESMOKE_SMOKE;
+			}
+		}
+
 		
 		switch (m_eFireType)
 		{

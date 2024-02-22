@@ -87,7 +87,7 @@ public:
 
 protected:
 
-	void			UpdateGlowObstruction( const Vector &vToGlow, bool bCacheFullSceneState );
+	virtual void			UpdateGlowObstruction( const Vector &vToGlow, bool bCacheFullSceneState );
 	void			UpdateSkyGlowObstruction( float zFar, bool bCacheFullSceneState );
 
 	virtual void	CalcSpriteColorAndSize( 
