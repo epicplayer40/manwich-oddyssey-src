@@ -46,7 +46,6 @@ CLIENTEFFECT_MATERIAL( "effects/huntertracer" )
 CLIENTEFFECT_MATERIAL( "sprites/physcannon_bluelight2" )
 CLIENTEFFECT_MATERIAL( "effects/combinemuzzle1" )
 CLIENTEFFECT_MATERIAL( "effects/combinemuzzle2" )
-CLIENTEFFECT_MATERIAL( "effects/aidstracer" )
 CLIENTEFFECT_MATERIAL( "effects/combinemuzzle2_nocull" )
 #endif
 CLIENTEFFECT_REGISTER_END()
@@ -935,32 +934,6 @@ void FX_StriderTracer( Vector& start, Vector& end, int velocity, bool makeWhiz )
 	
 	//Add it
 	FX_AddDiscreetLine( start, shotDir, velocity, length, totalDist, 2.5f, life, "effects/gunshiptracer" );
-
-	if( makeWhiz )
-	{
-		FX_TracerSound( start, end, TRACER_TYPE_STRIDER );
-	}
-}
-
-void FX_AidsTracer( Vector& start, Vector& end, int velocity, bool makeWhiz )
-{
-	VPROF_BUDGET( "FX_AidsTracer", VPROF_BUDGETGROUP_PARTICLE_RENDERING );
-	Vector	vNear, dStart, dEnd, shotDir;
-	float	totalDist;
-
-	//Get out shot direction and length
-	VectorSubtract( end, start, shotDir );
-	totalDist = VectorNormalize( shotDir );
-
-	//Don't make small tracers
-	if ( totalDist <= 256 )
-		return;
-
-	float length = random->RandomFloat( 64.0f, 128.0f );
-	float life = ( totalDist + length ) / velocity;	//NOTENOTE: We want the tail to finish its run as well
-	
-	//Add it
-	FX_AddDiscreetLine( start, shotDir, velocity, length, totalDist, 2.5f, life, "effects/aidstracer" );
 
 	if( makeWhiz )
 	{
