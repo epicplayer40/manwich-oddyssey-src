@@ -337,8 +337,6 @@ void CImmolatorBeam::ImmolationDamage( const CTakeDamageInfo &info, const Vector
 //-----------------------------------------------------------------------------
 void CImmolatorBeam::BoltTouch( CBaseEntity *pOther )
 {
-	if (!pOther->IsSolid())
-		return;
 
 	if (GetOwnerEntity() == pOther)
 		return;
