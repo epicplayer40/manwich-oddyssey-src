@@ -26,7 +26,8 @@
 
 CLIENTEFFECT_REGISTER_BEGIN( PrecacheEffectsTest )
 CLIENTEFFECT_MATERIAL( "effects/spark" )
-CLIENTEFFECT_MATERIAL( "effects/gunshiptracer" )CLIENTEFFECT_MATERIAL( "effects/bluespark" )
+CLIENTEFFECT_MATERIAL( "effects/gunshiptracer" )
+CLIENTEFFECT_MATERIAL( "effects/bluespark" )
 CLIENTEFFECT_REGISTER_END()
 
 //-----------------------------------------------------------------------------
