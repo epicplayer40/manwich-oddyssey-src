@@ -16,6 +16,7 @@ ConVar	sk_apc_conscript_burst_size("sk_apc_conscript_burst_size", "10");
 class CPropAPCConscript : public CPropAPC
 {
 	DECLARE_CLASS(CPropAPCConscript, CPropAPC);
+	DECLARE_DATADESC();
 	
 	// Muzzle flashes
 	const char* GetTracerType(void);
@@ -31,12 +32,18 @@ class CPropAPCConscript : public CPropAPC
 	void	Activate();
 	void	Spawn();
 
+	void InputEnableGun(inputdata_t& inputdata);
+
 private:
 	int		m_nMachineGunMuzzleRAttachment;
 	bool	m_bShootRightBarrel;
 };
 
 LINK_ENTITY_TO_CLASS(prop_vehicle_apc_conscript, CPropAPCConscript);
+
+BEGIN_DATADESC(CPropAPCConscript)
+	DEFINE_INPUTFUNC(FIELD_BOOLEAN, "EnableGun", InputEnableGun),
+END_DATADESC()
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -169,4 +176,13 @@ void CPropAPCConscript::Spawn(void)
 {
 	m_iMachineGunBurstLeft = sk_apc_conscript_burst_size.GetInt();
 	BaseClass::Spawn();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Input handler to enable or disable the APC's mounted gun.
+//-----------------------------------------------------------------------------
+void CPropAPCConscript::InputEnableGun(inputdata_t& inputdata)
+{
+	m_bHasGun = inputdata.value.Bool();
+	SetBodygroup(FindBodygroupByName("turret"), m_bHasGun);
 }
