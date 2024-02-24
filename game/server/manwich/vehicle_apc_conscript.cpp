@@ -117,6 +117,16 @@ void CPropAPCConscript::Activate()
 
 	m_nMachineGunMuzzleAttachment = LookupAttachment( "muzzle_L" );
 	m_nMachineGunMuzzleRAttachment = LookupAttachment( "muzzle_R" );
+
+
+	// NOTE: gun_ref must have the same position as gun_base, but rotates with the gun
+	int nMachineGunRefAttachment = LookupAttachment("gun_def");
+
+	Vector vecWorldBarrelPos;
+	matrix3x4_t matRefToWorld;
+	GetAttachment(m_nMachineGunMuzzleAttachment, vecWorldBarrelPos);
+	GetAttachment(nMachineGunRefAttachment, matRefToWorld);
+	VectorITransform(vecWorldBarrelPos, matRefToWorld, m_vecBarrelPos);
 }
 
 //-----------------------------------------------------------------------------
