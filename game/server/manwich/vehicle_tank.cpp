@@ -209,6 +209,8 @@ public:
 
 	void StopLoopingSounds() OVERRIDE;
 
+	void InputDestroy(inputdata_t& inputdata);
+
 	CNPC_VehicleDriver* GetNPCDriver();
 	
 	float			m_aimYaw;
@@ -237,6 +239,10 @@ public:
 	Vector			m_vecPrevUnStickOrigin;
 	Vector2D		m_vec2DPrevAimVector;
 
+	COutputEvent m_OnDeath;
+	COutputEvent m_OnDamaged;
+	COutputEvent m_OnDamagedByPlayer;
+
 };
 
 BEGIN_DATADESC(CVehicleTank)
@@ -253,6 +259,12 @@ BEGIN_DATADESC(CVehicleTank)
 	DEFINE_FIELD(m_bHasNotYetReloaded, FIELD_BOOLEAN),
 	DEFINE_FIELD(m_vecNPCTarget, FIELD_VECTOR),
 	DEFINE_BITSTRING(m_bitsSmoking),
+
+	DEFINE_INPUTFUNC(FIELD_VOID, "Destroy", InputDestroy),
+
+	DEFINE_OUTPUT(m_OnDeath, "OnDeath"),
+	DEFINE_OUTPUT(m_OnDamaged, "OnDamaged"),
+	DEFINE_OUTPUT(m_OnDamagedByPlayer, "OnDamagedByPlayer"),
 
 END_DATADESC()
 
@@ -936,6 +948,13 @@ int CVehicleTank::OnTakeDamage(const CTakeDamageInfo& info)
 {
 	if (!HasSpawnFlags(SF_INDESTRUCTIBLE) && info.GetAttacker() != GetDriver())
 	{
+		m_OnDamaged.FireOutput(info.GetAttacker(), this);
+
+		if (info.GetAttacker() && info.GetAttacker()->IsPlayer())
+		{
+			m_OnDamagedByPlayer.FireOutput(info.GetAttacker(), this);
+		}
+
 		int prevQuarterDestroyed = (GetMaxHealth() - GetHealth()) / (GetMaxHealth() / 4);
 		if (info.GetDamageType() & DMG_BLAST || HasSpawnFlags(SF_TAKE_ALL_DAMAGE))
 		{
@@ -955,6 +974,7 @@ int CVehicleTank::OnTakeDamage(const CTakeDamageInfo& info)
 
 void CVehicleTank::Event_Killed(const CTakeDamageInfo& info)
 {
+	m_OnDeath.FireOutput(info.GetAttacker(), this);
 	m_takedamage = DAMAGE_NO;
 	m_lifeState = LIFE_DEAD;
 	if (info.GetAttacker())
@@ -1283,4 +1303,16 @@ void CVehicleTank::UnStickCheckThink()
 		m_vecPrevUnStickOrigin = GetAbsOrigin();
 	}
 	m_flPrevUnStickTime = gpGlobals->curtime;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Blows it up!
+//-----------------------------------------------------------------------------
+void CVehicleTank::InputDestroy(inputdata_t& inputdata)
+{
+	CTakeDamageInfo info(this, this, m_iHealth, DMG_BLAST);
+	info.SetDamagePosition(WorldSpaceCenter());
+	info.SetDamageForce(Vector(0, 0, 1));
+	TakeDamage(info);
 }
