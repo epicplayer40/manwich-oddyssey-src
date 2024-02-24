@@ -61,7 +61,7 @@ public:
 
 	// Weaponry
 	const Vector	&GetPrimaryGunOrigin( void );
-	void			AimPrimaryWeapon( const Vector &vecForward );
+	virtual void			AimPrimaryWeapon( const Vector &vecForward );
 	void			AimSecondaryWeaponAt( CBaseEntity *pTarget );
 	float			PrimaryWeaponFireTime( void ) { return m_flMachineGunTime; }
 	float			SecondaryWeaponFireTime( void ) { return m_flRocketTime; }

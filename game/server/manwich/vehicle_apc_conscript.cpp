@@ -25,7 +25,9 @@ class CPropAPCConscript : public CPropAPC
 
 	const char* GetBulletType() const;
 	const char* GetFireMachineGunSound() const;
+
 	void FireMachineGun(int iAttachment);
+	void AimPrimaryWeapon(const Vector& vecWorldTarget);
 
 	void	DriveVehicle(float flFrameTime, CUserCmd* ucmd, int iButtonsDown, int iButtonsReleased);
 
@@ -185,4 +187,63 @@ void CPropAPCConscript::InputEnableGun(inputdata_t& inputdata)
 {
 	m_bHasGun = inputdata.value.Bool();
 	SetBodygroup(FindBodygroupByName("turret"), m_bHasGun);
+}
+
+//-----------------------------------------------------------------------------
+// Primary gun 
+//-----------------------------------------------------------------------------
+void CPropAPCConscript::AimPrimaryWeapon(const Vector& vecWorldTarget)
+{
+	EntityMatrix parentMatrix;
+	parentMatrix.InitFromEntity(this, m_nMachineGunBaseAttachment);
+	Vector target = parentMatrix.WorldToLocal(vecWorldTarget);
+
+	float quadTarget = target.LengthSqr();
+	float quadTargetXY = target.x * target.x + target.y * target.y;
+
+	// Target is too close!  Can't aim at it
+	if (quadTarget > m_vecBarrelPos.LengthSqr())
+	{
+		// We're trying to aim the offset barrel at an arbitrary point.
+		// To calculate this, I think of the target as being on a sphere with 
+		// it's center at the origin of the gun.
+		// The rotation we need is the opposite of the rotation that moves the target 
+		// along the surface of that sphere to intersect with the gun's shooting direction
+		// To calculate that rotation, we simply calculate the intersection of the ray 
+		// coming out of the barrel with the target sphere (that's the new target position)
+		// and use atan2() to get angles
+
+		// angles from target pos to center
+		float targetToCenterYaw = atan2(target.y, target.x);
+		float centerToGunYaw = atan2(m_vecBarrelPos.y, sqrt(quadTarget - (m_vecBarrelPos.y * m_vecBarrelPos.y)));
+
+		float targetToCenterPitch = atan2(target.z, sqrt(quadTargetXY));
+		float centerToGunPitch = atan2(-m_vecBarrelPos.z, sqrt(quadTarget - (m_vecBarrelPos.z * m_vecBarrelPos.z)));
+
+		QAngle angles;
+		angles.Init(-RAD2DEG(targetToCenterPitch + centerToGunPitch), RAD2DEG(targetToCenterYaw + centerToGunYaw), 0);
+
+		float curPitch = GetPoseParameter("vehicle_weapon_pitch");
+		float curYaw = GetPoseParameter("vehicle_weapon_yaw");
+
+		float pitchSpeed = 20;
+		float yawSpeed = pitchSpeed;
+
+		QAngle angleInterp(UTIL_Approach(angles.x, curPitch, pitchSpeed), UTIL_Approach(angles.y, curYaw, yawSpeed), 0);
+
+		SetPoseParameter("vehicle_weapon_yaw", angleInterp.y);
+		SetPoseParameter("vehicle_weapon_pitch", angleInterp.x);
+
+
+		curPitch = GetPoseParameter("vehicle_weapon_pitch");
+		curYaw = GetPoseParameter("vehicle_weapon_yaw");
+		StudioFrameAdvance();
+
+
+		m_bInFiringCone = (fabs(curPitch - angles.x) < 1e-3) && (fabs(curYaw - angles.y) < 1e-3);
+	}
+	else
+	{
+		m_bInFiringCone = false;
+	}
 }
