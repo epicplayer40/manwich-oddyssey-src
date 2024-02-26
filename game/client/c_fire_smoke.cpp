@@ -139,7 +139,7 @@ IMPLEMENT_CLIENTCLASS_DT( C_FireSmoke, DT_FireSmoke, CFireSmoke )
 	RecvPropInt( RECVINFO( m_nFlameFromAboveModelIndex ) ),
 END_RECV_TABLE()
 
-ConVar manod_fire_new("manod_fire_new","1",FCVAR_REPLICATED);
+ConVar manod_fire_new("manod_fire_new","0",FCVAR_REPLICATED);
 
 //==================================================
 // C_FireSmoke
