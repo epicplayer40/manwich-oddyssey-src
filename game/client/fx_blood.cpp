@@ -37,7 +37,7 @@ PMaterialHandle g_Blood_Core = NULL;
 PMaterialHandle g_Blood_Gore = NULL;
 PMaterialHandle g_Blood_Drops = NULL;
 
-ConVar manod_old_blood("manod_old_blood", "0");
+ConVar manod_old_blood("manod_old_blood", "0", FCVAR_ARCHIVE);
 
 //-----------------------------------------------------------------------------
 // Purpose: 
