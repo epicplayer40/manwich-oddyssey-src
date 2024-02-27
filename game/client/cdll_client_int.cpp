@@ -218,6 +218,8 @@ IEngineClientReplay *g_pEngineClientReplay = NULL;
 IReplaySystem *g_pReplay = NULL;
 #endif
 
+extern void AddCustomManOdOptions();
+
 IHaptics* haptics = NULL;// NVNT haptics system interface singleton
 
 //=============================================================================
@@ -2115,6 +2117,7 @@ void OnRenderStart()
 	C_BaseEntity::SetAbsQueriesValid( false );
 
 	Rope_ResetCounters();
+	AddCustomManOdOptions();
 
 	// Interpolate server entities and move aiments.
 	{

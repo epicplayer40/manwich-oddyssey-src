@@ -42,6 +42,7 @@ $Project "Client (Mambridge)"
 			$File	"hl2/energy_wave_effect.h"
 			$File	"manwich/fadingdecalfix.cpp"
 			$File	"manwich/fadingdecalfix.h"
+			$File	"manwich/OptionsManOd.cpp"
 			$File	"$SRCDIR/game/shared/manwich/engine_hooks.cpp"
 			{
 				$Configuration
