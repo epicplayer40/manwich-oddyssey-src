@@ -347,7 +347,7 @@ public:
 	void NPC_ThrottleReverse(void) OVERRIDE
 	{	
 		CheckAndSetTank();
-		if (GetTank()->ShouldNPCFire())
+		if (GetTank()->ShouldNPCFire() && !GetTank()->m_bEnableShootWhileMoving) //Keep driving if we're allowed to shoot and move - epicplayer
 			NPC_Brake();
 		else
 			BaseClass::NPC_ThrottleReverse();
@@ -356,7 +356,7 @@ public:
 	void NPC_ThrottleForward(void) OVERRIDE
 	{
 		CheckAndSetTank();
-		if (GetTank()->ShouldNPCFire())
+		if (GetTank()->ShouldNPCFire() && !GetTank()->m_bEnableShootWhileMoving)
 			NPC_Brake();
 		else
 			BaseClass::NPC_ThrottleForward();
