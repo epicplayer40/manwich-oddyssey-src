@@ -254,7 +254,10 @@ bool CWeaponM14::Deploy( void )
 //-----------------------------------------------------------------------------
 void CWeaponM14::PrimaryAttack( void )
 {
-
+	if (m_bGrenadeMode && !m_bHasGrenadeAttached)
+	{
+		return;
+	}
 	m_flLastAttackTime = gpGlobals->curtime;
 	m_flSoonestPrimaryAttack = gpGlobals->curtime + M14_FASTEST_REFIRE_TIME;
 	CSoundEnt::InsertSound( SOUND_COMBAT, GetAbsOrigin(), SOUNDENT_VOLUME_MACHINEGUN, 0.2, GetOwner() );
@@ -387,6 +390,10 @@ void CWeaponM14::FireBullets( const FireBulletsInfo_t& info )
 			//WeaponSound( WPN_DOUBLE, m_flNextPrimaryAttack );
 			GetOwner()->RemoveAmmo( 1, m_iSecondaryAmmoType );
 			m_bHasGrenadeAttached = false;
+			if (GetOwner()->GetAmmoCount(m_iSecondaryAmmoType) < 1)
+			{
+				m_bGrenadeMode = false;
+			}
 		}
 
 	}
