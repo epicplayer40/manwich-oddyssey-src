@@ -32,6 +32,7 @@ CLIENTEFFECT_REGISTER_BEGIN( SmokeStackMaterials )
 	CLIENTEFFECT_MATERIAL("sprites/plasma1")
 CLIENTEFFECT_REGISTER_END()
 
+#define PLASMA_RGB_FLOAT 0.4196f, 0.8555f, 0.6784f
 float g_flGlowObstructionDecayPerSecond = .2;
 //
 // Used for sorting hitboxes by volume.
@@ -363,7 +364,7 @@ void C_FireSmoke::Start(void)
 
 		float rate = 2.0f;
 
-		if (m_eFireStyle == FIRE_2003)
+		if (m_eFireStyle == FIRE_2003 && m_eFireType != FIRE_PLASMA)
 		{
 			rate = 10.0f;
 		}
@@ -466,7 +467,14 @@ void C_FireSmoke::Start(void)
 					m_pFireOverlay->m_vPos = GetAbsOrigin();
 					m_pFireOverlay->m_nSprites = 1;
 
-					m_pFireOverlay->m_vBaseColors[0].Init(0.4f, 0.2f, 0.05f);
+					if (m_eFireType == FIRE_PLASMA)
+					{
+						m_pFireOverlay->m_vBaseColors[0].Init(PLASMA_RGB_FLOAT);
+					}
+					else
+					{
+						m_pFireOverlay->m_vBaseColors[0].Init(0.4f, 0.2f, 0.05f);
+					}
 					m_pFireOverlay->Activate();
 				}
 #endif
@@ -758,8 +766,15 @@ void C_FireSmoke::SpawnSmoke( void )
 	{
 		//FIXME: These aren't visible enough to justify their cost, currently -- jdw
 
+		const char* szEmberMaterial = "particle/fire";
+
+		if (m_eFireType == FIRE_PLASMA)
+		{
+			szEmberMaterial = "sprites/plasmaember";
+		}
+
 		SimpleParticle* sParticle;
-		sParticle = (SimpleParticle*)m_pEmberEmitter->AddParticle(sizeof(SimpleParticle), m_pEmberEmitter->GetPMaterial("particle/fire"), GetAbsOrigin() + offset);
+		sParticle = (SimpleParticle*)m_pEmberEmitter->AddParticle(sizeof(SimpleParticle), m_pEmberEmitter->GetPMaterial(szEmberMaterial), GetAbsOrigin() + offset);
 
 		if (sParticle)
 		{
@@ -771,9 +786,16 @@ void C_FireSmoke::SpawnSmoke( void )
 
 			scalar = Helper_RandomFloat(0.5f, 2.0f);
 
-			sParticle->m_uchColor[0] = min(255, Helper_RandomFloat(185.0f, 190.0f) * scalar);
-			sParticle->m_uchColor[1] = min(255, Helper_RandomFloat(140.0f, 165.0f) * scalar);
-			sParticle->m_uchColor[2] = min(255, 65.0f * scalar);
+			if (m_eFireType == FIRE_PLASMA)
+			{
+				sParticle->m_uchColor[0] = sParticle->m_uchColor[1] = sParticle->m_uchColor[2] = 140;
+			}
+			else
+			{
+				sParticle->m_uchColor[0] = min(255, Helper_RandomFloat(185.0f, 190.0f) * scalar);
+				sParticle->m_uchColor[1] = min(255, Helper_RandomFloat(140.0f, 165.0f) * scalar);
+				sParticle->m_uchColor[2] = min(255, 65.0f * scalar);
+			}
 			sParticle->m_uchStartAlpha = 255;
 			sParticle->m_uchEndAlpha = 0;
 			sParticle->m_uchStartSize = 2;
@@ -796,7 +818,12 @@ void C_FireSmoke::SpawnSmoke( void )
 		offset[2] += 100.0f;
 	}
 
-	m_pSmokeEmitter->SetDirectionalLight(GetAbsOrigin(), Vector(1.0f, 0.5f, 0.2f), 2500);
+	Vector litColour = Vector(1.0f, 0.5f, 0.2f);
+
+	if (m_eFireType == FIRE_PLASMA)
+		litColour = Vector(PLASMA_RGB_FLOAT);
+
+	m_pSmokeEmitter->SetDirectionalLight(GetAbsOrigin(), litColour, 2500);
 
 	CLitSmokeEmitter::LitSmokeParticle* pParticle;
 	pParticle = (CLitSmokeEmitter::LitSmokeParticle*)m_pSmokeEmitter->AddParticle(
@@ -817,10 +844,18 @@ void C_FireSmoke::SpawnSmoke( void )
 			pParticle->m_vecVelocity = Vector(random->RandomFloat(-16.0f, 16.0f), random->RandomFloat(-16.0f, 16.0f), random->RandomFloat(SMOKE_RISE_RATE - 16.0f, SMOKE_RISE_RATE));
 
 			int	color = random->RandomInt(8, 32);
+			if (m_eFireType == FIRE_PLASMA)
+			{
+				color = random->RandomInt(0, 6);
+			}
 			pParticle->m_uchColor[0] = color;
 			pParticle->m_uchColor[1] = color;
 			pParticle->m_uchColor[2] = color;
 			pParticle->m_uchColor[3] = random->RandomInt(64, 200);
+			if (m_eFireType == FIRE_PLASMA)
+			{
+				pParticle->m_uchColor[3] = random->RandomInt(128, 255);
+			}
 
 			pParticle->m_uchStartSize = random->RandomFloat(12.0f, 16.0f);
 			pParticle->m_uchEndSize = pParticle->m_uchStartSize * 4.0f;
@@ -1264,6 +1299,8 @@ void C_EntityFlame::AttachToHitBoxes(void)
 		VectorTransform(m_vecFireOrigin[i], *hitboxbones[pBox->bone], vecAbsOrigin);
 		m_pFireSmoke[i]->SetLocalOrigin(vecAbsOrigin);
 
+		m_pFireSmoke[i]->m_eFireType = m_eFireType;
+
 
 		//
 		// The first fire emits smoke, the rest do not.
@@ -1273,7 +1310,7 @@ void C_EntityFlame::AttachToHitBoxes(void)
 		if (m_eFireStyle == FIRE_2003)
 		{
 			m_pFireSmoke[i]->m_nFlags |= bitsFIRESMOKE_GLOW;
-			if (m_eFireType == FIRE_NATURAL && i < 2)
+			if (i < 2)
 			{
 				m_pFireSmoke[i]->m_nFlags |= bitsFIRESMOKE_SMOKE;
 			}

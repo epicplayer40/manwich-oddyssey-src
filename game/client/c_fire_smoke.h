@@ -175,6 +175,7 @@ public:
 	bool	m_bFadingOut;
 
 	FireStyles_e m_eFireStyle;
+	fireType_e m_eFireType; //Lychy: da plasma
 
 protected:
 
@@ -211,10 +212,12 @@ public:
 		m_pOwner	= owner;
 		m_flScale	= 0.0f;
 		m_nGUID		= random->RandomInt( -999999, 999999 );
+		const char* szParticleName = "sun/overlay";
+
 		//Init our sprites
 		for (int i = 0; i < MAX_SUN_LAYERS; i++)
 		{
-			m_Sprites[i].m_pMaterial = materials->FindMaterial("sun/overlay", TEXTURE_GROUP_CLIENT_EFFECTS);
+			m_Sprites[i].m_pMaterial = materials->FindMaterial(szParticleName, TEXTURE_GROUP_CLIENT_EFFECTS);
 		}
 	}
 
