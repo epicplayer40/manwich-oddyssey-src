@@ -83,7 +83,7 @@ void CNPC_Cigbine::Precache()
 
 int CNPC_Cigbine::SelectSchedule(void)
 {
-	if (m_NPCState == NPC_STATE_IDLE || m_NPCState == NPC_STATE_ALERT)
+	if (m_NPCState == NPC_STATE_IDLE || m_NPCState == NPC_STATE_ALERT || m_NPCState == NPC_STATE_COMBAT) 
 	{
 		CBaseEntity *pEnemy;
 
