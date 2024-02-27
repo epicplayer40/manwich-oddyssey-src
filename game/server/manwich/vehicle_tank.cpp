@@ -214,7 +214,11 @@ public:
 
 	void StopLoopingSounds() OVERRIDE;
 
-	void InputDestroy(inputdata_t& inputdata);
+	void InputDestroy( inputdata_t& inputdata );
+	void InputEnableShootWhileMoving( inputdata_t& inputdata );
+	void InputDisableShootWhileMoving( inputdata_t& inputdata) ;
+
+	bool m_bEnableShootWhileMoving;
 
 	CNPC_VehicleDriver* GetNPCDriver();
 	
@@ -263,9 +267,12 @@ BEGIN_DATADESC(CVehicleTank)
 	DEFINE_FIELD(m_bIsOnFire, FIELD_BOOLEAN),
 	DEFINE_FIELD(m_bHasNotYetReloaded, FIELD_BOOLEAN),
 	DEFINE_FIELD(m_vecNPCTarget, FIELD_VECTOR),
+	DEFINE_FIELD(m_bEnableShootWhileMoving, FIELD_BOOLEAN),
 	DEFINE_BITSTRING(m_bitsSmoking),
 
-	DEFINE_INPUTFUNC(FIELD_VOID, "Destroy", InputDestroy),
+	DEFINE_INPUTFUNC( FIELD_VOID, "Destroy", InputDestroy ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "EnableMoveShoot", InputEnableShootWhileMoving ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "DisableMoveShoot", InputDisableShootWhileMoving ),
 
 	DEFINE_OUTPUT(m_OnDeath, "OnDeath"),
 	DEFINE_OUTPUT(m_OnDamaged, "OnDamaged"),
@@ -1320,4 +1327,19 @@ void CVehicleTank::InputDestroy(inputdata_t& inputdata)
 	info.SetDamagePosition(WorldSpaceCenter());
 	info.SetDamageForce(Vector(0, 0, 1));
 	TakeDamage(info);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Allow shooting while moving for NPC drivers
+//-----------------------------------------------------------------------------
+void CVehicleTank::InputEnableShootWhileMoving(inputdata_t& inputdata)
+{
+	m_bEnableShootWhileMoving = true;
+}
+//-----------------------------------------------------------------------------
+// Purpose: Disallow shooting while moving for NPC drivers
+//-----------------------------------------------------------------------------
+void CVehicleTank::InputDisableShootWhileMoving(inputdata_t& inputdata)
+{
+	m_bEnableShootWhileMoving = false;
 }
