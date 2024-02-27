@@ -1,3 +1,8 @@
+//========= Totally Not Copyright © 2023, Valve Cut Content, All rights reserved. ============//
+//Big ass tank!! Drives around and blows stuff up in a really cool way.
+//Also player-drivable.
+//
+//=============================================================================//
 //Lychy world...
 
 #include "cbase.h"

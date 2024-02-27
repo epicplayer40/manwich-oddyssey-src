@@ -1,6 +1,7 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//========= Totally Not Copyright © 2024, Valve Cut Content, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:		Powerful silenced pistol with burst-fire capabilities
+//
 //
 //=============================================================================//
 

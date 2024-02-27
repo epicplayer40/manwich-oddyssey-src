@@ -1,9 +1,8 @@
-//========= Copyright © 1996-2001, Valve LLC, All rights reserved. ============
+//========= Totally Not Copyright © 2024, Valve Cut Content, All rights reserved. ============//
+//The big lad who punches people while warping them out of existance.
+//He's not a big fan when people break his armor though...
 //
-// Purpose:		Combine Guard - massive armored cyborg
-//
-// $NoKeywords: $
-//=============================================================================
+//=============================================================================//
 
 #include "cbase.h"
 #include "ai_task.h"

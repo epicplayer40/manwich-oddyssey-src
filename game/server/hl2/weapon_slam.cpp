@@ -1,6 +1,6 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//========= Totally Not Copyright © 2024, Valve Cut Content, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:		Multi-use explosive weapon with tripwire and remote-detonation modes.
 //
 //=============================================================================//
 

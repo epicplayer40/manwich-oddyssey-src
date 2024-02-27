@@ -1,3 +1,7 @@
+//========= Totally Not Copyright © 2024, Valve Cut Content, All rights reserved. ============//
+//The APC that the conscripts drive around a lot. Has a lot of variants (sometimes with guns).
+//
+//=============================================================================//
 // Lychy!!! :D
 
 #include "cbase.h"

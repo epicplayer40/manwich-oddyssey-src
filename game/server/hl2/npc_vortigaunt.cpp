@@ -1,8 +1,6 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Totally Not Copyright © 2024, Valve Cut Content, All rights reserved. ============//
+//The evil version of the vortigaunts, recontextualised as Alien Slaves from HL1.
 //
-// Purpose: 
-//
-// $NoKeywords: $
 //=============================================================================//
 
 #include "cbase.h"

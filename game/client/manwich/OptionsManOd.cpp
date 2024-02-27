@@ -1,3 +1,8 @@
+//========= Totally Not Copyright © 2024, Valve Cut Content, All rights reserved. ============//
+//Options menu for Manwich's Odyssey stuff
+//
+//=============================================================================//
+
 #include "cbase.h"
 #include "ienginevgui.h"
 #include "vgui_controls/PropertyPage.h"

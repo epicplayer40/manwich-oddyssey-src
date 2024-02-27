@@ -1,3 +1,9 @@
+//========= Totally Not Copyright © 2024, Valve Cut Content, All rights reserved. ============//
+//Cigbine, Manwich's quirky sidekick for the latter half of the story!
+//Based off of the Combine soldier but designed to be an ally, with a few other quirks.
+//
+//=============================================================================//
+
 #include "cbase.h"
 #include "npc_combines.h"
 #include "weapon_physcannon.h"
