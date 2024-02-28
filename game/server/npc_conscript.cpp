@@ -59,6 +59,8 @@ ConVar	sk_conscript_hostile_model("sk_conscript_hostile_model", "random" ); //No
 ConVar	sk_conscript_ff_retaliation( "sk_conscript_ff_retaliation", "0"); //FULLY WORKING!
 ConVar	sk_conscript_personality_colors( "sk_conscript_personality_colors", "0"); //FULLY WORKING!
 
+#define SF_CONSCRIPT_DONT_INVESTIGATE ( 1 << 15)
+
 
 #define CONSCRIPT_MAD 		"CONSCRIPT_MAD"
 #define CONSCRIPT_SHOT 		"CONSCRIPT_SHOT"
@@ -1071,7 +1073,7 @@ int CNPC_Conscript::SelectSchedule ( void )
 		{
 			return SCHED_TAKE_COVER_FROM_BEST_SOUND;
 		}
-		if( HasCondition( COND_HEAR_BUGBAIT ) )
+		if( HasCondition( COND_HEAR_BUGBAIT ) && !HasSpawnFlags(SF_CONSCRIPT_DONT_INVESTIGATE))
 		{
 			return SCHED_INVESTIGATE_SOUND;
 		}
@@ -1385,7 +1387,7 @@ int CNPC_Conscript::SelectSchedule ( void )
 			{
 				CSound *pSound = GetBestSound();
 
-				if( pSound && pSound->IsSoundType( SOUND_COMBAT ) )
+				if( pSound && pSound->IsSoundType( SOUND_COMBAT ) && !HasSpawnFlags(SF_CONSCRIPT_DONT_INVESTIGATE))
 				{
 					return SCHED_INVESTIGATE_SOUND;
 				}
