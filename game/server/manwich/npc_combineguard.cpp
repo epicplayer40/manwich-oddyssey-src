@@ -32,6 +32,8 @@
 #include "engine/IEngineSound.h"
 #include "props.h"
 #include "prop_combine_ball.h"
+#include "te_particlesystem.h"
+#include "particle_parse.h"
 
 class CSprite;
 
@@ -150,7 +152,7 @@ private:
 
 	bool			m_fHasInitedArmor; //Don't initialize the armor straight away, so the full armor can be shown before breaking off any pieces - epicplayer
 	void			InitArmorPieces( void );
-	void			DamageArmorPiece( int pieceID, float damage, const Vector &vecOrigin, const Vector &vecDir );
+	void			DamageArmorPiece( int pieceID, float damage, const Vector &vecOrigin, const Vector &vecDir, const CTakeDamageInfo &info );
 	void			DestroyArmorPiece( int pieceID );
 	void			Shove( void );
 	void			FireRangeWeapon( void );
@@ -298,6 +300,7 @@ void CNPC_CombineGuard::Precache( void )
 	PrecacheScriptSound("NPC_CombineGuard.PhysCollapse");
 	PrecacheScriptSound("NPC_CombineGuard.Alert");
 	PrecacheScriptSound("NPC_CombineGuard.Death");
+	PrecacheScriptSound("NPC_CombineGuard.FleshImpact");
 
 	PrecacheParticleSystem( "blood_impact_synth_01" );
 	PrecacheParticleSystem( "blood_impact_synth_01_arc_parent" );
@@ -357,6 +360,7 @@ void CNPC_CombineGuard::Spawn( void )
 	m_NPCState				= NPC_STATE_NONE;
 //	SetBloodColor( BLOOD_COLOR_YELLOW );
 	SetBloodColor( BLOOD_COLOR_MECH );
+	m_bloodColor = DONT_BLEED; //Emit Hunter blood - epicplayer
 //	m_iHealth				= 100;
 	m_iHealth = sk_combineguard_health.GetFloat();
 	m_iMaxHealth			= m_iHealth;
@@ -1004,7 +1008,7 @@ void CNPC_CombineGuard::DestroyArmorPiece( int pieceID )
 // Input  : pieceID - 
 //			damage - 
 //-----------------------------------------------------------------------------
-void CNPC_CombineGuard::DamageArmorPiece(int pieceID, float damage, const Vector &vecOrigin, const Vector &vecDir)
+void CNPC_CombineGuard::DamageArmorPiece(int pieceID, float damage, const Vector &vecOrigin, const Vector &vecDir, const CTakeDamageInfo &inputInfo )
 {
 	if ( !m_fHasInitedArmor )
 	{
@@ -1014,9 +1018,41 @@ void CNPC_CombineGuard::DamageArmorPiece(int pieceID, float damage, const Vector
 	//Destroyed pieces take no damage
 	if ( m_armorPieces[pieceID].destroyed )
 	{
+		/*
 		if ( ( random->RandomInt( 0, 8 ) == 0 ) && ( pieceID != CGUARD_BGROUP_HEAD ) )
 		{
 			g_pEffects->Ricochet( vecOrigin, (vecDir*-1.0f) );
+		}
+		*/
+
+		if ( ( pieceID != CGUARD_BGROUP_HEAD ) && ( IsArmorPiece(pieceID) ) ) //If the piece is destroyed, take normal damage because our flesh is hit!
+		{
+				// Makes the Guard emit hunter damage particles - epicplayer
+			if (( inputInfo.GetDamageType() & DMG_BULLET ) ||
+				( inputInfo.GetDamageType() & DMG_BUCKSHOT ) ||
+				( inputInfo.GetDamageType() & DMG_CLUB ) ||
+				( inputInfo.GetDamageType() & DMG_NEVERGIB ) )
+			{
+				QAngle vecAngles;
+				VectorAngles( vecDir, vecAngles );
+				DispatchParticleEffect( "blood_impact_synth_01", vecOrigin, vecAngles );
+
+				//TakeDamage( inputInfo );
+
+				CTakeDamageInfo info;
+
+				info.SetAttacker( inputInfo.GetAttacker() );
+				info.SetInflictor( inputInfo.GetInflictor() );
+				info.SetDamage( damage );
+				info.SetDamageType( DMG_FALL );
+				info.SetDamageForce( Vector( 0.1, 0.1, 0.1 ) );
+
+				TakeDamage( info );
+
+				EmitSound("NPC_CombineGuard.FleshImpact");
+			}
+
+
 		}
 
 		return;
@@ -1089,7 +1125,7 @@ void CNPC_CombineGuard::TraceAttack( const CTakeDamageInfo &inputInfo, const Vec
 		//If we found one, damage it
 		if ( nNearestGroup != CGUARD_BGROUP_MAIN )
 		{
-			DamageArmorPiece( nNearestGroup, flAdjustedDamage, vecDamagePoint, vecDir );
+			DamageArmorPiece( nNearestGroup, flAdjustedDamage, vecDamagePoint, vecDir, inputInfo );
 			return;
 		}
 	}// else BaseClass::TraceAttack( inputInfo, vecDir, ptr, pAccumulator );
@@ -1103,7 +1139,7 @@ void CNPC_CombineGuard::TraceAttack( const CTakeDamageInfo &inputInfo, const Vec
 	//Damage the hitgroup
 	if ( ptr->hitgroup != CGUARD_BGROUP_MAIN )
 	{
-		DamageArmorPiece( ptr->hitgroup, inputInfo.GetDamage(), vecDamagePoint, vecDir );
+		DamageArmorPiece( ptr->hitgroup, inputInfo.GetDamage(), vecDamagePoint, vecDir, inputInfo );
 	}
 	else
 	{
@@ -1129,7 +1165,7 @@ int	CNPC_CombineGuard::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 	}
 	*/
 
-	if ( AllArmorDestroyed() )
+	if ( AllArmorDestroyed() || (info.GetDamageType() & DMG_FALL) )
 	{
 		return BaseClass::OnTakeDamage_Alive( info );
 	}
