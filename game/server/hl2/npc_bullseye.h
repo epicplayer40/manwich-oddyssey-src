@@ -52,6 +52,9 @@ public:
 
 	bool	CanBeAnEnemyOf( CBaseEntity *pEnemy );
 
+	bool IsImmolatable(void) OVERRIDE { return false; }
+
+
 
 protected:
 
