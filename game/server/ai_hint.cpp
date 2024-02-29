@@ -1598,7 +1598,7 @@ hinttypedescs_t g_pszHintDescriptions[] =
 
 	//{	HINT_HEADCRAB_BURROW_POINT, "Obsolete / Unused"	},
 
-	//{	HINT_NOT_USED_ROLLER_PATROL_POINT, "Obsolete / Unused"	},
+	{	HINT_NOT_USED_ROLLER_PATROL_POINT, "Obsolete / Unused"	},
 	//{	HINT_NOT_USED_ROLLER_CLEANUP_POINT, "Obsolete / Unused"	},
 	
 	//{	HINT_NOT_USED_PSTORM_ROCK_SPAWN, "Obsolete / Unused"	},
