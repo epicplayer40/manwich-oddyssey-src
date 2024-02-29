@@ -6,29 +6,44 @@
 
 #include "dbg.h"
 #define ENGINE_SIZE 0x0069b000
+#define GAMEUI_SIZE 0x00210000
 
 bool g_bIsEngineChecksumValid = false;
+bool g_bIsGameUIChecksumValid = false;
 
-void CheckEngineChecksum()
+void DoCheckSum(const char* moduleName, const DWORD expectedSize, bool& boolResult)
 {
 #ifdef WIN32
 	//TODO: Do a proper checksum
-	HMODULE module = GetModuleHandle("engine.dll");
+	HMODULE module = GetModuleHandle(moduleName);
 	MODULEINFO mInfo = { 0 };
 	GetModuleInformation(GetCurrentProcess(), module, &mInfo, sizeof(mInfo));
-	g_bIsEngineChecksumValid = mInfo.SizeOfImage == ENGINE_SIZE;
+	boolResult = mInfo.SizeOfImage == expectedSize;
 #endif // WIN32
 }
+void CheckEngineChecksum()
+{
+	DoCheckSum("engine.dll", ENGINE_SIZE, g_bIsEngineChecksumValid);
+	DoCheckSum("GameUI.dll", GAMEUI_SIZE, g_bIsGameUIChecksumValid);
+}
+
+
 bool IsEngineValidChecksum()
 {
 	return g_bIsEngineChecksumValid;
 }
-void* GetEngineBaseAddress()
+
+bool IsGameUIValidChecksum()
 {
-#ifdef WIN32
+	return g_bIsGameUIChecksumValid;
+}
+
+void* GetBaseAddress(const char* moduleName)
+{
+	#ifdef WIN32
 	if (IsEngineValidChecksum())
 	{
-		return GetModuleHandle("engine.dll");
+		return GetModuleHandle(moduleName);
 	}
 	else
 #endif // WIN32
@@ -37,10 +52,18 @@ void* GetEngineBaseAddress()
 		return 0;
 	}
 }
-
-void* GetAbsoluteAddress(uint offset)
+void* GetEngineBaseAddress()
 {
-	void* baseAddress = GetEngineBaseAddress();
+	return GetBaseAddress("engine.dll");
+}
+
+void* GetGameUIBaseAddress()
+{
+	return GetBaseAddress("GameUI.dll");
+}
+
+void* GetAbsoluteAddress(void* baseAddress, uint offset)
+{
 	if (baseAddress == NULL)
 	{
 		Assert(0);

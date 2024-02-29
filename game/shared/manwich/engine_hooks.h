@@ -5,7 +5,9 @@
 
 void CheckEngineChecksum();
 bool IsEngineValidChecksum();
+bool IsGameUIValidChecksum();
 void* GetEngineBaseAddress();
-void* GetAbsoluteAddress(uint offset);
+void* GetGameUIBaseAddress();
+void* GetAbsoluteAddress(void* baseAddress, uint offset);
 
 #endif // !ENGINE_HOOKS_H

@@ -387,7 +387,7 @@ static unsigned int s_DecalSecondPassVarCache = 0;
 
 static void R_DecalAddToDestroyList(decal_t* pDecal)
 {
-	s_pDecalDestroyList = (decal_t**)GetAbsoluteAddress(0x5AC780);
+	s_pDecalDestroyList = (decal_t**)GetAbsoluteAddress(GetEngineBaseAddress(),0x5AC780);
 	if (!pDecal->pDestroyList)
 	{
 		pDecal->pDestroyList = *s_pDecalDestroyList;
@@ -403,9 +403,9 @@ void DecalShootFixed(int textureIndex, int entity,
 #ifdef WIN32
 	if (IsEngineValidChecksum())
 	{
-		Draw_DecalMaterial = (IMaterial * (__cdecl*)(int))GetAbsoluteAddress(0xE2AE0);
-		DispInfo_ClearAllTags = (void(__cdecl*)(HDISPINFOARRAY))GetAbsoluteAddress(0xE9340);
-		R_DecalNode = (void(__cdecl*)(mnode_t*, decalinfo_t*))GetAbsoluteAddress(0x12C830);
+		Draw_DecalMaterial = (IMaterial * (__cdecl*)(int))GetAbsoluteAddress(GetEngineBaseAddress(),0xE2AE0);
+		DispInfo_ClearAllTags = (void(__cdecl*)(HDISPINFOARRAY))GetAbsoluteAddress(GetEngineBaseAddress(),0xE9340);
+		R_DecalNode = (void(__cdecl*)(mnode_t*, decalinfo_t*))GetAbsoluteAddress(GetEngineBaseAddress(),0x12C830);
 		DecalShoot(textureIndex, entity, model, model_origin, model_angles, position, saxis, flags);
 	}
 	else
@@ -547,7 +547,7 @@ void UpdateDispDecals()
 	{
 		return;
 	}
-	s_DispDecals = (CUtlLinkedList< CDispDecal, DispShadowHandle_t, true >*)GetAbsoluteAddress(0x3B60F4);
+	s_DispDecals = (CUtlLinkedList< CDispDecal, DispShadowHandle_t, true >*)GetAbsoluteAddress(GetEngineBaseAddress(),0x3B60F4);
 	int iElement = s_DispDecals->Head();
 	while (iElement != s_DispDecals->InvalidIndex())
 	{
