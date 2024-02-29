@@ -62,6 +62,7 @@
 #include "env_debughistory.h"
 #include "tier1/utlstring.h"
 #include "utlhashtable.h"
+#include "npc_vehicledriver.h"
 
 #if defined( TF_DLL )
 #include "tf_gamerules.h"
@@ -2820,11 +2821,20 @@ bool CBaseEntity::FVisible( CBaseEntity *pEntity, int traceMask, CBaseEntity **p
 			return true;
 
 		// Got line of sight on the vehicle the player is driving!
-		if ( pEntity && pEntity->IsPlayer() )
+		if (pEntity)
 		{
-			CBasePlayer *pPlayer = assert_cast<CBasePlayer*>( pEntity );
-			if ( tr.m_pEnt == pPlayer->GetVehicleEntity() )
-				return true;
+			if(pEntity->IsPlayer() )
+			{
+				CBasePlayer* pPlayer = assert_cast<CBasePlayer*>(pEntity);
+				if (tr.m_pEnt == pPlayer->GetVehicleEntity())
+					return true;
+			}
+			else if (pEntity->IsVehicleDriver())
+			{
+				CNPC_VehicleDriver* pDriver = assert_cast<CNPC_VehicleDriver*>(pEntity);
+				if (tr.m_pEnt == pDriver->m_hVehicleEntity)
+					return true;
+			}
 		}
 
 		if (ppBlocker)

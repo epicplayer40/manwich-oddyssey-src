@@ -1810,6 +1810,9 @@ public:
 
 private:
 	CNetworkVar(fireType_e, m_eBurningType);
+
+public:
+	virtual bool	IsVehicleDriver() { return false; }
 };
 
 // Send tables exposed in this module.

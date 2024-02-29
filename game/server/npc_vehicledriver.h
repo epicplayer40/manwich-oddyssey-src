@@ -127,6 +127,8 @@ public:
 	virtual void	Activate( void );
 	virtual void	OnRestore();
 	virtual void	UpdateOnRemove( void );
+	virtual bool	IsVehicleDriver() { return true; }
+
 	
 	// AI
 	void			UpdateEfficiency( bool bInPVS )	{ SetEfficiency( ( GetSleepState() != AISS_AWAKE ) ? AIE_DORMANT : AIE_NORMAL ); SetMoveEfficiency( AIME_NORMAL ); }
