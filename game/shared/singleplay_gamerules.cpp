@@ -22,6 +22,8 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+ConVar weapon_disable_autoswitch("weapon_disable_autoswitch", "0", FCVAR_ARCHIVE );
+
 
 
 //=========================================================
@@ -176,6 +178,10 @@ bool CSingleplayRules::Damage_ShouldNotBleed( int iDmgType )
 	//-----------------------------------------------------------------------------
 	bool CSingleplayRules::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBaseCombatWeapon *pWeapon )
 	{
+		// Disable it if the player doesnt want it
+		if (weapon_disable_autoswitch.GetBool() == true)
+			return false;
+
 		//Must have ammo
 		if ( ( pWeapon->HasAnyAmmo() == false ) && ( pPlayer->GetAmmoCount( pWeapon->m_iPrimaryAmmoType ) <= 0 ) )
 			return false;

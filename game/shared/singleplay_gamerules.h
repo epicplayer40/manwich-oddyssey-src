@@ -20,6 +20,8 @@
 
 #endif
 
+extern ConVar weapon_disable_autoswitch;
+
 
 //=========================================================
 // CSingleplayRules - rules for the single player Half-Life 

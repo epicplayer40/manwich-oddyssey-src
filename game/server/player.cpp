@@ -69,6 +69,7 @@
 #include "dt_utlvector_send.h"
 #include "vote_controller.h"
 #include "ai_speech.h"
+#include "singleplay_gamerules.h"
 
 #if defined USES_ECON_ITEMS
 #include "econ_wearable.h"
@@ -6622,7 +6623,8 @@ bool CBasePlayer::BumpWeapon( CBaseCombatWeapon *pWeapon )
 					pWeapon->m_iClip1 = pWeapon->GetMaxClip1();
 				}
 
-				Weapon_Switch( pWeapon );
+				if(weapon_disable_autoswitch.GetBool() == false || !GetActiveWeapon())
+					Weapon_Switch( pWeapon );
 			}
 #endif
 		}
