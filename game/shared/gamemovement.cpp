@@ -4407,7 +4407,7 @@ void CGameMovement::Duck( void )
 				float flDuckSeconds = flDuckMilliseconds * 0.001f;
 				
 				// Finish in duck transition when transition time is over, in "duck", in air.
-				if ( ( flDuckSeconds > TIME_TO_DUCK ) || bInDuck || bInAir )
+				if ( ( flDuckSeconds > TIME_TO_DUCK ) || bInAir )
 				{
 					FinishDuck();
 				}
