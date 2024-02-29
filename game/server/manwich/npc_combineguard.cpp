@@ -161,6 +161,8 @@ private:
 
 	bool			AimGunAt( CBaseEntity *pEntity, float flInterval );
 
+	void			InputForceReload(inputdata_t& inputdata);
+
 	CSprite			*m_pGlowSprite[NUM_CGUARD_ATTACHMENTS];
 
 	//static const char	*m_pScaredSounds[]; 
@@ -170,7 +172,7 @@ private:
 	int				m_nGibModel;
 
 	float			m_flGlowTime;
-	float			m_flLastRangeTime;
+	float			m_flLastRangeTime;	// Next time before it can shoot
 
 	//Aiming
 	float			m_aimYaw;
@@ -225,6 +227,8 @@ BEGIN_DATADESC( CNPC_CombineGuard )
 	DEFINE_FIELD( m_PitchControl, FIELD_INTEGER ),
 	DEFINE_FIELD( m_MuzzleAttachment, FIELD_INTEGER ),
 	DEFINE_FIELD( m_fHasInitedArmor, FIELD_BOOLEAN ),
+	DEFINE_FIELD(m_flLastRangeTime, FIELD_TIME ),
+	DEFINE_INPUTFUNC(FIELD_VOID, "ForceReload", InputForceReload),
 
 END_DATADESC()
 
@@ -1547,6 +1551,11 @@ void CNPC_CombineGuard::AlertSound()
 		EmitSound( "NPC_CombineGuard.Alert" );
 //		m_flTimeLastAlertSound = gpGlobals->curtime;
 //	}
+}
+
+void CNPC_CombineGuard::InputForceReload(inputdata_t& inputdata)
+{
+	m_flLastRangeTime = gpGlobals->curtime;
 }
 
 //-----------------------------------------------------------------------------
