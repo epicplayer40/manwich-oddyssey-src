@@ -720,13 +720,14 @@ bool CCollisionEvent::ShouldFreezeContacts( IPhysicsObject **pObjectList, int ob
 	if ( m_lastTickFrictionError > gpGlobals->tickcount || m_lastTickFrictionError < (gpGlobals->tickcount-1) )
 	{
 		DevWarning("Performance Warning: large friction system (%d objects)!!!\n", objectCount );
+/*
 #if _DEBUG
 		for ( int i = 0; i < objectCount; i++ )
 		{
 			CBaseEntity *pEntity = static_cast<CBaseEntity *>(pObjectList[i]->GetGameData());
 			pEntity->m_debugOverlays |= OVERLAY_ABSBOX_BIT | OVERLAY_PIVOT_BIT;
 		}
-#endif
+#endif*/
 	}
 	m_lastTickFrictionError = gpGlobals->tickcount;
 	return false;
