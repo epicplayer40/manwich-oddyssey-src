@@ -177,6 +177,8 @@ extern vgui::IInputInternal *g_InputInternal;
 
 extern IClientMode *GetClientModeNormal();
 
+extern void SetupConVarOverrides();
+
 // IF YOU ADD AN INTERFACE, EXTERN IT IN THE HEADER FILE.
 IVEngineClient	*engine = NULL;
 IVModelRender *modelrender = NULL;
@@ -998,6 +1000,7 @@ int CHLClient::Init( CreateInterfaceFn appSystemFactory, CreateInterfaceFn physi
 	if (!VGui_Startup( appSystemFactory ))
 		return false;
 
+	SetupConVarOverrides();
 	vgui::VGui_InitMatSysInterfacesList( "ClientDLL", &appSystemFactory, 1 );
 
 	// Add the client systems.	
