@@ -39,7 +39,6 @@ public:
 
 	void OnResetData();
 	void OnApplyChanges();
-	void OnRadioButtonChecked();
 
 	//Fixes for cross-module vgui stuff
 	MODULENAME_PATCH;
@@ -47,8 +46,11 @@ public:
 	static bool isAdded;
 
 private:
+
 	PatchedCheckButton*	m_pOldFire;
 	PatchedCheckButton*	m_pOldBlood;
+	PatchedCheckButton* m_pDisableAutoSwitch;
+	PatchedCheckButton* m_pEnhanceStereo;
 	PatchedLabel* m_pTopLabel;
 };
 
@@ -62,16 +64,23 @@ COptionsManOd::COptionsManOd(Panel* parent) : BaseClass(parent, NULL)
 	m_pTopLabel = new PatchedLabel(this, "ManOdLabel", "#ManwichsOdyssey_Option_Label");
 	m_pOldFire = new PatchedCheckButton(this, "OldFireCheck", "#ManwichsOdyssey_Option_OldFire");
 	m_pOldBlood = new PatchedCheckButton(this, "OldBloodCheck", "#ManwichsOdyssey_Option_OldBlood");
+	m_pDisableAutoSwitch = new PatchedCheckButton(this, "DisableAutoSwitchCheck", "#ManwichsOdyssey_Option_DisableAutoSwitch");
+	m_pEnhanceStereo = new PatchedCheckButton(this, "EnhanceStereo", "#ManwichsOdyssey_Option_EnhanceStereo");
 
 	m_pTopLabel->SetPos(30, 10);
 	m_pTopLabel->SetSize(300, 30);
 
-	m_pOldFire->SetSize(200, 30);
+	m_pOldFire->SetSize(400, 30);
 	m_pOldFire->SetPos(30, 40);
 
-	m_pOldBlood->SetSize(200, 30);
+	m_pOldBlood->SetSize(400, 30);
 	m_pOldBlood->SetPos(30, 70);
 
+	m_pDisableAutoSwitch->SetSize(400, 30);
+	m_pDisableAutoSwitch->SetPos(30, 100);
+
+	m_pEnhanceStereo->SetSize(400, 30);
+	m_pEnhanceStereo->SetPos(30, 130);
 
 	isAdded = true;
 }
@@ -88,9 +97,13 @@ void COptionsManOd::OnResetData()
 {
 	ConVarRef oldBloodVar("manod_old_blood");
 	ConVarRef newFireVar("manod_fire_new");
+	ConVarRef disableAutoSwitchVar("weapon_disable_autoswitch");
+	ConVarRef enhanceStereoVar("dsp_enhance_stereo");
 
 	m_pOldBlood->SetSelected(oldBloodVar.GetBool());
 	m_pOldFire->SetSelected(!newFireVar.GetBool());
+	m_pDisableAutoSwitch->SetSelected(disableAutoSwitchVar.GetBool());
+	m_pEnhanceStereo->SetSelected(enhanceStereoVar.GetBool());
 }
 
 //-----------------------------------------------------------------------------
@@ -100,18 +113,14 @@ void COptionsManOd::OnApplyChanges()
 {
 	ConVarRef oldBloodVar("manod_old_blood");
 	ConVarRef newFireVar("manod_fire_new");
+	ConVarRef disableAutoSwitchVar("weapon_disable_autoswitch");
+	ConVarRef enhanceStereoVar("dsp_enhance_stereo");
+
 
 	oldBloodVar.SetValue(m_pOldBlood->IsSelected());
 	newFireVar.SetValue(!m_pOldFire->IsSelected());
-}
-
-
-//-----------------------------------------------------------------------------
-// Purpose: enables apply button on radio buttons being pressed
-//-----------------------------------------------------------------------------
-void COptionsManOd::OnRadioButtonChecked()
-{
-	PostActionSignal(new KeyValues("ApplyButtonEnable"));
+	disableAutoSwitchVar.SetValue(m_pDisableAutoSwitch->IsSelected());
+	enhanceStereoVar.SetValue(m_pEnhanceStereo->IsSelected());
 }
 
 // Static function to add this page to the optionsmenu
