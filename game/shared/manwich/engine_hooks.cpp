@@ -71,3 +71,24 @@ void* GetAbsoluteAddress(void* baseAddress, uint offset)
 	}
 	return (void*)((uint)baseAddress + offset);
 }
+
+bool PatchMemory(void* address, size_t length, byte newByte)
+{
+#ifdef WIN32
+	DWORD prevProtection;
+	BOOL ret = VirtualProtect(address, length, PAGE_EXECUTE_READWRITE, &prevProtection);
+	if (ret == FALSE)
+	{
+		LPSTR errorText = 0;
+		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&errorText, 0, NULL);
+		Warning("Failed to patch memory, %s\n", errorText);
+		return false;
+	}
+	memset(address, newByte, length);
+	VirtualProtect(address, length, prevProtection, NULL);
+	return true;
+
+#endif // WIN32
+	Assert(0);
+	return false;
+}
