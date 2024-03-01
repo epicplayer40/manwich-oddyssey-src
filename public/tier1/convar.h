@@ -342,6 +342,7 @@ public:
 	virtual bool				IsRegistered( void ) const;
 	virtual const char			*GetName( void ) const;
 	virtual void				AddFlags( int flags );
+	void						SetFlags( int flags );
 	virtual	bool				IsCommand( void ) const;
 
 	// Install a change callback (there shouldn't already be one....)

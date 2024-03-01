@@ -717,6 +717,11 @@ void ConVar::AddFlags( int flags )
 #endif
 }
 
+void ConVar::SetFlags(int flags)
+{
+	m_pParent->m_nFlags = flags;
+}
+
 bool ConVar::IsRegistered( void ) const
 {
 	return m_pParent->m_bRegistered;
