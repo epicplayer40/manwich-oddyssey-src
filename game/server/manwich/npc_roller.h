@@ -118,6 +118,8 @@ public:
 	int OnTakeDamage_Alive( const CTakeDamageInfo &info );
 	int VPhysicsTakeDamage( const CTakeDamageInfo &info );
 
+	void Event_Killed(const CTakeDamageInfo& info) OVERRIDE;
+
 	bool FInViewCone( CBaseEntity *pEntity );
 
 	bool OverrideMove( float flInterval = 0.1 );

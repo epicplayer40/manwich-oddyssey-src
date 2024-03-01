@@ -32,6 +32,7 @@
 #include "vstdlib/random.h"
 #include "engine/IEngineSound.h"
 #include "physics_saverestore.h"
+#include "explode.h"
 
 
 #define TIME_NEVER	1e9
@@ -283,6 +284,7 @@ bool CNPC_Roller::FInViewCone( CBaseEntity *pEntity )
 //-----------------------------------------------------------------------------
 int CNPC_Roller::OnTakeDamage_Alive( const CTakeDamageInfo &info )
 {
+	BaseClass::OnTakeDamage_Alive(info);
 	return VPhysicsTakeDamage( info );
 }
 
@@ -719,6 +721,8 @@ void CNPC_Roller::StartTask( const Task_t *pTask )
 //---------------------------------------------------------
 void CNPC_Roller::RunTask( const Task_t *pTask )
 {
+	if (GetHealth() < 0)
+		return;
 	switch( pTask->iTask )
 	{
 	case TASK_ROLLER_UNSTICK:
@@ -940,7 +944,12 @@ void CNPC_Roller::TaskFail( AI_TaskFailureCode_t code )
 	BaseClass::TaskFail( code );
 }
 
-
+void CNPC_Roller::Event_Killed(const CTakeDamageInfo& info)
+{
+	m_lifeState = LIFE_DEAD;
+	ExplosionCreate(GetAbsOrigin(), vec3_angle, this, 25, 128, true);
+	Remove();
+}
 //-----------------------------------------------------------------------------
 //
 // Schedules
