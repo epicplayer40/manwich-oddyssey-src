@@ -1445,7 +1445,7 @@ void CNPC_Vortigaunt06::PainSound( const CTakeDamageInfo &info )
 	if (gpGlobals->curtime < m_painTime)
 		return;
 	
-	m_painTime = gpGlobals->curtime + random->RandomFloat(0.5, 5.75);
+	m_painTime = gpGlobals->curtime + random->RandomFloat(20.5, 65.75);
 
 //	Speak( VORT_PAIN );
 	CPASAttenuationFilter filter( this );

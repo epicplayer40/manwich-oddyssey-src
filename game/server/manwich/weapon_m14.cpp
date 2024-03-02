@@ -390,10 +390,11 @@ void CWeaponM14::FireBullets( const FireBulletsInfo_t& info )
 			//WeaponSound( WPN_DOUBLE, m_flNextPrimaryAttack );
 			GetOwner()->RemoveAmmo( 1, m_iSecondaryAmmoType );
 			m_bHasGrenadeAttached = false;
-			if (GetOwner()->GetAmmoCount(m_iSecondaryAmmoType) < 1)
+			/*
+			if (GetOwner()->GetAmmoCount(m_iSecondaryAmmoType) < 1) //Causes an irritating animation bug, so disabling - epicplayer
 			{
 				m_bGrenadeMode = false;
-			}
+			}*/
 		}
 
 	}
