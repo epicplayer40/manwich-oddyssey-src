@@ -1122,13 +1122,13 @@ C_RopeKeyframe* C_RopeKeyframe::CreateFromKeyValues( C_BaseAnimating *pEnt, KeyV
 		pRope->m_RopeLength = pValues->GetInt( "Length" );
 		pRope->m_TextureScale = pValues->GetFloat( "TextureScale", pRope->m_TextureScale );
 		pRope->m_Slack = 0;
-		pRope->m_RopeFlags |= ROPE_SIMULATE | ROPE_COLLIDE;
+		pRope->m_RopeFlags |= ROPE_SIMULATE | ROPE_COLLIDE | ROPE_NO_SHAKE;
 
 		if (pEnt->ShouldSavePhysics() && pValues->GetBool("BreakOnDeath"))
 		{
 			pRope->m_fLockedPoints &= ~1;
 		}
-	}
+	}	
 
 	return pRope;
 }
@@ -1252,6 +1252,8 @@ void C_RopeKeyframe::RecomputeSprings()
 
 void C_RopeKeyframe::ShakeRope( const Vector &vCenter, float flRadius, float flMagnitude )
 {
+	if (m_RopeFlags & ROPE_NO_SHAKE)
+		return;
 	// Sum up whatever it would apply to all of our points.
 	for ( int i=0; i < m_nSegments; i++ )
 	{
