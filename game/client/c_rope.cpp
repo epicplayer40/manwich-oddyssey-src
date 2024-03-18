@@ -1122,7 +1122,12 @@ C_RopeKeyframe* C_RopeKeyframe::CreateFromKeyValues( C_BaseAnimating *pEnt, KeyV
 		pRope->m_RopeLength = pValues->GetInt( "Length" );
 		pRope->m_TextureScale = pValues->GetFloat( "TextureScale", pRope->m_TextureScale );
 		pRope->m_Slack = 0;
-		pRope->m_RopeFlags |= ROPE_SIMULATE;
+		pRope->m_RopeFlags |= ROPE_SIMULATE | ROPE_COLLIDE;
+
+		if (pEnt->ShouldSavePhysics() && pValues->GetBool("BreakOnDeath"))
+		{
+			pRope->m_fLockedPoints &= ~1;
+		}
 	}
 
 	return pRope;
