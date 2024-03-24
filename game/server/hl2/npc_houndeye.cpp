@@ -13,7 +13,7 @@
 #include "ai_navigator.h"
 #include "ai_motor.h"
 #include "ai_squad.h"
-#include "AI_TacticalServices.h"
+#include "ai_tacticalservices.h"
 #include "soundent.h"
 #include "entitylist.h"
 #include "game.h"

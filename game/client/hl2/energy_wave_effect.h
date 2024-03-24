@@ -13,8 +13,8 @@
 
 #include "mathlib/mathlib.h"
 #include "mathlib/vector.h"
-#include "UtlVector.h"
-#include "SheetSimulator.h"
+#include "utlvector.h"
+#include "sheetsimulator.h"
 
 // --------------------------------------
 //  Energy wave defs
