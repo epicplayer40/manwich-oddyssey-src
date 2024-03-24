@@ -63,8 +63,9 @@ void CEnergyWaveEffect::ComputeRestPositions()
 	// Compute box for fake volume testing
 	Vector dist = GetFixedPoint(0) - GetFixedPoint(1);
 	float l = dist.Length();
-	SetBoundingBox( Vector( -l * 0.25f, -l * 0.25f, -l * 0.25f), 
-		Vector( l * 0.25f, l * 0.25f, l * 0.25f) );
+	Vector mins(-l * 0.25f, -l * 0.25f, -l * 0.25f);
+	Vector maxs(l * 0.25f, l * 0.25f, l * 0.25f);
+	SetBoundingBox(mins, maxs);
 }
 
 void CEnergyWaveEffect::MakeSpring( int p1, int p2 )
