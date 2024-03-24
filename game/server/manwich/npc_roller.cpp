@@ -28,9 +28,9 @@
 #include "ndebugoverlay.h"
 #include "entitylist.h"
 #include "npc_roller.h"
-#include "ieffects.h"
+#include "IEffects.h"
 #include "vstdlib/random.h"
-#include "engine/iengineSound.h"
+#include "engine/IEngineSound.h"
 #include "physics_saverestore.h"
 #include "explode.h"
 
