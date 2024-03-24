@@ -13,16 +13,16 @@
 //=============================================================================
 
 #include "cbase.h"
-#include	"AI_Default.h"
-#include	"AI_Task.h"
-#include	"AI_Schedule.h"
-#include	"AI_Hull.h"
-#include "AI_Hint.h"
-#include	"AI_Node.h"
-#include	"AI_BaseNPC.h"
-#include "AI_Navigator.h"
+#include	"ai_default.h"
+#include	"ai_task.h"
+#include	"ai_schedule.h"
+#include	"ai_hull.h"
+#include "ai_hint.h"
+#include	"ai_node.h"
+#include	"ai_basenpc.h"
+#include "ai_navigator.h"
 #include	"ndebugoverlay.h"
-#include	"NPC_Roller.h"
+#include	"npc_roller.h"
 #include "vstdlib/random.h"
 
 #define ROLLERDOZER_DEBRIS_FREQUENCY	5

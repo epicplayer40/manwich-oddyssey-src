@@ -13,14 +13,14 @@
 //=============================================================================
 
 #include "cbase.h"
-#include	"AI_Default.h"
-#include	"AI_Task.h"
-#include	"AI_Schedule.h"
-#include	"AI_Hull.h"
-#include	"AI_BaseNPC.h"
+#include	"ai_default.h"
+#include	"ai_task.h"
+#include	"ai_schedule.h"
+#include	"ai_hull.h"
+#include	"ai_basenpc.h"
 #include	"ndebugoverlay.h"
-#include	"NPC_Roller.h"
-#include	"CBaseSpriteProjectile.h"
+#include	"npc_roller.h"
+#include	"cbasespriteprojectile.h"
 #include "vstdlib/random.h"
 #include "engine/IEngineSound.h"
 
